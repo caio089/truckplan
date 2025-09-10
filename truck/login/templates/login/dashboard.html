@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruckPlan - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        },
+                        secondary: {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Background Animation -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full animate-pulse-slow"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-400/10 rounded-full animate-bounce-gentle"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gray-300/5 rounded-full animate-pulse-slow"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="relative z-10 p-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🚛</span>
+                <h1 class="text-2xl font-bold text-white">TruckPlan</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-300">Bem-vindo, {{ user.username }}!</span>
+                <a href="{% url 'logout' %}" class="bg-gray-800/50 hover:bg-gray-700/50 text-white px-4 py-2 rounded-lg transition-all duration-300 backdrop-blur-sm border border-gray-600">
+                    Sair
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-6 pb-12">
+        <!-- Welcome Section -->
+        <div class="text-center mb-12 animate-slide-up">
+            <h2 class="text-4xl font-bold text-white mb-4">Dashboard</h2>
+            <p class="text-gray-300 text-lg">Sistema de Controle de Despesas de Caminhão</p>
+        </div>
+
+        <!-- Resumo da Semana Atual -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-white mb-6">Resumo da Semana Atual</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-effect rounded-2xl p-6 text-white animate-fade-in border border-gray-600/30">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-300 text-sm">Total de Gastos</p>
+                            <p class="text-3xl font-bold" id="totalGastos">R$ 0,00</p>
+                        </div>
+                        <div class="text-4xl">💰</div>
+                    </div>
+                </div>
+
+                <div class="glass-effect rounded-2xl p-6 text-white animate-fade-in border border-gray-600/30" style="animation-delay: 0.1s">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-300 text-sm">Total de Lucros</p>
+                            <p class="text-3xl font-bold text-green-400" id="totalLucros">R$ 0,00</p>
+                        </div>
+                        <div class="text-4xl">📈</div>
+                    </div>
+                </div>
+
+                <div class="glass-effect rounded-2xl p-6 text-white animate-fade-in border border-gray-600/30" style="animation-delay: 0.2s">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-300 text-sm">Lucro Líquido</p>
+                            <p class="text-3xl font-bold" id="lucroLiquido">R$ 0,00</p>
+                        </div>
+                        <div class="text-4xl">💎</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+            <h3 class="text-2xl font-bold text-white mb-6">Ações Rápidas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="openReportModal()" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-600">
+                    <div class="flex items-center justify-center space-x-3">
+                        <span class="text-2xl">📊</span>
+                        <span>Gerar Novo Relatório</span>
+                    </div>
+                </button>
+
+                <button onclick="showPreviousReports()" class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-400 hover:to-gray-500 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-400">
+                    <div class="flex items-center justify-center space-x-3">
+                        <span class="text-2xl">📅</span>
+                        <span>Relatórios Anteriores</span>
+                    </div>
+                </button>
+
+                <button onclick="showSettings()" class="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-300 hover:to-gray-400 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-300">
+                    <div class="flex items-center justify-center space-x-3">
+                        <span class="text-2xl">⚙️</span>
+                        <span>Configurações</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal para Gerar Novo Relatório -->
+    <div id="reportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Gerar Novo Relatório</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
+            </div>
+            
+            <form id="reportForm" class="space-y-6">
+                <!-- Informações Básicas -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-white">Informações Básicas</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Data do Relatório</label>
+                            <input type="date" id="reportDate" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Motorista</label>
+                            <input type="text" id="motorista" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Nome completo do motorista">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Placa do Caminhão</label>
+                            <input type="text" id="placa" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="ABC-1234" maxlength="8" oninput="formatPlaca(this)">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Modelo do Caminhão</label>
+                            <input type="text" id="modelo" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Volvo FH 540">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Despesas -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-white">Despesas</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Combustível (R$)</label>
+                            <input type="number" id="combustivel" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Comida (R$)</label>
+                            <input type="number" id="comida" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Aluguel (R$)</label>
+                            <input type="number" id="aluguel" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Pedágios (R$)</label>
+                            <input type="number" id="pedagios" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Manutenção (R$)</label>
+                            <input type="number" id="manutencao" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Pneus (R$)</label>
+                            <input type="number" id="pneus" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Seguro (R$)</label>
+                            <input type="number" id="seguro" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">IPVA/Licenciamento (R$)</label>
+                            <input type="number" id="ipva" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Outras Despesas (R$)</label>
+                        <input type="number" id="outrasDespesas" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                    </div>
+                </div>
+
+                <!-- Receita -->
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Receita</h4>
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Receita/Frete (R$)</label>
+                        <input type="number" id="receita" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                    </div>
+                </div>
+
+                <!-- Resumo Automático -->
+                <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
+                    <h4 class="text-lg font-semibold text-white mb-3">Resumo Automático</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Total Despesas:</span>
+                            <span class="text-white font-semibold" id="totalDespesasPreview">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Receita:</span>
+                            <span class="text-white font-semibold" id="receitaPreview">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between col-span-2 border-t border-gray-600 pt-2">
+                            <span class="text-gray-300">Lucro Líquido:</span>
+                            <span class="text-green-400 font-bold text-lg" id="lucroLiquidoPreview">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="flex space-x-4">
+                    <button type="button" onclick="closeReportModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 border border-gray-600">
+                        Salvar Relatório
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Ver Resumo de Relatório -->
+    <div id="reportSummaryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Resumo do Relatório</h3>
+                <button onclick="closeReportSummaryModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
+            </div>
+            
+            <div id="reportSummaryContent">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Relatórios Anteriores -->
+    <div id="previousReportsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Relatórios Anteriores</h3>
+                <button onclick="closePreviousReportsModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Filtrar por Período</label>
+                        <select id="periodSelect" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                            <option value="day">Por Dia</option>
+                            <option value="week">Por Semana</option>
+                            <option value="month">Por Mês</option>
+                            <option value="custom">Data Específica</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customDateContainer" class="hidden">
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Selecionar Data</label>
+                        <input type="date" id="customDate" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4 mb-6">
+                    <button onclick="generatePeriodReport()" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                        Gerar Relatório
+                    </button>
+                    <button onclick="clearFilters()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                        Limpar Filtros
+                    </button>
+                </div>
+                
+                <div id="periodReportContent" class="space-y-4">
+                    <!-- Conteúdo será preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="confirmDeleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-md">
+            <div class="text-center">
+                <div class="text-6xl mb-4">⚠️</div>
+                <h3 class="text-2xl font-bold text-white mb-4">Confirmar Exclusão</h3>
+                <p class="text-gray-300 mb-6" id="confirmDeleteMessage">
+                    Tem certeza que deseja excluir este relatório?
+                </p>
+                <div class="flex space-x-4">
+                    <button onclick="closeConfirmDeleteModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                        Cancelar
+                    </button>
+                    <button onclick="confirmDelete()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Configurações -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Configurações</h3>
+                <button onclick="closeSettingsModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Alterar Senha/Login</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nova Senha</label>
+                            <input type="password" id="newPassword" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                        </div>
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Confirmar Nova Senha</label>
+                            <input type="password" id="confirmPassword" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Backup e Restauração</h4>
+                    <div class="space-y-4">
+                        <button onclick="exportData()" class="w-full bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                            Exportar Dados (JSON)
+                        </button>
+                        <button onclick="importData()" class="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                            Importar Dados
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Preferências de Exibição</h4>
+                    <div class="space-y-4">
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" id="darkMode" checked class="w-4 h-4 text-gray-600 bg-gray-800 border-gray-600 rounded focus:ring-gray-500">
+                            <span class="text-gray-200">Modo Escuro (Atual)</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" id="notifications" checked class="w-4 h-4 text-gray-600 bg-gray-800 border-gray-600 rounded focus:ring-gray-500">
+                            <span class="text-gray-200">Notificações</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button onclick="closeSettingsModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                        Fechar
+                    </button>
+                    <button onclick="saveSettings()" class="flex-1 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                        Salvar Configurações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados armazenados localmente
+        let reports = JSON.parse(localStorage.getItem('truckReports')) || [];
+        let currentWeekData = { gastos: 0, lucros: 0, lucroLiquido: 0 };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir data atual como padrão
+            document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+            
+            // Atualizar resumo da semana
+            updateWeekSummary();
+            
+            // Adicionar listeners para cálculo automático
+            setupReportFormListeners();
+            
+            // Animações de entrada
+            const cards = document.querySelectorAll('.animate-fade-in');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // Configurar listeners do formulário de relatório
+        function setupReportFormListeners() {
+            const inputs = ['combustivel', 'comida', 'aluguel', 'pedagios', 'manutencao', 'pneus', 'seguro', 'ipva', 'outrasDespesas', 'receita'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', updateReportPreview);
+            });
+        }
+
+        // Atualizar preview do relatório
+        function updateReportPreview() {
+            const combustivel = parseFloat(document.getElementById('combustivel').value) || 0;
+            const comida = parseFloat(document.getElementById('comida').value) || 0;
+            const aluguel = parseFloat(document.getElementById('aluguel').value) || 0;
+            const pedagios = parseFloat(document.getElementById('pedagios').value) || 0;
+            const manutencao = parseFloat(document.getElementById('manutencao').value) || 0;
+            const pneus = parseFloat(document.getElementById('pneus').value) || 0;
+            const seguro = parseFloat(document.getElementById('seguro').value) || 0;
+            const ipva = parseFloat(document.getElementById('ipva').value) || 0;
+            const outrasDespesas = parseFloat(document.getElementById('outrasDespesas').value) || 0;
+            const receita = parseFloat(document.getElementById('receita').value) || 0;
+
+            const totalDespesas = combustivel + comida + aluguel + pedagios + manutencao + pneus + seguro + ipva + outrasDespesas;
+            const lucroLiquido = receita - totalDespesas;
+
+            document.getElementById('totalDespesasPreview').textContent = `R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
+            document.getElementById('receitaPreview').textContent = `R$ ${receita.toFixed(2).replace('.', ',')}`;
+            document.getElementById('lucroLiquidoPreview').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+            
+            // Mudar cor do lucro
+            const lucroElement = document.getElementById('lucroLiquidoPreview');
+            if (lucroLiquido >= 0) {
+                lucroElement.className = 'text-green-400 font-bold text-lg';
+            } else {
+                lucroElement.className = 'text-red-400 font-bold text-lg';
+            }
+        }
+
+        // Atualizar resumo da semana
+        function updateWeekSummary() {
+            const currentWeek = getCurrentWeek();
+            const weekReports = reports.filter(report => {
+                const reportDate = new Date(report.date);
+                return isSameWeek(reportDate, currentWeek);
+            });
+
+            let totalGastos = 0;
+            let totalLucros = 0;
+
+            weekReports.forEach(report => {
+                totalGastos += report.totalDespesas;
+                totalLucros += report.receita;
+            });
+
+            const lucroLiquido = totalLucros - totalGastos;
+
+            document.getElementById('totalGastos').textContent = `R$ ${totalGastos.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalLucros').textContent = `R$ ${totalLucros.toFixed(2).replace('.', ',')}`;
+            document.getElementById('lucroLiquido').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+
+            // Atualizar cor do lucro líquido
+            const lucroElement = document.getElementById('lucroLiquido');
+            if (lucroLiquido >= 0) {
+                lucroElement.className = 'text-3xl font-bold text-green-400';
+            } else {
+                lucroElement.className = 'text-3xl font-bold text-red-400';
+            }
+        }
+
+        // Funções de modal
+        function openReportModal() {
+            document.getElementById('reportModal').classList.remove('hidden');
+            document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+            updateReportPreview();
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+            document.getElementById('reportForm').reset();
+        }
+
+
+        function showPreviousReports() {
+            document.getElementById('previousReportsModal').classList.remove('hidden');
+            // Configurar listener para mostrar/ocultar campo de data personalizada
+            setupPeriodSelectListener();
+        }
+
+        function closePreviousReportsModal() {
+            document.getElementById('previousReportsModal').classList.add('hidden');
+        }
+
+        function showSettings() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        // Salvar relatório
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validar formulário
+            if (!validateReportForm()) {
+                return;
+            }
+            
+            const reportData = {
+                id: Date.now(),
+                date: document.getElementById('reportDate').value,
+                motorista: document.getElementById('motorista').value.trim(),
+                placa: document.getElementById('placa').value.trim().toUpperCase(),
+                modelo: document.getElementById('modelo').value.trim(),
+                combustivel: parseFloat(document.getElementById('combustivel').value) || 0,
+                comida: parseFloat(document.getElementById('comida').value) || 0,
+                aluguel: parseFloat(document.getElementById('aluguel').value) || 0,
+                pedagios: parseFloat(document.getElementById('pedagios').value) || 0,
+                manutencao: parseFloat(document.getElementById('manutencao').value) || 0,
+                pneus: parseFloat(document.getElementById('pneus').value) || 0,
+                seguro: parseFloat(document.getElementById('seguro').value) || 0,
+                ipva: parseFloat(document.getElementById('ipva').value) || 0,
+                outrasDespesas: parseFloat(document.getElementById('outrasDespesas').value) || 0,
+                receita: parseFloat(document.getElementById('receita').value) || 0,
+                totalDespesas: 0,
+                lucroLiquido: 0
+            };
+
+            reportData.totalDespesas = reportData.combustivel + reportData.comida + reportData.aluguel + 
+                                     reportData.pedagios + reportData.manutencao + reportData.pneus + 
+                                     reportData.seguro + reportData.ipva + reportData.outrasDespesas;
+            reportData.lucroLiquido = reportData.receita - reportData.totalDespesas;
+
+            reports.unshift(reportData);
+            localStorage.setItem('truckReports', JSON.stringify(reports));
+
+            updateWeekSummary();
+            closeReportModal();
+            
+            showNotification('Relatório salvo com sucesso!', 'success');
+        });
+
+
+        // Ver resumo do relatório
+        function viewReportSummary(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+
+            const content = document.getElementById('reportSummaryContent');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-gray-800/30 p-6 rounded-xl border border-gray-600/30">
+                        <h4 class="text-xl font-bold text-white mb-4">Data: ${formatDate(report.date)}</h4>
+                        
+                        <!-- Informações do Veículo e Motorista -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-700/30 rounded-lg">
+                            <div>
+                                <span class="text-gray-300 text-sm">Motorista:</span>
+                                <p class="text-white font-semibold">${report.motorista || 'Não informado'}</p>
+                            </div>
+                            <div>
+                                <span class="text-gray-300 text-sm">Placa:</span>
+                                <p class="text-white font-semibold">${report.placa || 'Não informada'}</p>
+                            </div>
+                            <div>
+                                <span class="text-gray-300 text-sm">Modelo:</span>
+                                <p class="text-white font-semibold">${report.modelo || 'Não informado'}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h5 class="text-lg font-semibold text-white mb-3">Despesas Detalhadas</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Combustível:</span>
+                                        <span class="text-white">R$ ${report.combustivel.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Comida:</span>
+                                        <span class="text-white">R$ ${report.comida.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Aluguel:</span>
+                                        <span class="text-white">R$ ${report.aluguel.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Pedágios:</span>
+                                        <span class="text-white">R$ ${report.pedagios.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Manutenção:</span>
+                                        <span class="text-white">R$ ${(report.manutencao || 0).toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Pneus:</span>
+                                        <span class="text-white">R$ ${(report.pneus || 0).toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Seguro:</span>
+                                        <span class="text-white">R$ ${(report.seguro || 0).toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">IPVA/Licenciamento:</span>
+                                        <span class="text-white">R$ ${(report.ipva || 0).toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Outras Despesas:</span>
+                                        <span class="text-white">R$ ${report.outrasDespesas.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-gray-600 pt-2">
+                                        <span class="text-gray-300 font-semibold">Total Despesas:</span>
+                                        <span class="text-white font-bold">R$ ${report.totalDespesas.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 class="text-lg font-semibold text-white mb-3">Receita e Lucro</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-300">Receita/Frete:</span>
+                                        <span class="text-white">R$ ${report.receita.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-gray-600 pt-2">
+                                        <span class="text-gray-300 font-semibold">Lucro Líquido:</span>
+                                        <span class="font-bold text-lg ${report.lucroLiquido >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                            R$ ${report.lucroLiquido.toFixed(2).replace('.', ',')}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-800/30 p-6 rounded-xl border border-gray-600/30">
+                            <h5 class="text-lg font-semibold text-white mb-4">Gráfico de Pizza - Gastos por Categoria</h5>
+                            <div id="pieChart" class="h-64 flex items-center justify-center">
+                                <canvas id="pieChartCanvas" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-800/30 p-6 rounded-xl border border-gray-600/30">
+                            <h5 class="text-lg font-semibold text-white mb-4">Gráfico de Barra - Lucro vs Despesa</h5>
+                            <div id="barChart" class="h-64 flex items-center justify-center">
+                                <canvas id="barChartCanvas" width="300" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botões de Ação -->
+                    <div class="flex justify-center space-x-4 mt-6">
+                        <button onclick="closeReportSummaryModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                            Fechar
+                        </button>
+                        <button onclick="deleteReport(${report.id}); closeReportSummaryModal();" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                            Excluir Relatório
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Gerar gráficos
+            generatePieChart(report);
+            generateBarChart(report);
+            
+            document.getElementById('reportSummaryModal').classList.remove('hidden');
+        }
+
+        function closeReportSummaryModal() {
+            document.getElementById('reportSummaryModal').classList.add('hidden');
+        }
+
+        // Variável para armazenar o ID do relatório a ser excluído
+        let reportToDelete = null;
+
+        // Excluir relatório
+        function deleteReport(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+
+            reportToDelete = reportId;
+            
+            // Configurar mensagem de confirmação
+            const confirmMessage = `Relatório de ${formatDate(report.date)}\n\n` +
+                                 `Motorista: ${report.motorista || 'Não informado'}\n` +
+                                 `Placa: ${report.placa || 'Não informada'}\n` +
+                                 `Despesas: R$ ${report.totalDespesas.toFixed(2).replace('.', ',')}\n` +
+                                 `Receita: R$ ${report.receita.toFixed(2).replace('.', ',')}\n` +
+                                 `Lucro: R$ ${report.lucroLiquido.toFixed(2).replace('.', ',')}\n\n` +
+                                 `Esta ação não pode ser desfeita!`;
+
+            document.getElementById('confirmDeleteMessage').textContent = confirmMessage;
+            document.getElementById('confirmDeleteModal').classList.remove('hidden');
+        }
+
+        // Confirmar exclusão
+        function confirmDelete() {
+            if (reportToDelete) {
+                // Remover relatório da lista
+                reports = reports.filter(r => r.id !== reportToDelete);
+                
+                // Salvar no localStorage
+                localStorage.setItem('truckReports', JSON.stringify(reports));
+                
+                // Atualizar interface
+                updateWeekSummary();
+                
+                // Fechar modais
+                closeConfirmDeleteModal();
+                closeReportSummaryModal();
+                closePreviousReportsModal();
+                
+                showNotification('Relatório excluído com sucesso!', 'success');
+                
+                reportToDelete = null;
+            }
+        }
+
+        // Fechar modal de confirmação
+        function closeConfirmDeleteModal() {
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+            reportToDelete = null;
+        }
+
+        // Configurar listener para o seletor de período
+        function setupPeriodSelectListener() {
+            const periodSelect = document.getElementById('periodSelect');
+            const customDateContainer = document.getElementById('customDateContainer');
+            
+            periodSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customDateContainer.classList.remove('hidden');
+                    // Definir data atual como padrão
+                    document.getElementById('customDate').value = new Date().toISOString().split('T')[0];
+                } else {
+                    customDateContainer.classList.add('hidden');
+                }
+            });
+        }
+
+        // Limpar filtros
+        function clearFilters() {
+            document.getElementById('periodSelect').value = 'day';
+            document.getElementById('customDateContainer').classList.add('hidden');
+            document.getElementById('periodReportContent').innerHTML = '';
+        }
+
+        // Gerar relatório por período
+        function generatePeriodReport() {
+            const period = document.getElementById('periodSelect').value;
+            const content = document.getElementById('periodReportContent');
+            
+            let filteredReports = [];
+            const now = new Date();
+            
+            switch(period) {
+                case 'day':
+                    filteredReports = reports.filter(r => {
+                        const reportDate = new Date(r.date);
+                        return reportDate.toDateString() === now.toDateString();
+                    });
+                    break;
+                case 'week':
+                    const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+                    filteredReports = reports.filter(r => {
+                        const reportDate = new Date(r.date);
+                        return reportDate >= weekStart;
+                    });
+                    break;
+                case 'month':
+                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    filteredReports = reports.filter(r => {
+                        const reportDate = new Date(r.date);
+                        return reportDate >= monthStart;
+                    });
+                    break;
+                case 'custom':
+                    const customDate = document.getElementById('customDate').value;
+                    if (!customDate) {
+                        showNotification('Por favor, selecione uma data!', 'error');
+                        return;
+                    }
+                    filteredReports = reports.filter(r => {
+                        return r.date === customDate;
+                    });
+                    break;
+            }
+
+            if (filteredReports.length === 0) {
+                let message = 'Nenhum relatório encontrado para o período selecionado';
+                
+                if (period === 'custom') {
+                    const customDate = document.getElementById('customDate').value;
+                    const formattedDate = customDate ? formatDate(customDate) : 'data selecionada';
+                    message = `Nenhum relatório encontrado para a data ${formattedDate}`;
+                } else if (period === 'day') {
+                    message = 'Nenhum relatório encontrado para hoje';
+                } else if (period === 'week') {
+                    message = 'Nenhum relatório encontrado para esta semana';
+                } else if (period === 'month') {
+                    message = 'Nenhum relatório encontrado para este mês';
+                }
+                
+                content.innerHTML = `
+                    <div class="text-center text-gray-400 py-12">
+                        <div class="text-6xl mb-4">📊</div>
+                        <p class="text-lg">${message}</p>
+                        <p class="text-sm mt-2">Tente selecionar outro período ou data</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let totalDespesas = 0;
+            let totalReceita = 0;
+            let totalLucro = 0;
+
+            filteredReports.forEach(report => {
+                totalDespesas += report.totalDespesas;
+                totalReceita += report.receita;
+                totalLucro += report.lucroLiquido;
+            });
+
+            // Gerar título do período
+            let periodTitle = '';
+            if (period === 'custom') {
+                const customDate = document.getElementById('customDate').value;
+                periodTitle = `Relatórios de ${formatDate(customDate)}`;
+            } else if (period === 'day') {
+                periodTitle = 'Relatórios de Hoje';
+            } else if (period === 'week') {
+                periodTitle = 'Relatórios desta Semana';
+            } else if (period === 'month') {
+                periodTitle = 'Relatórios deste Mês';
+            }
+
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="text-center mb-6">
+                        <h4 class="text-2xl font-bold text-white">${periodTitle}</h4>
+                        <p class="text-gray-300">${filteredReports.length} relatório(s) encontrado(s)</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30 text-center">
+                            <h4 class="text-white font-semibold">Total Despesas</h4>
+                            <p class="text-2xl font-bold text-red-400">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30 text-center">
+                            <h4 class="text-white font-semibold">Total Receita</h4>
+                            <p class="text-2xl font-bold text-green-400">R$ ${totalReceita.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30 text-center">
+                            <h4 class="text-white font-semibold">Lucro Líquido</h4>
+                            <p class="text-2xl font-bold ${totalLucro >= 0 ? 'text-green-400' : 'text-red-400'}">R$ ${totalLucro.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-white">Relatórios do Período (${filteredReports.length} encontrados)</h4>
+                        ${filteredReports.map(report => `
+                            <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex-1">
+                                        <h5 class="text-white font-semibold">${formatDate(report.date)}</h5>
+                                        <p class="text-gray-300 text-sm">
+                                            ${report.motorista ? `Motorista: ${report.motorista} | ` : ''}
+                                            ${report.placa ? `Placa: ${report.placa}` : ''}
+                                        </p>
+                                        <p class="text-gray-300 text-sm mt-1">
+                                            Despesas: R$ ${report.totalDespesas.toFixed(2).replace('.', ',')} | 
+                                            Receita: R$ ${report.receita.toFixed(2).replace('.', ',')} | 
+                                            Lucro: R$ ${report.lucroLiquido.toFixed(2).replace('.', ',')}
+                                        </p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="viewReportSummary(${report.id})" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                                            Ver Detalhes
+                                        </button>
+                                        <button onclick="deleteReport(${report.id})" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                                            Excluir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button onclick="exportToPDF()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                            Exportar PDF
+                        </button>
+                        <button onclick="exportToExcel()" class="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                            Exportar Excel
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Funções de configurações
+        function saveSettings() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword && newPassword !== confirmPassword) {
+                showNotification('As senhas não coincidem!', 'error');
+                return;
+            }
+            
+            if (newPassword) {
+                showNotification('Senha alterada com sucesso!', 'success');
+            }
+            
+            showNotification('Configurações salvas!', 'success');
+            closeSettingsModal();
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(reports, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `truckplan-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showNotification('Dados exportados com sucesso!', 'success');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            reports = importedData;
+                            localStorage.setItem('truckReports', JSON.stringify(reports));
+                            updateWeekSummary();
+                            showNotification('Dados importados com sucesso!', 'success');
+                        } catch (error) {
+                            showNotification('Erro ao importar dados!', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function exportToPDF() {
+            showNotification('Funcionalidade de PDF em desenvolvimento!', 'info');
+        }
+
+        function exportToExcel() {
+            showNotification('Funcionalidade de Excel em desenvolvimento!', 'info');
+        }
+
+        // Funções auxiliares
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function getCurrentWeek() {
+            const now = new Date();
+            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+            return startOfWeek;
+        }
+
+        function isSameWeek(date1, date2) {
+            const week1 = getWeekNumber(date1);
+            const week2 = getWeekNumber(date2);
+            return week1 === week2 && date1.getFullYear() === date2.getFullYear();
+        }
+
+        function getWeekNumber(date) {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-slide-up ${
+                type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' : 
+                type === 'success' ? 'bg-green-100 text-green-700 border border-green-200' :
+                'bg-blue-100 text-blue-700 border border-blue-200'
+            }`;
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <span class="text-xl mr-2">${type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️'}</span>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Gerar gráfico de pizza
+        function generatePieChart(report) {
+            const canvas = document.getElementById('pieChartCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const data = [
+                { label: 'Combustível', value: report.combustivel, color: '#3B82F6' },
+                { label: 'Comida', value: report.comida, color: '#10B981' },
+                { label: 'Aluguel', value: report.aluguel, color: '#F59E0B' },
+                { label: 'Pedágios', value: report.pedagios, color: '#EF4444' },
+                { label: 'Manutenção', value: report.manutencao || 0, color: '#8B5CF6' },
+                { label: 'Pneus', value: report.pneus || 0, color: '#F97316' },
+                { label: 'Seguro', value: report.seguro || 0, color: '#06B6D4' },
+                { label: 'IPVA', value: report.ipva || 0, color: '#84CC16' },
+                { label: 'Outras', value: report.outrasDespesas, color: '#EC4899' }
+            ].filter(item => item.value > 0);
+
+            if (data.length === 0) {
+                ctx.fillStyle = '#6B7280';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Sem dados', 100, 100);
+                return;
+            }
+
+            const total = data.reduce((sum, item) => sum + item.value, 0);
+            let currentAngle = 0;
+
+            data.forEach(item => {
+                const sliceAngle = (item.value / total) * 2 * Math.PI;
+                
+                ctx.beginPath();
+                ctx.moveTo(100, 100);
+                ctx.arc(100, 100, 80, currentAngle, currentAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+                
+                currentAngle += sliceAngle;
+            });
+        }
+
+        // Gerar gráfico de barra
+        function generateBarChart(report) {
+            const canvas = document.getElementById('barChartCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const maxValue = Math.max(report.totalDespesas, report.receita);
+            const barWidth = 100;
+            const barHeight1 = (report.totalDespesas / maxValue) * 150;
+            const barHeight2 = (report.receita / maxValue) * 150;
+            
+            // Despesas (vermelho)
+            ctx.fillStyle = '#EF4444';
+            ctx.fillRect(50, 180 - barHeight1, barWidth, barHeight1);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Despesas', 100, 200);
+            
+            // Receita (verde)
+            ctx.fillStyle = '#10B981';
+            ctx.fillRect(200, 180 - barHeight2, barWidth, barHeight2);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('Receita', 250, 200);
+        }
+
+        // Formatação da placa do caminhão
+        function formatPlaca(input) {
+            let value = input.value.replace(/\D/g, '').toUpperCase();
+            
+            if (value.length <= 3) {
+                input.value = value;
+            } else if (value.length <= 7) {
+                input.value = value.substring(0, 3) + '-' + value.substring(3);
+            } else {
+                input.value = value.substring(0, 3) + '-' + value.substring(3, 7);
+            }
+        }
+
+        // Validação do formulário
+        function validateReportForm() {
+            const motorista = document.getElementById('motorista').value.trim();
+            const placa = document.getElementById('placa').value.trim();
+            const modelo = document.getElementById('modelo').value.trim();
+            
+            if (!motorista) {
+                showNotification('Por favor, informe o nome do motorista!', 'error');
+                return false;
+            }
+            
+            if (!placa) {
+                showNotification('Por favor, informe a placa do caminhão!', 'error');
+                return false;
+            }
+            
+            if (!modelo) {
+                showNotification('Por favor, informe o modelo do caminhão!', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Efeito de hover nos botões
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
