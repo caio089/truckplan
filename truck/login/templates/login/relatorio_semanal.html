@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>TruckPlan - Relatório Semanal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <!-- Header -->
+    <div class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-white">📊 Relatório Semanal</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'dashboard' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        ← Voltar ao Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Filtros -->
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
+            <h2 class="text-xl font-semibold text-white mb-4">Filtros de Período</h2>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Data de Início</label>
+                        <input type="date" name="data_inicio" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Data de Fim</label>
+                        <input type="date" name="data_fim" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
+                    </div>
+                </div>
+                <button type="button" onclick="gerarRelatorio()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                    Gerar Relatório
+                </button>
+                <button type="button" onclick="limparRelatorio()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 ml-4">
+                    Limpar
+                </button>
+            </form>
+        </div>
+
+        {% if relatorios %}
+        <!-- Resumo Geral -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div id="totalLitrosCard" class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium">Total de Litros</p>
+                        <p class="text-3xl font-bold">{{ total_litros|floatformat:2 }}L</p>
+                    </div>
+                    <div class="text-4xl opacity-80">⛽</div>
+                </div>
+            </div>
+
+            <div id="totalGastoGasolinaCard" class="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-red-100 text-sm font-medium">Gasto com Gasolina</p>
+                        <p class="text-3xl font-bold">R$ {{ total_gasto_gasolina|floatformat:2 }}</p>
+                    </div>
+                    <div class="text-4xl opacity-80">💰</div>
+                </div>
+            </div>
+
+            <div id="totalDiariasCard" class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm font-medium">Total de Diárias</p>
+                        <p class="text-3xl font-bold">{{ total_diarias }}</p>
+                        <p class="text-sm opacity-80">R$ {{ total_valor_diarias|floatformat:2 }}</p>
+                    </div>
+                    <div class="text-4xl opacity-80">📅</div>
+                </div>
+            </div>
+
+            <div id="lucroCard" class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
+                        <p class="text-3xl font-bold {% if lucro >= 0 %}text-green-300{% else %}text-red-300{% endif %}">
+                            R$ {{ lucro|floatformat:2 }}
+                        </p>
+                    </div>
+                    <div class="text-4xl opacity-80">📈</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo por Motorista -->
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
+            <h3 class="text-xl font-semibold text-white mb-6">Resumo por Motorista</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-white">
+                    <thead>
+                        <tr class="border-b border-gray-600">
+                            <th class="text-left py-3 px-4">Motorista</th>
+                            <th class="text-right py-3 px-4">Viagens</th>
+                            <th class="text-right py-3 px-4">Diárias</th>
+                            <th class="text-right py-3 px-4">Valor Diárias</th>
+                            <th class="text-right py-3 px-4">Gasolina</th>
+                            <th class="text-right py-3 px-4">Receita</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in resumo_motorista %}
+                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
+                            <td class="py-3 px-4 font-medium">{{ item.motorista }}</td>
+                            <td class="py-3 px-4 text-right">{{ item.total_viagens }}</td>
+                            <td class="py-3 px-4 text-right">{{ item.total_diarias }}</td>
+                            <td class="py-3 px-4 text-right">R$ {{ item.total_valor_diarias|floatformat:2 }}</td>
+                            <td class="py-3 px-4 text-right">R$ {{ item.total_gasto_gasolina|floatformat:2 }}</td>
+                            <td class="py-3 px-4 text-right">R$ {{ item.total_receita_frete|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumo por Caminhão -->
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
+            <h3 class="text-xl font-semibold text-white mb-6">Resumo por Caminhão</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-white">
+                    <thead>
+                        <tr class="border-b border-gray-600">
+                            <th class="text-left py-3 px-4">Caminhão</th>
+                            <th class="text-right py-3 px-4">Viagens</th>
+                            <th class="text-right py-3 px-4">Diárias</th>
+                            <th class="text-right py-3 px-4">Valor Diárias</th>
+                            <th class="text-right py-3 px-4">Gasolina</th>
+                            <th class="text-right py-3 px-4">Receita</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in resumo_caminhao %}
+                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
+                            <td class="py-3 px-4 font-medium">{{ item.caminhao }}</td>
+                            <td class="py-3 px-4 text-right">{{ item.total_viagens }}</td>
+                            <td class="py-3 px-4 text-right">{{ item.total_diarias }}</td>
+                            <td class="py-3 px-4 text-right">R$ {{ item.total_valor_diarias|floatformat:2 }}</td>
+                            <td class="py-3 px-4 text-right">R$ {{ item.total_gasto_gasolina|floatformat:2 }}</td>
+                            <td class="py-3 px-4 text-right">R$ {{ item.total_receita_frete|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detalhes das Viagens -->
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+            <h3 class="text-xl font-semibold text-white mb-6">Detalhes das Viagens ({{ relatorios|length }} encontradas)</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-white">
+                    <thead>
+                        <tr class="border-b border-gray-600">
+                            <th class="text-left py-3 px-4">Data</th>
+                            <th class="text-left py-3 px-4">Motorista</th>
+                            <th class="text-left py-3 px-4">Caminhão</th>
+                            <th class="text-left py-3 px-4">Rota</th>
+                            <th class="text-right py-3 px-4">Diárias</th>
+                            <th class="text-right py-3 px-4">Gasolina</th>
+                            <th class="text-right py-3 px-4">Receita</th>
+                            <th class="text-right py-3 px-4">Lucro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for relatorio in relatorios %}
+                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
+                            <td class="py-3 px-4">{{ relatorio.data_viagem|date:"d/m/Y" }}</td>
+                            <td class="py-3 px-4 font-medium">{{ relatorio.motorista }}</td>
+                            <td class="py-3 px-4">{{ relatorio.caminhao }}</td>
+                            <td class="py-3 px-4">{{ relatorio.partida }} → {{ relatorio.chegada }}</td>
+                            <td class="py-3 px-4 text-right">{{ relatorio.diarias }} (R$ {{ relatorio.valor_diarias|floatformat:2 }})</td>
+                            <td class="py-3 px-4 text-right">{{ relatorio.litros_gasolina|floatformat:2 }}L (R$ {{ relatorio.gasto_gasolina|floatformat:2 }})</td>
+                            <td class="py-3 px-4 text-right">R$ {{ relatorio.receita_frete|floatformat:2 }}</td>
+                            <td class="py-3 px-4 text-right {% if relatorio.get_lucro >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                                R$ {{ relatorio.get_lucro|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <!-- Mensagem quando não há dados -->
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-12 text-center border border-gray-700/50">
+            <div class="text-6xl mb-4">📊</div>
+            <h3 class="text-xl font-semibold text-white mb-2">Nenhum Relatório Encontrado</h3>
+            <p class="text-gray-400 mb-6">Selecione um período para gerar o relatório semanal</p>
+            <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                Cadastrar Nova Viagem
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Incluir o arquivo JavaScript de relatórios -->
+    <script src="{% static 'login/js/relatorios-debug.js' %}"></script>
+    
+    <script>
+        // Definir data padrão (última semana)
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoje = new Date();
+            const fimSemana = new Date(hoje);
+            const inicioSemana = new Date(hoje);
+            
+            // Última segunda-feira
+            inicioSemana.setDate(hoje.getDate() - hoje.getDay() + 1);
+            // Último domingo
+            fimSemana.setDate(inicioSemana.getDate() + 6);
+            
+            document.querySelector('input[name="data_inicio"]').value = inicioSemana.toISOString().split('T')[0];
+            document.querySelector('input[name="data_fim"]').value = fimSemana.toISOString().split('T')[0];
+        });
+        
+        // Funções movidas para relatorios-debug.js
+    </script>
+</body>
+</html>

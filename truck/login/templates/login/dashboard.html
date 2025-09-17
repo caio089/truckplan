@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruckPlan - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- JavaScript Simplificado -->
+    <script src="{% static 'login/js/dashboard-simple.js' %}"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -108,38 +112,129 @@
             <p class="text-gray-300 text-lg">Sistema de Controle de Despesas de Caminhão</p>
         </div>
 
-        <!-- Resumo da Semana Atual -->
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-white mb-6">Resumo da Semana Atual</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-effect rounded-2xl p-6 text-white animate-fade-in border border-gray-600/30">
+        <!-- Resumo Financeiro -->
+        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Resumo Financeiro</h3>
+                <div class="flex space-x-2">
+                    <button id="btnSemanal" onclick="alternarResumo('semanal')" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold transition-all duration-300">
+                        Semanal
+                    </button>
+                    <button id="btnMensal" onclick="alternarResumo('mensal')" class="px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold transition-all duration-300">
+                        Mensal
+                    </button>
+                </div>
+            </div>
+            
+            <div id="resumoSemanal" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-300 text-sm">Total de Gastos</p>
-                            <p class="text-3xl font-bold" id="totalGastos">R$ 0,00</p>
+                            <p class="text-red-100 text-sm font-medium">Total de Gastos</p>
+                            <p class="text-3xl font-bold" id="totalGastosSemanal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Esta semana</p>
                         </div>
-                        <div class="text-4xl">💰</div>
+                        <div class="text-4xl opacity-80">💰</div>
                     </div>
                 </div>
 
-                <div class="glass-effect rounded-2xl p-6 text-white animate-fade-in border border-gray-600/30" style="animation-delay: 0.1s">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-300 text-sm">Total de Lucros</p>
-                            <p class="text-3xl font-bold text-green-400" id="totalLucros">R$ 0,00</p>
+                            <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
+                            <p class="text-3xl font-bold" id="totalReceitasSemanal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Esta semana</p>
                         </div>
-                        <div class="text-4xl">📈</div>
+                        <div class="text-4xl opacity-80">📈</div>
                     </div>
                 </div>
 
-                <div class="glass-effect rounded-2xl p-6 text-white animate-fade-in border border-gray-600/30" style="animation-delay: 0.2s">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-300 text-sm">Lucro Líquido</p>
-                            <p class="text-3xl font-bold" id="lucroLiquido">R$ 0,00</p>
+                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-3xl font-bold" id="lucroLiquidoSemanal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Esta semana</p>
                         </div>
-                        <div class="text-4xl">💎</div>
+                        <div class="text-4xl opacity-80">💎</div>
                     </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-2xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-yellow-100 text-sm font-medium">Média Diária</p>
+                            <p class="text-3xl font-bold" id="mediaDiariaSemanal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Por dia</p>
+                        </div>
+                        <div class="text-4xl opacity-80">📊</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resumoMensal" class="grid grid-cols-1 md:grid-cols-4 gap-6 hidden">
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100 text-sm font-medium">Total de Gastos</p>
+                            <p class="text-3xl font-bold" id="totalGastosMensal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Este mês</p>
+                        </div>
+                        <div class="text-4xl opacity-80">💰</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
+                            <p class="text-3xl font-bold" id="totalReceitasMensal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Este mês</p>
+                        </div>
+                        <div class="text-4xl opacity-80">📈</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-3xl font-bold" id="lucroLiquidoMensal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Este mês</p>
+                        </div>
+                        <div class="text-4xl opacity-80">💎</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-2xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-yellow-100 text-sm font-medium">Média Diária</p>
+                            <p class="text-3xl font-bold" id="mediaDiariaMensal">R$ 0,00</p>
+                            <p class="text-xs opacity-80">Por dia</p>
+                        </div>
+                        <div class="text-4xl opacity-80">📊</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Busca por Data -->
+        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+            <h3 class="text-2xl font-bold text-white mb-6">🔍 Buscar Relatórios por Data</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data Inicial</label>
+                    <input type="date" id="dataInicial" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                </div>
+                <div>
+                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data Final</label>
+                    <input type="date" id="dataFinal" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="buscarRelatoriosPorData()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                        🔍 Buscar
+                    </button>
                 </div>
             </div>
         </div>
@@ -147,27 +242,47 @@
         <!-- Quick Actions -->
         <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
             <h3 class="text-2xl font-bold text-white mb-6">Ações Rápidas</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <button onclick="openReportModal()" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-600">
-                    <div class="flex items-center justify-center space-x-3">
-                        <span class="text-2xl">📊</span>
-                        <span>Gerar Novo Relatório</span>
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <span class="text-3xl">📊</span>
+                        <span class="text-sm">Novo Relatório</span>
                     </div>
                 </button>
 
-                <button onclick="showPreviousReports()" class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-400 hover:to-gray-500 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-400">
-                    <div class="flex items-center justify-center space-x-3">
-                        <span class="text-2xl">📅</span>
-                        <span>Relatórios Anteriores</span>
+                <button onclick="mostrarRelatoriosHoje()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-green-500">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <span class="text-3xl">📅</span>
+                        <span class="text-sm">Hoje</span>
                     </div>
                 </button>
 
-                <button onclick="showSettings()" class="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-300 hover:to-gray-400 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-300">
-                    <div class="flex items-center justify-center space-x-3">
-                        <span class="text-2xl">⚙️</span>
-                        <span>Configurações</span>
+                <button onclick="mostrarRelatoriosSemana()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-blue-500">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <span class="text-3xl">📈</span>
+                        <span class="text-sm">Esta Semana</span>
                     </div>
                 </button>
+
+                <button onclick="mostrarRelatoriosMes()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-purple-500">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <span class="text-3xl">📊</span>
+                        <span class="text-sm">Este Mês</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultados da Busca -->
+        <div id="resultadosBusca" class="hidden">
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+                <h3 class="text-2xl font-bold text-white mb-6">📊 Resultados da Busca</h3>
+                <div id="resumoResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Resumo será preenchido aqui -->
+                </div>
+                <div id="tabelaResultados" class="overflow-x-auto">
+                    <!-- Tabela será preenchida aqui -->
+                </div>
             </div>
         </div>
 
@@ -182,82 +297,235 @@
             </div>
             
             <form id="reportForm" class="space-y-6">
-                <!-- Informações Básicas -->
+                <!-- Cadastro de Viagem (Relatório Diário) -->
                 <div class="space-y-4">
-                    <h4 class="text-lg font-semibold text-white">Informações Básicas</h4>
+                    <h4 class="text-lg font-semibold text-white">Cadastro de Viagem (Relatório Diário)</h4>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Data do Relatório</label>
-                            <input type="date" id="reportDate" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem *</label>
+                            <input type="date" id="dataViagem" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
                         </div>
                         
                         <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Motorista</label>
-                            <input type="text" id="motorista" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Nome completo do motorista">
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Partida *</label>
+                            <input type="text" id="localPartida" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: São Paulo - SP" required>
                         </div>
                         
                         <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Placa do Caminhão</label>
-                            <input type="text" id="placa" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="ABC-1234" maxlength="8" oninput="formatPlaca(this)">
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Chegada *</label>
+                            <input type="text" id="localChegada" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Rio de Janeiro - RJ" required>
                         </div>
                         
                         <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Modelo do Caminhão</label>
-                            <input type="text" id="modelo" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Volvo FH 540">
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Quantidade de Diárias *</label>
+                            <input type="number" id="quantidadeDiarias" min="1" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="1" oninput="calcularDiarias()" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Motorista *</label>
+                            <input type="text" id="nomeMotorista" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Nome completo do motorista" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Caminhão *</label>
+                            <input type="text" id="nomeCaminhao" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Volvo FH 540" required>
                         </div>
                     </div>
                 </div>
 
-                <!-- Despesas -->
+                <!-- Despesas da Viagem -->
                 <div class="space-y-4">
-                    <h4 class="text-lg font-semibold text-white">Despesas</h4>
+                    <h4 class="text-lg font-semibold text-white">Despesas da Viagem</h4>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Combustível (R$)</label>
-                            <input type="number" id="combustivel" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de Gasolina Gastos *</label>
+                            <input type="number" id="litrosGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" oninput="calcularGastosViagem()" required>
                         </div>
                         
                         <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Comida (R$)</label>
-                            <input type="number" id="comida" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Aluguel (R$)</label>
-                            <input type="number" id="aluguel" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Pedágios (R$)</label>
-                            <input type="number" id="pedagios" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Manutenção (R$)</label>
-                            <input type="number" id="manutencao" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Pneus (R$)</label>
-                            <input type="number" id="pneus" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Seguro (R$)</label>
-                            <input type="number" id="seguro" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">IPVA/Licenciamento (R$)</label>
-                            <input type="number" id="ipva" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Valor Gasto com Gasolina (R$) *</label>
+                            <input type="number" id="valorGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" oninput="calcularGastosViagem()" required>
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-gray-200 text-sm font-semibold mb-2">Outras Despesas (R$)</label>
-                        <input type="number" id="outrasDespesas" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                    <!-- Cálculo Automático de Diárias -->
+                    <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-600/30">
+                        <h5 class="text-md font-semibold text-blue-300 mb-3">💰 Cálculo Automático de Diárias</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Quantidade de Diárias:</span>
+                                <span class="text-white font-semibold" id="quantidadeDiariasDisplay">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Valor por Diária:</span>
+                                <span class="text-white font-semibold">R$ 70,00</span>
+                            </div>
+                            <div class="flex justify-between col-span-2 border-t border-blue-600/30 pt-2">
+                                <span class="text-blue-300 font-semibold">Total de Diárias:</span>
+                                <span class="text-blue-400 font-bold text-lg" id="totalDiariasDisplay">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resumo de Gastos da Viagem -->
+                    <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
+                        <h5 class="text-md font-semibold text-white mb-3">📊 Resumo de Gastos da Viagem</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Gasto com Gasolina:</span>
+                                <span class="text-white font-semibold" id="gastoGasolinaDisplay">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Total de Diárias:</span>
+                                <span class="text-white font-semibold" id="totalDiariasResumo">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between col-span-2 border-t border-gray-600 pt-2">
+                                <span class="text-gray-300 font-semibold">Total de Gastos da Viagem:</span>
+                                <span class="text-red-400 font-bold text-lg" id="totalGastosViagemDisplay">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.1 Custos Gerais -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-white">1.1 Custos Gerais</h4>
+                    
+                    <!-- Busca e Filtros -->
+                    <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
+                        <h5 class="text-md font-semibold text-white mb-3">Buscar Custos Existentes</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Buscar por Placa</label>
+                                <input type="text" id="buscarPlaca" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="ABC-1234" oninput="buscarCustosPorPlaca()">
+                            </div>
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Filtrar por Tipo</label>
+                                <select id="filtrarTipo" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" onchange="filtrarCustosPorTipo()">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="manutencao">Manutenção</option>
+                                    <option value="ipva">IPVA</option>
+                                    <option value="seguro">Seguro</option>
+                                    <option value="batida">Batida</option>
+                                    <option value="pecas">Peças</option>
+                                    <option value="acessorios">Acessórios</option>
+                                    <option value="combustivel">Combustível</option>
+                                    <option value="documentacao">Documentação</option>
+                                    <option value="multas">Multas</option>
+                                    <option value="estacionamento">Estacionamento</option>
+                                    <option value="pedagio">Pedágio</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="custosEncontrados" class="space-y-2 max-h-40 overflow-y-auto">
+                            <!-- Custos encontrados serão exibidos aqui -->
+                        </div>
+                    </div>
+                    
+                    <!-- Adicionar Novo Custo -->
+                    <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
+                        <h5 class="text-md font-semibold text-white mb-3">Adicionar Novo Custo</h5>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Tipo de Gasto *</label>
+                                <select id="tipoGasto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="manutencao">Manutenção</option>
+                                    <option value="ipva">IPVA</option>
+                                    <option value="seguro">Seguro</option>
+                                    <option value="batida">Batida</option>
+                                    <option value="pecas">Peças</option>
+                                    <option value="acessorios">Acessórios</option>
+                                    <option value="combustivel">Combustível</option>
+                                    <option value="documentacao">Documentação</option>
+                                    <option value="multas">Multas</option>
+                                    <option value="estacionamento">Estacionamento</option>
+                                    <option value="pedagio">Pedágio</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Data *</label>
+                                <input type="date" id="dataCusto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Veículo (Placa) *</label>
+                                <input type="text" id="placaCusto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="ABC-1234" maxlength="8" oninput="formatPlaca(this)">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Oficina/Fornecedor *</label>
+                                <input type="text" id="oficinaFornecedor" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="Nome da oficina ou fornecedor">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Descrição do Serviço/Peça *</label>
+                            <textarea id="descricaoCusto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" rows="2" placeholder="Descreva o serviço realizado ou peça adquirida"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Valor (R$) *</label>
+                                <input type="number" id="valorCusto" step="0.01" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="0,00">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Forma de Pagamento *</label>
+                                <select id="formaPagamento" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                    <option value="">Selecione</option>
+                                    <option value="boleto">Boleto</option>
+                                    <option value="vista">À Vista</option>
+                                    <option value="fiado">Fiado</option>
+                                    <option value="aberto">Em Aberto</option>
+                                    <option value="credito">Cartão de Crédito</option>
+                                    <option value="debito">Cartão de Débito</option>
+                                    <option value="pix">PIX</option>
+                                    <option value="transferencia">Transferência</option>
+                                    <option value="cheque">Cheque</option>
+                                    <option value="parcelado">Parcelado</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Status de Pagamento *</label>
+                                <select id="statusPagamento" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                    <option value="">Selecione</option>
+                                    <option value="pago">Pago</option>
+                                    <option value="nao_pago">Não Pago</option>
+                                    <option value="parcial">Parcialmente Pago</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Data de Vencimento</label>
+                                <input type="date" id="dataVencimento" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Comprovante/Boleto</label>
+                                <input type="file" id="comprovante" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" onclick="adicionarCustoGeral()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300">
+                                Adicionar Custo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de Custos Adicionados -->
+                    <div id="listaCustosGerais" class="space-y-2">
+                        <!-- Custos adicionados serão exibidos aqui -->
                     </div>
                 </div>
 
@@ -448,7 +716,7 @@
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             // Definir data atual como padrão
-            document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
             
             // Atualizar resumo da semana
             updateWeekSummary();
@@ -465,26 +733,59 @@
 
         // Configurar listeners do formulário de relatório
         function setupReportFormListeners() {
-            const inputs = ['combustivel', 'comida', 'aluguel', 'pedagios', 'manutencao', 'pneus', 'seguro', 'ipva', 'outrasDespesas', 'receita'];
+            const inputs = ['quantidadeDiarias', 'litrosGasolina', 'valorGasolina', 'receita'];
             inputs.forEach(id => {
-                document.getElementById(id).addEventListener('input', updateReportPreview);
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateReportPreview);
+                }
             });
+        }
+
+        // ========== FUNÇÕES PARA CÁLCULO DE VIAGEM ==========
+        
+        // Calcular diárias automaticamente
+        function calcularDiarias() {
+            const quantidade = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
+            const valorPorDiaria = 70.00;
+            const totalDiarias = quantidade * valorPorDiaria;
+            
+            // Atualizar displays
+            document.getElementById('quantidadeDiariasDisplay').textContent = quantidade;
+            document.getElementById('totalDiariasDisplay').textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalDiariasResumo').textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
+            
+            // Atualizar preview geral diretamente (evitar loop)
+            updateReportPreview();
+        }
+        
+        // Calcular gastos da viagem
+        function calcularGastosViagem() {
+            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
+            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
+            const totalDiarias = quantidadeDiarias * 70.00;
+            const totalGastosViagem = valorGasolina + totalDiarias;
+            
+            // Atualizar displays
+            document.getElementById('gastoGasolinaDisplay').textContent = `R$ ${valorGasolina.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalGastosViagemDisplay').textContent = `R$ ${totalGastosViagem.toFixed(2).replace('.', ',')}`;
+            
+            // Atualizar preview geral (sem recursão)
+            updateReportPreview();
         }
 
         // Atualizar preview do relatório
         function updateReportPreview() {
-            const combustivel = parseFloat(document.getElementById('combustivel').value) || 0;
-            const comida = parseFloat(document.getElementById('comida').value) || 0;
-            const aluguel = parseFloat(document.getElementById('aluguel').value) || 0;
-            const pedagios = parseFloat(document.getElementById('pedagios').value) || 0;
-            const manutencao = parseFloat(document.getElementById('manutencao').value) || 0;
-            const pneus = parseFloat(document.getElementById('pneus').value) || 0;
-            const seguro = parseFloat(document.getElementById('seguro').value) || 0;
-            const ipva = parseFloat(document.getElementById('ipva').value) || 0;
-            const outrasDespesas = parseFloat(document.getElementById('outrasDespesas').value) || 0;
+            // Dados da viagem
+            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
+            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
             const receita = parseFloat(document.getElementById('receita').value) || 0;
 
-            const totalDespesas = combustivel + comida + aluguel + pedagios + manutencao + pneus + seguro + ipva + outrasDespesas;
+            // Calcular totais
+            const totalDiarias = quantidadeDiarias * 70.00;
+            const totalCustosGerais = custosGeraisRelatorio.reduce((sum, custo) => sum + custo.valor, 0);
+            const totalGastosViagem = valorGasolina + totalDiarias;
+            const totalDespesas = totalGastosViagem + totalCustosGerais;
             const lucroLiquido = receita - totalDespesas;
 
             document.getElementById('totalDespesasPreview').textContent = `R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
@@ -502,45 +803,66 @@
 
         // Atualizar resumo da semana
         function updateWeekSummary() {
+            console.log('Atualizando resumo da semana...');
+            console.log('Total de relatórios:', reports.length);
+            
             const currentWeek = getCurrentWeek();
             const weekReports = reports.filter(report => {
                 const reportDate = new Date(report.date);
                 return isSameWeek(reportDate, currentWeek);
             });
 
+            console.log('Relatórios da semana atual:', weekReports.length);
+
             let totalGastos = 0;
             let totalLucros = 0;
 
             weekReports.forEach(report => {
-                totalGastos += report.totalDespesas;
-                totalLucros += report.receita;
+                totalGastos += report.totalDespesas || 0;
+                totalLucros += report.receita || 0;
+                console.log('Relatório:', report.date, 'Receita:', report.receita, 'Despesas:', report.totalDespesas);
             });
 
             const lucroLiquido = totalLucros - totalGastos;
 
-            document.getElementById('totalGastos').textContent = `R$ ${totalGastos.toFixed(2).replace('.', ',')}`;
-            document.getElementById('totalLucros').textContent = `R$ ${totalLucros.toFixed(2).replace('.', ',')}`;
-            document.getElementById('lucroLiquido').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+            console.log('Totais calculados:', { totalGastos, totalLucros, lucroLiquido });
 
-            // Atualizar cor do lucro líquido
-            const lucroElement = document.getElementById('lucroLiquido');
-            if (lucroLiquido >= 0) {
-                lucroElement.className = 'text-3xl font-bold text-green-400';
-            } else {
-                lucroElement.className = 'text-3xl font-bold text-red-400';
+            // Atualizar elementos do resumo semanal
+            const totalGastosElement = document.getElementById('totalGastosSemanal');
+            const totalLucrosElement = document.getElementById('totalReceitasSemanal');
+            const lucroLiquidoElement = document.getElementById('lucroLiquidoSemanal');
+
+            if (totalGastosElement) {
+                totalGastosElement.textContent = `R$ ${totalGastos.toFixed(2).replace('.', ',')}`;
+            }
+            if (totalLucrosElement) {
+                totalLucrosElement.textContent = `R$ ${totalLucros.toFixed(2).replace('.', ',')}`;
+            }
+            if (lucroLiquidoElement) {
+                lucroLiquidoElement.textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+                
+                // Atualizar cor do lucro líquido
+                if (lucroLiquido >= 0) {
+                    lucroLiquidoElement.className = 'text-3xl font-bold text-green-300';
+                } else {
+                    lucroLiquidoElement.className = 'text-3xl font-bold text-red-300';
+                }
             }
         }
 
         // Funções de modal
         function openReportModal() {
+            // Limpar formulário ao abrir
+            limparFormularioViagem();
+            
             document.getElementById('reportModal').classList.remove('hidden');
-            document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
             updateReportPreview();
         }
 
         function closeReportModal() {
             document.getElementById('reportModal').classList.add('hidden');
-            document.getElementById('reportForm').reset();
+            // Não limpar o formulário aqui - será feito após salvar
         }
 
 
@@ -571,39 +893,83 @@
                 return;
             }
             
+            // Dados da viagem
+            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
+            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
+            const totalDiarias = quantidadeDiarias * 70.00;
+            const totalCustosGerais = custosGeraisRelatorio.reduce((sum, custo) => sum + custo.valor, 0);
+            const totalGastosViagem = valorGasolina + totalDiarias;
+            const totalDespesas = totalGastosViagem + totalCustosGerais;
+            const receita = parseFloat(document.getElementById('receita').value) || 0;
+            const lucroLiquido = receita - totalDespesas;
+
             const reportData = {
                 id: Date.now(),
-                date: document.getElementById('reportDate').value,
-                motorista: document.getElementById('motorista').value.trim(),
-                placa: document.getElementById('placa').value.trim().toUpperCase(),
-                modelo: document.getElementById('modelo').value.trim(),
-                combustivel: parseFloat(document.getElementById('combustivel').value) || 0,
-                comida: parseFloat(document.getElementById('comida').value) || 0,
-                aluguel: parseFloat(document.getElementById('aluguel').value) || 0,
-                pedagios: parseFloat(document.getElementById('pedagios').value) || 0,
-                manutencao: parseFloat(document.getElementById('manutencao').value) || 0,
-                pneus: parseFloat(document.getElementById('pneus').value) || 0,
-                seguro: parseFloat(document.getElementById('seguro').value) || 0,
-                ipva: parseFloat(document.getElementById('ipva').value) || 0,
-                outrasDespesas: parseFloat(document.getElementById('outrasDespesas').value) || 0,
-                receita: parseFloat(document.getElementById('receita').value) || 0,
-                totalDespesas: 0,
-                lucroLiquido: 0
+                date: document.getElementById('dataViagem').value,
+                localPartida: document.getElementById('localPartida').value.trim(),
+                localChegada: document.getElementById('localChegada').value.trim(),
+                quantidadeDiarias: quantidadeDiarias,
+                totalDiarias: totalDiarias,
+                litrosGasolina: parseFloat(document.getElementById('litrosGasolina').value) || 0,
+                valorGasolina: valorGasolina,
+                nomeMotorista: document.getElementById('nomeMotorista').value.trim(),
+                nomeCaminhao: document.getElementById('nomeCaminhao').value.trim(),
+                receita: receita,
+                totalGastosViagem: totalGastosViagem,
+                totalCustosGerais: totalCustosGerais,
+                totalDespesas: totalDespesas,
+                lucroLiquido: lucroLiquido,
+                custosGerais: [...custosGeraisRelatorio] // Copiar array de custos gerais
             };
 
-            reportData.totalDespesas = reportData.combustivel + reportData.comida + reportData.aluguel + 
-                                     reportData.pedagios + reportData.manutencao + reportData.pneus + 
-                                     reportData.seguro + reportData.ipva + reportData.outrasDespesas;
-            reportData.lucroLiquido = reportData.receita - reportData.totalDespesas;
+            console.log('Salvando relatório:', reportData);
+            console.log('Receita capturada:', receita);
+            console.log('Total de despesas:', totalDespesas);
+            console.log('Lucro líquido:', lucroLiquido);
 
             reports.unshift(reportData);
             localStorage.setItem('truckReports', JSON.stringify(reports));
 
-            updateWeekSummary();
+            console.log('Relatórios salvos no localStorage:', reports.length);
+
+            // Fechar modal primeiro
             closeReportModal();
             
-            showNotification('Relatório salvo com sucesso!', 'success');
+            // Limpar formulário após fechar modal
+            setTimeout(() => {
+                limparFormularioViagem();
+                updateWeekSummary();
+                showNotification('Relatório salvo com sucesso!', 'success');
+            }, 300);
         });
+
+        // Limpar formulário de viagem
+        function limparFormularioViagem() {
+            document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
+            document.getElementById('localPartida').value = '';
+            document.getElementById('localChegada').value = '';
+            document.getElementById('quantidadeDiarias').value = '';
+            document.getElementById('litrosGasolina').value = '';
+            document.getElementById('valorGasolina').value = '';
+            document.getElementById('nomeMotorista').value = '';
+            document.getElementById('nomeCaminhao').value = '';
+            document.getElementById('receita').value = '';
+            
+            // Limpar custos gerais
+            custosGeraisRelatorio = [];
+            atualizarListaCustosGerais();
+            
+            // Limpar busca de custos
+            document.getElementById('buscarPlaca').value = '';
+            document.getElementById('filtrarTipo').value = '';
+            document.getElementById('custosEncontrados').innerHTML = '';
+            
+            // Limpar formulário de custo
+            limparFormularioCusto();
+            
+            // Atualizar preview
+            updateReportPreview();
+        }
 
 
         // Ver resumo do relatório
@@ -621,15 +987,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-700/30 rounded-lg">
                             <div>
                                 <span class="text-gray-300 text-sm">Motorista:</span>
-                                <p class="text-white font-semibold">${report.motorista || 'Não informado'}</p>
+                                <p class="text-white font-semibold">${report.nomeMotorista || 'Não informado'}</p>
                             </div>
                             <div>
-                                <span class="text-gray-300 text-sm">Placa:</span>
-                                <p class="text-white font-semibold">${report.placa || 'Não informada'}</p>
+                                <span class="text-gray-300 text-sm">Caminhão:</span>
+                                <p class="text-white font-semibold">${report.nomeCaminhao || 'Não informado'}</p>
                             </div>
                             <div>
-                                <span class="text-gray-300 text-sm">Modelo:</span>
-                                <p class="text-white font-semibold">${report.modelo || 'Não informado'}</p>
+                                <span class="text-gray-300 text-sm">Rota:</span>
+                                <p class="text-white font-semibold">${report.localPartida || ''} → ${report.localChegada || ''}</p>
                             </div>
                         </div>
                         
@@ -638,44 +1004,20 @@
                                 <h5 class="text-lg font-semibold text-white mb-3">Despesas Detalhadas</h5>
                                 <div class="space-y-2 text-sm">
                                     <div class="flex justify-between">
-                                        <span class="text-gray-300">Combustível:</span>
-                                        <span class="text-white">R$ ${report.combustivel.toFixed(2).replace('.', ',')}</span>
+                                        <span class="text-gray-300">Gasolina:</span>
+                                        <span class="text-white">R$ ${(report.valorGasolina || 0).toFixed(2).replace('.', ',')}</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-gray-300">Comida:</span>
-                                        <span class="text-white">R$ ${report.comida.toFixed(2).replace('.', ',')}</span>
+                                        <span class="text-gray-300">Diárias (${report.quantidadeDiarias || 0} x R$ 70,00):</span>
+                                        <span class="text-white">R$ ${(report.totalDiarias || 0).toFixed(2).replace('.', ',')}</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-gray-300">Aluguel:</span>
-                                        <span class="text-white">R$ ${report.aluguel.toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Pedágios:</span>
-                                        <span class="text-white">R$ ${report.pedagios.toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Manutenção:</span>
-                                        <span class="text-white">R$ ${(report.manutencao || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Pneus:</span>
-                                        <span class="text-white">R$ ${(report.pneus || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Seguro:</span>
-                                        <span class="text-white">R$ ${(report.seguro || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">IPVA/Licenciamento:</span>
-                                        <span class="text-white">R$ ${(report.ipva || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Outras Despesas:</span>
-                                        <span class="text-white">R$ ${report.outrasDespesas.toFixed(2).replace('.', ',')}</span>
+                                        <span class="text-gray-300">Custos Gerais:</span>
+                                        <span class="text-white">R$ ${(report.totalCustosGerais || 0).toFixed(2).replace('.', ',')}</span>
                                     </div>
                                     <div class="flex justify-between border-t border-gray-600 pt-2">
                                         <span class="text-gray-300 font-semibold">Total Despesas:</span>
-                                        <span class="text-white font-bold">R$ ${report.totalDespesas.toFixed(2).replace('.', ',')}</span>
+                                        <span class="text-white font-bold">R$ ${(report.totalDespesas || 0).toFixed(2).replace('.', ',')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -685,12 +1027,12 @@
                                 <div class="space-y-2 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-300">Receita/Frete:</span>
-                                        <span class="text-white">R$ ${report.receita.toFixed(2).replace('.', ',')}</span>
+                                        <span class="text-white">R$ ${(report.receita || 0).toFixed(2).replace('.', ',')}</span>
                                     </div>
                                     <div class="flex justify-between border-t border-gray-600 pt-2">
                                         <span class="text-gray-300 font-semibold">Lucro Líquido:</span>
-                                        <span class="font-bold text-lg ${report.lucroLiquido >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                            R$ ${report.lucroLiquido.toFixed(2).replace('.', ',')}
+                                        <span class="font-bold text-lg ${(report.lucroLiquido || 0) >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                            R$ ${(report.lucroLiquido || 0).toFixed(2).replace('.', ',')}
                                         </span>
                                     </div>
                                 </div>
@@ -749,11 +1091,11 @@
             
             // Configurar mensagem de confirmação
             const confirmMessage = `Relatório de ${formatDate(report.date)}\n\n` +
-                                 `Motorista: ${report.motorista || 'Não informado'}\n` +
-                                 `Placa: ${report.placa || 'Não informada'}\n` +
-                                 `Despesas: R$ ${report.totalDespesas.toFixed(2).replace('.', ',')}\n` +
-                                 `Receita: R$ ${report.receita.toFixed(2).replace('.', ',')}\n` +
-                                 `Lucro: R$ ${report.lucroLiquido.toFixed(2).replace('.', ',')}\n\n` +
+                                 `Motorista: ${report.nomeMotorista || 'Não informado'}\n` +
+                                 `Caminhão: ${report.nomeCaminhao || 'Não informado'}\n` +
+                                 `Despesas: R$ ${(report.totalDespesas || 0).toFixed(2).replace('.', ',')}\n` +
+                                 `Receita: R$ ${(report.receita || 0).toFixed(2).replace('.', ',')}\n` +
+                                 `Lucro: R$ ${(report.lucroLiquido || 0).toFixed(2).replace('.', ',')}\n\n` +
                                  `Esta ação não pode ser desfeita!`;
 
             document.getElementById('confirmDeleteMessage').textContent = confirmMessage;
@@ -814,6 +1156,9 @@
 
         // Gerar relatório por período
         function generatePeriodReport() {
+            console.log('Gerando relatório por período...');
+            console.log('Total de relatórios disponíveis:', reports.length);
+            
             const period = document.getElementById('periodSelect').value;
             const content = document.getElementById('periodReportContent');
             
@@ -852,6 +1197,9 @@
                     });
                     break;
             }
+            
+            console.log('Relatórios filtrados:', filteredReports.length);
+            console.log('Relatórios encontrados:', filteredReports);
 
             if (filteredReports.length === 0) {
                 let message = 'Nenhum relatório encontrado para o período selecionado';
@@ -931,13 +1279,17 @@
                                     <div class="flex-1">
                                         <h5 class="text-white font-semibold">${formatDate(report.date)}</h5>
                                         <p class="text-gray-300 text-sm">
-                                            ${report.motorista ? `Motorista: ${report.motorista} | ` : ''}
-                                            ${report.placa ? `Placa: ${report.placa}` : ''}
+                                            ${report.nomeMotorista ? `Motorista: ${report.nomeMotorista} | ` : ''}
+                                            ${report.nomeCaminhao ? `Caminhão: ${report.nomeCaminhao}` : ''}
+                                        </p>
+                                        <p class="text-gray-300 text-sm">
+                                            ${report.localPartida ? `Partida: ${report.localPartida} | ` : ''}
+                                            ${report.localChegada ? `Chegada: ${report.localChegada}` : ''}
                                         </p>
                                         <p class="text-gray-300 text-sm mt-1">
-                                            Despesas: R$ ${report.totalDespesas.toFixed(2).replace('.', ',')} | 
-                                            Receita: R$ ${report.receita.toFixed(2).replace('.', ',')} | 
-                                            Lucro: R$ ${report.lucroLiquido.toFixed(2).replace('.', ',')}
+                                            Despesas: R$ ${(report.totalDespesas || 0).toFixed(2).replace('.', ',')} | 
+                                            Receita: R$ ${(report.receita || 0).toFixed(2).replace('.', ',')} | 
+                                            Lucro: R$ ${(report.lucroLiquido || 0).toFixed(2).replace('.', ',')}
                                         </p>
                                     </div>
                                     <div class="flex space-x-2">
@@ -1156,25 +1508,69 @@
 
         // Validação do formulário
         function validateReportForm() {
-            const motorista = document.getElementById('motorista').value.trim();
-            const placa = document.getElementById('placa').value.trim();
-            const modelo = document.getElementById('modelo').value.trim();
+            const dataViagem = document.getElementById('dataViagem').value;
+            const localPartida = document.getElementById('localPartida').value.trim();
+            const localChegada = document.getElementById('localChegada').value.trim();
+            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
+            const litrosGasolina = parseFloat(document.getElementById('litrosGasolina').value) || 0;
+            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
+            const nomeMotorista = document.getElementById('nomeMotorista').value.trim();
+            const nomeCaminhao = document.getElementById('nomeCaminhao').value.trim();
             
-            if (!motorista) {
+            console.log('Validando formulário:', {
+                dataViagem, localPartida, localChegada, quantidadeDiarias, 
+                litrosGasolina, valorGasolina, nomeMotorista, nomeCaminhao
+            });
+            
+            if (!dataViagem) {
+                showNotification('Por favor, informe a data da viagem!', 'error');
+                document.getElementById('dataViagem').focus();
+                return false;
+            }
+            
+            if (!localPartida) {
+                showNotification('Por favor, informe o local de partida!', 'error');
+                document.getElementById('localPartida').focus();
+                return false;
+            }
+            
+            if (!localChegada) {
+                showNotification('Por favor, informe o local de chegada!', 'error');
+                document.getElementById('localChegada').focus();
+                return false;
+            }
+            
+            if (quantidadeDiarias < 1) {
+                showNotification('Por favor, informe a quantidade de diárias (mínimo 1)!', 'error');
+                document.getElementById('quantidadeDiarias').focus();
+                return false;
+            }
+            
+            if (litrosGasolina < 0) {
+                showNotification('Por favor, informe a quantidade de litros de gasolina!', 'error');
+                document.getElementById('litrosGasolina').focus();
+                return false;
+            }
+            
+            if (valorGasolina < 0) {
+                showNotification('Por favor, informe o valor gasto com gasolina!', 'error');
+                document.getElementById('valorGasolina').focus();
+                return false;
+            }
+            
+            if (!nomeMotorista) {
                 showNotification('Por favor, informe o nome do motorista!', 'error');
+                document.getElementById('nomeMotorista').focus();
                 return false;
             }
             
-            if (!placa) {
-                showNotification('Por favor, informe a placa do caminhão!', 'error');
+            if (!nomeCaminhao) {
+                showNotification('Por favor, informe o nome do caminhão!', 'error');
+                document.getElementById('nomeCaminhao').focus();
                 return false;
             }
             
-            if (!modelo) {
-                showNotification('Por favor, informe o modelo do caminhão!', 'error');
-                return false;
-            }
-            
+            console.log('Formulário válido!');
             return true;
         }
 
@@ -1189,6 +1585,267 @@
                 this.style.transform = 'translateY(0)';
             });
         });
+
+        // ========== FUNÇÕES PARA CUSTOS GERAIS ==========
+        
+        // Array para armazenar custos gerais do relatório atual
+        let custosGeraisRelatorio = [];
+
+        // Buscar custos por placa
+        function buscarCustosPorPlaca() {
+            const placa = document.getElementById('buscarPlaca').value.trim().toUpperCase();
+            if (placa.length < 3) {
+                document.getElementById('custosEncontrados').innerHTML = '';
+                return;
+            }
+
+            // Simular busca (em produção, isso seria uma chamada AJAX)
+            const custosEncontrados = buscarCustosNoBanco(placa);
+            exibirCustosEncontrados(custosEncontrados);
+        }
+
+        // Filtrar custos por tipo
+        function filtrarCustosPorTipo() {
+            const tipo = document.getElementById('filtrarTipo').value;
+            const placa = document.getElementById('buscarPlaca').value.trim().toUpperCase();
+            
+            let custosEncontrados = [];
+            if (placa.length >= 3) {
+                custosEncontrados = buscarCustosNoBanco(placa, tipo);
+            } else if (tipo) {
+                custosEncontrados = buscarCustosPorTipoNoBanco(tipo);
+            }
+            
+            exibirCustosEncontrados(custosEncontrados);
+        }
+
+        // Simular busca no banco de dados
+        function buscarCustosNoBanco(placa, tipo = null) {
+            // Em produção, isso seria uma chamada AJAX para o backend
+            const custosExemplo = [
+                {
+                    id: 1,
+                    tipo: 'manutencao',
+                    data: '2024-01-15',
+                    placa: 'ABC-1234',
+                    oficina: 'Oficina Central',
+                    descricao: 'Troca de óleo e filtros',
+                    valor: 150.00,
+                    formaPagamento: 'vista',
+                    statusPagamento: 'pago'
+                },
+                {
+                    id: 2,
+                    tipo: 'pecas',
+                    data: '2024-01-10',
+                    placa: 'ABC-1234',
+                    oficina: 'Auto Peças Silva',
+                    descricao: 'Pastilhas de freio dianteiras',
+                    valor: 89.50,
+                    formaPagamento: 'boleto',
+                    statusPagamento: 'nao_pago'
+                }
+            ];
+
+            return custosExemplo.filter(custo => {
+                const placaMatch = custo.placa.includes(placa);
+                const tipoMatch = !tipo || custo.tipo === tipo;
+                return placaMatch && tipoMatch;
+            });
+        }
+
+        function buscarCustosPorTipoNoBanco(tipo) {
+            // Simular busca por tipo
+            return buscarCustosNoBanco('', tipo);
+        }
+
+        // Exibir custos encontrados
+        function exibirCustosEncontrados(custos) {
+            const container = document.getElementById('custosEncontrados');
+            
+            if (custos.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm">Nenhum custo encontrado</p>';
+                return;
+            }
+
+            const html = custos.map(custo => `
+                <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-600/30 cursor-pointer hover:bg-gray-700/70 transition-colors" 
+                     onclick="adicionarCustoExistente(${custo.id})">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">${getTipoDisplay(custo.tipo)}</span>
+                                <span class="text-xs text-gray-400">${formatDate(custo.data)}</span>
+                            </div>
+                            <p class="text-sm text-white font-medium">${custo.oficina}</p>
+                            <p class="text-xs text-gray-300">${custo.descricao}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-white">R$ ${custo.valor.toFixed(2).replace('.', ',')}</p>
+                            <p class="text-xs ${custo.statusPagamento === 'pago' ? 'text-green-400' : 'text-red-400'}">
+                                ${getStatusDisplay(custo.statusPagamento)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // Adicionar custo existente à lista
+        function adicionarCustoExistente(custoId) {
+            // Em produção, buscar detalhes completos do custo
+            const custo = buscarCustosNoBanco('').find(c => c.id === custoId);
+            if (custo) {
+                custosGeraisRelatorio.push(custo);
+                atualizarListaCustosGerais();
+                updateReportPreview(); // Atualizar preview após adicionar custo existente
+                showNotification('Custo adicionado ao relatório!', 'success');
+            }
+        }
+
+        // Adicionar novo custo geral
+        function adicionarCustoGeral() {
+            const tipoGasto = document.getElementById('tipoGasto').value;
+            const dataCusto = document.getElementById('dataCusto').value;
+            const placaCusto = document.getElementById('placaCusto').value;
+            const oficinaFornecedor = document.getElementById('oficinaFornecedor').value;
+            const descricaoCusto = document.getElementById('descricaoCusto').value;
+            const valorCusto = document.getElementById('valorCusto').value;
+            const formaPagamento = document.getElementById('formaPagamento').value;
+            const statusPagamento = document.getElementById('statusPagamento').value;
+            const dataVencimento = document.getElementById('dataVencimento').value;
+            const comprovante = document.getElementById('comprovante').files[0];
+
+            // Validação
+            if (!tipoGasto || !dataCusto || !placaCusto || !oficinaFornecedor || !descricaoCusto || !valorCusto || !formaPagamento || !statusPagamento) {
+                showNotification('Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+
+            const novoCusto = {
+                id: Date.now(), // ID temporário
+                tipo: tipoGasto,
+                data: dataCusto,
+                placa: placaCusto.toUpperCase(),
+                oficina: oficinaFornecedor,
+                descricao: descricaoCusto,
+                valor: parseFloat(valorCusto),
+                formaPagamento: formaPagamento,
+                statusPagamento: statusPagamento,
+                dataVencimento: dataVencimento || null,
+                comprovante: comprovante ? comprovante.name : null,
+                isNew: true // Marcar como novo custo
+            };
+
+            custosGeraisRelatorio.push(novoCusto);
+            atualizarListaCustosGerais();
+            limparFormularioCusto();
+            updateReportPreview(); // Atualizar preview após adicionar custo
+            showNotification('Custo adicionado com sucesso!', 'success');
+        }
+
+        // Atualizar lista de custos gerais
+        function atualizarListaCustosGerais() {
+            const container = document.getElementById('listaCustosGerais');
+            
+            if (custosGeraisRelatorio.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Nenhum custo adicionado</p>';
+                return;
+            }
+
+            const totalCustos = custosGeraisRelatorio.reduce((sum, custo) => sum + custo.valor, 0);
+
+            const html = `
+                <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
+                    <div class="flex justify-between items-center mb-3">
+                        <h6 class="text-md font-semibold text-white">Custos Adicionados (${custosGeraisRelatorio.length})</h6>
+                        <span class="text-lg font-bold text-red-400">Total: R$ ${totalCustos.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="space-y-2 max-h-60 overflow-y-auto">
+                        ${custosGeraisRelatorio.map((custo, index) => `
+                            <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-600/30">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">${getTipoDisplay(custo.tipo)}</span>
+                                            <span class="text-xs text-gray-400">${formatDate(custo.data)}</span>
+                                            ${custo.isNew ? '<span class="text-xs bg-green-600 text-white px-2 py-1 rounded">NOVO</span>' : ''}
+                                        </div>
+                                        <p class="text-sm text-white font-medium">${custo.oficina}</p>
+                                        <p class="text-xs text-gray-300">${custo.descricao}</p>
+                                        <p class="text-xs text-gray-400">Placa: ${custo.placa}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-white">R$ ${custo.valor.toFixed(2).replace('.', ',')}</p>
+                                        <p class="text-xs ${custo.statusPagamento === 'pago' ? 'text-green-400' : 'text-red-400'}">
+                                            ${getStatusDisplay(custo.statusPagamento)}
+                                        </p>
+                                        <button onclick="removerCustoGeral(${index})" class="text-red-400 hover:text-red-300 text-xs mt-1">
+                                            Remover
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Remover custo da lista
+        function removerCustoGeral(index) {
+            custosGeraisRelatorio.splice(index, 1);
+            atualizarListaCustosGerais();
+            updateReportPreview(); // Atualizar preview após remover custo
+            showNotification('Custo removido!', 'info');
+        }
+
+        // Limpar formulário de custo
+        function limparFormularioCusto() {
+            document.getElementById('tipoGasto').value = '';
+            document.getElementById('dataCusto').value = '';
+            document.getElementById('placaCusto').value = '';
+            document.getElementById('oficinaFornecedor').value = '';
+            document.getElementById('descricaoCusto').value = '';
+            document.getElementById('valorCusto').value = '';
+            document.getElementById('formaPagamento').value = '';
+            document.getElementById('statusPagamento').value = '';
+            document.getElementById('dataVencimento').value = '';
+            document.getElementById('comprovante').value = '';
+        }
+
+        // Funções auxiliares
+        function getTipoDisplay(tipo) {
+            const tipos = {
+                'manutencao': 'Manutenção',
+                'ipva': 'IPVA',
+                'seguro': 'Seguro',
+                'batida': 'Batida',
+                'pecas': 'Peças',
+                'acessorios': 'Acessórios',
+                'combustivel': 'Combustível',
+                'documentacao': 'Documentação',
+                'multas': 'Multas',
+                'estacionamento': 'Estacionamento',
+                'pedagio': 'Pedágio',
+                'outros': 'Outros'
+            };
+            return tipos[tipo] || tipo;
+        }
+
+        function getStatusDisplay(status) {
+            const statusMap = {
+                'pago': 'Pago',
+                'nao_pago': 'Não Pago',
+                'parcial': 'Parcial'
+            };
+            return statusMap[status] || status;
+        }
+
     </script>
 </body>
 </html>
