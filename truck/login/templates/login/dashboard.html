@@ -271,6 +271,14 @@
                     </div>
                 </button>
             </div>
+            
+            <!-- Botão para limpar dados de teste -->
+            <div class="mt-6 text-center">
+                <button onclick="clearAllTestData()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 border border-red-500">
+                    <i class="fas fa-trash mr-2"></i>
+                    Limpar Dados de Teste
+                </button>
+            </div>
         </div>
 
         <!-- Resultados da Busca -->
@@ -710,16 +718,78 @@
 
     <script>
         // Dados armazenados localmente
-        let reports = JSON.parse(localStorage.getItem('truckReports')) || [];
+        // Limpar todos os dados de teste
+        localStorage.removeItem('truckReports');
+        localStorage.removeItem('truckCosts');
+        
+        let reports = [];
         let currentWeekData = { gastos: 0, lucros: 0, lucroLiquido: 0 };
+
+        // Função para limpar todos os dados de teste
+        function clearAllTestData() {
+            // Limpar localStorage
+            localStorage.removeItem('truckReports');
+            localStorage.removeItem('truckCosts');
+            localStorage.removeItem('truckReportsBackup');
+            
+            // Limpar arrays
+            reports = [];
+            custosGerais = [];
+            custosGeraisRelatorio = [];
+            
+            // Limpar interface sem recarregar dados
+            limparInterface();
+            
+            console.log('Todos os dados de teste foram removidos!');
+        }
+        
+        // Função para limpar interface sem recarregar dados
+        function limparInterface() {
+            // Limpar resumo semanal
+            const totalGastosElement = document.getElementById('totalGastosSemanal');
+            const totalReceitasElement = document.getElementById('totalReceitasSemanal');
+            const lucroLiquidoElement = document.getElementById('lucroLiquidoSemanal');
+            const mediaDiariaElement = document.getElementById('mediaDiariaSemanal');
+            
+            if (totalGastosElement) totalGastosElement.textContent = 'R$ 0,00';
+            if (totalReceitasElement) totalReceitasElement.textContent = 'R$ 0,00';
+            if (lucroLiquidoElement) {
+                lucroLiquidoElement.textContent = 'R$ 0,00';
+                lucroLiquidoElement.className = 'text-3xl font-bold text-gray-300';
+            }
+            if (mediaDiariaElement) mediaDiariaElement.textContent = 'R$ 0,00';
+            
+            // Limpar resumo mensal
+            const totalGastosMensalElement = document.getElementById('totalGastosMensal');
+            const totalReceitasMensalElement = document.getElementById('totalReceitasMensal');
+            const lucroLiquidoMensalElement = document.getElementById('lucroLiquidoMensal');
+            const mediaDiariaMensalElement = document.getElementById('mediaDiariaMensal');
+            
+            if (totalGastosMensalElement) totalGastosMensalElement.textContent = 'R$ 0,00';
+            if (totalReceitasMensalElement) totalReceitasMensalElement.textContent = 'R$ 0,00';
+            if (lucroLiquidoMensalElement) {
+                lucroLiquidoMensalElement.textContent = 'R$ 0,00';
+                lucroLiquidoMensalElement.className = 'text-3xl font-bold text-gray-300';
+            }
+            if (mediaDiariaMensalElement) mediaDiariaMensalElement.textContent = 'R$ 0,00';
+            
+            // Ocultar resultados de busca
+            const resultadosDiv = document.getElementById('resultadosBusca');
+            if (resultadosDiv) {
+                resultadosDiv.classList.add('hidden');
+            }
+        }
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
+            // Limpar todos os dados de teste
+            clearAllTestData();
+            
             // Definir data atual como padrão
             document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
             
-            // Atualizar resumo da semana
-            updateWeekSummary();
+            // NÃO atualizar resumo da semana automaticamente para manter sistema limpo
+            // updateWeekSummary(); // Removido para evitar recarregamento
             
             // Adicionar listeners para cálculo automático
             setupReportFormListeners();
@@ -903,8 +973,12 @@
             const receita = parseFloat(document.getElementById('receita').value) || 0;
             const lucroLiquido = receita - totalDespesas;
 
+            // Verificar se é edição ou criação
+            const editId = document.getElementById('reportForm').dataset.editId;
+            const isEdit = editId && editId !== '';
+            
             const reportData = {
-                id: Date.now(),
+                id: isEdit ? parseInt(editId) : Date.now(),
                 date: document.getElementById('dataViagem').value,
                 localPartida: document.getElementById('localPartida').value.trim(),
                 localChegada: document.getElementById('localChegada').value.trim(),
@@ -927,7 +1001,17 @@
             console.log('Total de despesas:', totalDespesas);
             console.log('Lucro líquido:', lucroLiquido);
 
-            reports.unshift(reportData);
+            if (isEdit) {
+                // Atualizar relatório existente
+                const index = reports.findIndex(r => r.id == editId);
+                if (index !== -1) {
+                    reports[index] = reportData;
+                }
+            } else {
+                // Adicionar novo relatório
+                reports.unshift(reportData);
+            }
+            
             localStorage.setItem('truckReports', JSON.stringify(reports));
 
             console.log('Relatórios salvos no localStorage:', reports.length);
@@ -939,7 +1023,11 @@
             setTimeout(() => {
                 limparFormularioViagem();
                 updateWeekSummary();
-                showNotification('Relatório salvo com sucesso!', 'success');
+                const mensagem = isEdit ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!';
+                showNotification(mensagem, 'success');
+                
+                // Limpar ID de edição
+                document.getElementById('reportForm').dataset.editId = '';
             }, 300);
         });
 
@@ -1619,44 +1707,15 @@
             exibirCustosEncontrados(custosEncontrados);
         }
 
-        // Simular busca no banco de dados
+        // Buscar custos no banco de dados (sem dados simulados)
         function buscarCustosNoBanco(placa, tipo = null) {
-            // Em produção, isso seria uma chamada AJAX para o backend
-            const custosExemplo = [
-                {
-                    id: 1,
-                    tipo: 'manutencao',
-                    data: '2024-01-15',
-                    placa: 'ABC-1234',
-                    oficina: 'Oficina Central',
-                    descricao: 'Troca de óleo e filtros',
-                    valor: 150.00,
-                    formaPagamento: 'vista',
-                    statusPagamento: 'pago'
-                },
-                {
-                    id: 2,
-                    tipo: 'pecas',
-                    data: '2024-01-10',
-                    placa: 'ABC-1234',
-                    oficina: 'Auto Peças Silva',
-                    descricao: 'Pastilhas de freio dianteiras',
-                    valor: 89.50,
-                    formaPagamento: 'boleto',
-                    statusPagamento: 'nao_pago'
-                }
-            ];
-
-            return custosExemplo.filter(custo => {
-                const placaMatch = custo.placa.includes(placa);
-                const tipoMatch = !tipo || custo.tipo === tipo;
-                return placaMatch && tipoMatch;
-            });
+            // Retornar array vazio - sem dados simulados
+            return [];
         }
 
         function buscarCustosPorTipoNoBanco(tipo) {
-            // Simular busca por tipo
-            return buscarCustosNoBanco('', tipo);
+            // Buscar por tipo (sem dados simulados)
+            return [];
         }
 
         // Exibir custos encontrados
