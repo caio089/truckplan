@@ -51,11 +51,18 @@ class DailyReport(models.Model):
 
     def get_lucro(self):
         """Calcula o lucro da viagem (receita - gastos)"""
-        return self.receita_frete - self.gasto_gasolina - self.valor_diarias
+        try:
+            return self.receita_frete - self.gasto_gasolina - self.valor_diarias
+        except (TypeError, ValueError, InvalidOperation):
+            return Decimal('0.00')
 
     def save(self, *args, **kwargs):
         # Calcular valor das diárias automaticamente (R$ 70 por diária)
-        self.valor_diarias = self.diarias * Decimal('70.00')
+        try:
+            self.valor_diarias = self.diarias * Decimal('70.00')
+        except (TypeError, ValueError, InvalidOperation) as e:
+            # Se houver erro na operação decimal, usar valor padrão
+            self.valor_diarias = Decimal('0.00')
         super().save(*args, **kwargs)
 
 class MonthlyCost(models.Model):
@@ -190,7 +197,8 @@ class CustosGerais(models.Model):
     valor = models.DecimalField(
         max_digits=10, 
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))],
+        default=Decimal('0.00'),
+        validators=[MinValueValidator(Decimal('0.00'))],
         verbose_name="Valor"
     )
     forma_pagamento = models.CharField(
@@ -220,7 +228,10 @@ class CustosGerais(models.Model):
         ordering = ['-data', '-created_at']
 
     def __str__(self):
-        return f"{self.get_tipo_gasto_display()} - {self.oficina_fornecedor} - R$ {self.valor}"
+        try:
+            return f"{self.get_tipo_gasto_display()} - {self.oficina_fornecedor} - R$ {self.valor}"
+        except (TypeError, ValueError, InvalidOperation):
+            return f"Custo Geral - ID {self.id}"
 
     def get_tipo_gasto_display(self):
         return dict(self.TIPO_GASTO_CHOICES).get(self.tipo_gasto, self.tipo_gasto)

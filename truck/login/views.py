@@ -106,36 +106,86 @@ def cadastrar_viagem(request):
     """View para cadastrar nova viagem"""
     if request.method == 'POST':
         try:
+            # Debug: Log dos dados recebidos
+            print("=== DEBUG BACKEND CADASTRAR_VIAGEM ===")
+            print("Dados POST recebidos:", dict(request.POST))
+            print("Headers:", dict(request.headers))
+            
             # Validar campos obrigatórios
-            data_viagem = request.POST.get('data_viagem')
-            partida = request.POST.get('partida', '').strip()
-            chegada = request.POST.get('chegada', '').strip()
-            diarias = request.POST.get('diarias')
-            litros_gasolina = request.POST.get('litros_gasolina')
-            gasto_gasolina = request.POST.get('gasto_gasolina')
-            receita_frete = request.POST.get('receita_frete', '0')
-            motorista = request.POST.get('motorista', '').strip()
-            caminhao = request.POST.get('caminhao', '').strip()
+            # Aceitar tanto data_viagem quanto dataViagem
+            data_viagem = request.POST.get('data_viagem', '').strip() or request.POST.get('dataViagem', '').strip()
+            partida = request.POST.get('partida', '').strip() or request.POST.get('localPartida', '').strip()
+            chegada = request.POST.get('chegada', '').strip() or request.POST.get('localChegada', '').strip()
+            diarias = request.POST.get('diarias', '').strip() or request.POST.get('quantidadeDiarias', '').strip()
+            litros_gasolina = request.POST.get('litros_gasolina', '').strip() or request.POST.get('litrosGasolina', '').strip()
+            gasto_gasolina = request.POST.get('gasto_gasolina', '').strip() or request.POST.get('valorGasolina', '').strip()
+            receita_frete = request.POST.get('receita_frete', '0').strip() or request.POST.get('receita', '0').strip()
+            motorista = request.POST.get('motorista', '').strip() or request.POST.get('nomeMotorista', '').strip()
+            caminhao = request.POST.get('caminhao', '').strip() or request.POST.get('nomeCaminhao', '').strip()
+            
+            print(f"Data viagem extraída: '{data_viagem}' (tipo: {type(data_viagem)})")
+            print(f"Partida extraída: '{partida}'")
+            print(f"Chegada extraída: '{chegada}'")
+            print("=====================================")
             
             # Dados do salário do motorista
-            salario_base = request.POST.get('salario_base', '0')
-            bonus_viagens = request.POST.get('bonus_viagens', '0')
-            desconto_faltas = request.POST.get('desconto_faltas', '0')
+            salario_base = request.POST.get('salario_base', '0').strip()
+            bonus_viagens = request.POST.get('bonus_viagens', '0').strip()
+            desconto_faltas = request.POST.get('desconto_faltas', '0').strip()
             
             # Validações
             if not all([data_viagem, partida, chegada, diarias, litros_gasolina, gasto_gasolina, motorista, caminhao]):
-                messages.error(request, 'Todos os campos são obrigatórios.')
-                return render(request, 'login/cadastrar_viagem.html')
+                error_msg = 'Todos os campos são obrigatórios.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'message': error_msg})
+                else:
+                    messages.error(request, error_msg)
+                    return render(request, 'login/cadastrar_viagem.html')
+            
+            # Validar formato da data
+            print(f"=== VALIDAÇÃO DE DATA ===")
+            print(f"Data a ser validada: '{data_viagem}'")
+            print(f"Tipo da data: {type(data_viagem)}")
+            print(f"Comprimento: {len(data_viagem) if data_viagem else 'None'}")
+            print(f"Representação: {repr(data_viagem)}")
+            
+            try:
+                from datetime import datetime
+                data_obj = datetime.strptime(data_viagem, '%Y-%m-%d')
+                print(f"Data convertida com sucesso: {data_obj}")
+            except ValueError as e:
+                print(f"ERRO na conversão da data: {e}")
+                error_msg = f'Formato de data inválido. Use YYYY-MM-DD. Data recebida: "{data_viagem}"'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'message': error_msg})
+                else:
+                    messages.error(request, error_msg)
+                    return render(request, 'login/cadastrar_viagem.html')
+            print("=========================")
+            
+            # Validar campos numéricos
+            try:
+                diarias_int = int(diarias)
+                litros_float = float(litros_gasolina)
+                gasto_float = float(gasto_gasolina)
+                receita_float = float(receita_frete)
+            except ValueError:
+                error_msg = 'Valores numéricos inválidos.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'message': error_msg})
+                else:
+                    messages.error(request, error_msg)
+                    return render(request, 'login/cadastrar_viagem.html')
             
             # Criar relatório diário
             relatorio = DailyReport.objects.create(
                 data_viagem=data_viagem,
                 partida=partida,
                 chegada=chegada,
-                diarias=int(diarias),
-                litros_gasolina=Decimal(litros_gasolina),
-                gasto_gasolina=Decimal(gasto_gasolina),
-                receita_frete=Decimal(receita_frete),
+                diarias=diarias_int,
+                litros_gasolina=Decimal(str(litros_float)),
+                gasto_gasolina=Decimal(str(gasto_float)),
+                receita_frete=Decimal(str(receita_float)),
                 motorista=motorista,
                 caminhao=caminhao
             )
@@ -143,25 +193,33 @@ def cadastrar_viagem(request):
             # Salvar salário do motorista se fornecido
             if motorista and (salario_base != '0' or bonus_viagens != '0' or desconto_faltas != '0'):
                 # Obter ano-mês da data da viagem
-                from datetime import datetime
-                data_obj = datetime.strptime(data_viagem, '%Y-%m-%d')
                 ano_mes = data_obj.strftime('%Y-%m')
+                
+                # Validar valores do salário
+                try:
+                    salario_base_float = float(salario_base)
+                    bonus_viagens_float = float(bonus_viagens)
+                    desconto_faltas_float = float(desconto_faltas)
+                except ValueError:
+                    salario_base_float = 0.0
+                    bonus_viagens_float = 0.0
+                    desconto_faltas_float = 0.0
                 
                 # Criar ou atualizar salário do motorista
                 salario, created = MotoristaSalario.objects.get_or_create(
                     motorista=motorista,
                     ano_mes=ano_mes,
                     defaults={
-                        'salario_base': Decimal(salario_base),
-                        'bonus_viagens': Decimal(bonus_viagens),
-                        'desconto_faltas': Decimal(desconto_faltas)
+                        'salario_base': Decimal(str(salario_base_float)),
+                        'bonus_viagens': Decimal(str(bonus_viagens_float)),
+                        'desconto_faltas': Decimal(str(desconto_faltas_float))
                     }
                 )
                 
                 if not created:
-                    salario.salario_base = Decimal(salario_base)
-                    salario.bonus_viagens = Decimal(bonus_viagens)
-                    salario.desconto_faltas = Decimal(desconto_faltas)
+                    salario.salario_base = Decimal(str(salario_base_float))
+                    salario.bonus_viagens = Decimal(str(bonus_viagens_float))
+                    salario.desconto_faltas = Decimal(str(desconto_faltas_float))
                     salario.save()
             
             # Processar custos gerais
@@ -191,7 +249,7 @@ def cadastrar_viagem(request):
                         custo = CustosGerais.objects.create(
                             relatorio=relatorio,
                             tipo_gasto=tipo_gasto,
-                            data=data_viagem,
+                            data=data_obj.date(),  # Converter para objeto date
                             veiculo_placa=caminhao,  # Usar o nome do caminhão como placa
                             oficina_fornecedor=oficina_fornecedor,
                             descricao=descricao,
@@ -336,21 +394,62 @@ def listar_relatorios(request):
         })
     
     print(f"✅ Relatórios processados: {len(relatorios_data)}")
-    print(f"📋 Primeiro relatório: {relatorios_data[0] if relatorios_data else 'Nenhum'}")
+    if relatorios_data:
+        print(f"📋 Primeiro relatório: {relatorios_data[0]}")
+        print(f"📋 Estrutura do primeiro relatório: {list(relatorios_data[0].keys())}")
+        print(f"📋 Valores do primeiro relatório:")
+        for key, value in relatorios_data[0].items():
+            print(f"    {key}: {value} (tipo: {type(value)})")
+    else:
+        print("📋 Nenhum relatório encontrado")
     
     return JsonResponse({'relatorios': relatorios_data})
 
 @login_required
 def excluir_relatorio(request, relatorio_id):
-    """View para excluir um relatório"""
+    """View para excluir um relatório usando SQL direto para evitar problemas com Decimal"""
     try:
-        relatorio = DailyReport.objects.get(id=relatorio_id)
-        relatorio.delete()
+        logger.info(f'=== INÍCIO EXCLUSÃO RELATÓRIO {relatorio_id} ===')
+        
+        from django.db import connection
+        
+        # Verificar se o relatório existe
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM login_dailyreport WHERE id = %s", [relatorio_id])
+            if not cursor.fetchone():
+                logger.warning(f'Relatório {relatorio_id} não encontrado')
+                return JsonResponse({'success': False, 'message': 'Relatório não encontrado!'})
+        
+        # Excluir custos gerais relacionados primeiro via SQL
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) FROM login_custosgerais WHERE relatorio_id = %s", [relatorio_id])
+                count_custos = cursor.fetchone()[0]
+                logger.info(f'Encontrados {count_custos} custos gerais para o relatório')
+                
+                if count_custos > 0:
+                    cursor.execute("DELETE FROM login_custosgerais WHERE relatorio_id = %s", [relatorio_id])
+                    logger.info('Custos gerais excluídos com sucesso via SQL')
+        except Exception as e:
+            logger.error(f'Erro ao excluir custos gerais via SQL: {e}', exc_info=True)
+            # Continuar mesmo com erro
+        
+        # Excluir o relatório via SQL
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM login_dailyreport WHERE id = %s", [relatorio_id])
+                logger.info(f'Relatório {relatorio_id} excluído com sucesso via SQL')
+        except Exception as e:
+            logger.error(f'Erro ao excluir relatório via SQL: {e}', exc_info=True)
+            return JsonResponse({'success': False, 'message': f'Erro ao excluir relatório: {str(e)}'})
+        
         return JsonResponse({'success': True, 'message': 'Relatório excluído com sucesso!'})
-    except DailyReport.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Relatório não encontrado!'})
+        
     except Exception as e:
+        logger.error(f'Erro inesperado ao excluir relatório {relatorio_id}: {e}', exc_info=True)
         return JsonResponse({'success': False, 'message': f'Erro ao excluir relatório: {str(e)}'})
+    finally:
+        logger.info(f'=== FIM EXCLUSÃO RELATÓRIO {relatorio_id} ===')
 
 @login_required
 def relatorio_semanal(request):
@@ -795,9 +894,11 @@ def adicionar_custo_geral(request):
                 })
             
             # Criar custo geral
+            # Converter data string para objeto date
+            data_obj = datetime.strptime(data, '%Y-%m-%d')
             custo = CustosGerais.objects.create(
                 tipo_gasto=tipo_gasto,
-                data=data,
+                data=data_obj.date(),  # Converter para objeto date
                 veiculo_placa=veiculo_placa,
                 km_atual=int(km_atual) if km_atual else None,
                 oficina_fornecedor=oficina_fornecedor,
@@ -838,7 +939,11 @@ def editar_custo_geral(request, custo_id):
         try:
             # Atualizar dados
             custo.tipo_gasto = request.POST.get('tipo_gasto')
-            custo.data = request.POST.get('data')
+            # Converter data string para objeto date
+            data_str = request.POST.get('data')
+            if data_str:
+                data_obj = datetime.strptime(data_str, '%Y-%m-%d')
+                custo.data = data_obj.date()
             custo.veiculo_placa = request.POST.get('veiculo_placa', '').strip().upper()
             custo.km_atual = int(request.POST.get('km_atual', '')) if request.POST.get('km_atual') else None
             custo.oficina_fornecedor = request.POST.get('oficina_fornecedor', '').strip()
@@ -1208,18 +1313,19 @@ def atualizar_relatorio(request, relatorio_id):
             relatorio = get_object_or_404(DailyReport, id=relatorio_id)
             
             # Obter dados do POST
-            data_viagem = request.POST.get('data_viagem')
-            partida = request.POST.get('partida', '').strip()
-            chegada = request.POST.get('chegada', '').strip()
-            diarias = request.POST.get('diarias', '0')
-            litros_gasolina = request.POST.get('litros_gasolina', '0')
-            gasto_gasolina = request.POST.get('gasto_gasolina', '0')
-            receita_frete = request.POST.get('receita_frete', '0')
-            motorista = request.POST.get('motorista', '').strip()
-            caminhao = request.POST.get('caminhao', '').strip()
-            salario_base = request.POST.get('salario_base', '0')
-            bonus_viagens = request.POST.get('bonus_viagens', '0')
-            desconto_faltas = request.POST.get('desconto_faltas', '0')
+            # Aceitar tanto data_viagem quanto dataViagem
+            data_viagem = request.POST.get('data_viagem', '').strip() or request.POST.get('dataViagem', '').strip()
+            partida = request.POST.get('partida', '').strip() or request.POST.get('localPartida', '').strip()
+            chegada = request.POST.get('chegada', '').strip() or request.POST.get('localChegada', '').strip()
+            diarias = request.POST.get('diarias', '0').strip() or request.POST.get('quantidadeDiarias', '0').strip()
+            litros_gasolina = request.POST.get('litros_gasolina', '0').strip() or request.POST.get('litrosGasolina', '0').strip()
+            gasto_gasolina = request.POST.get('gasto_gasolina', '0').strip() or request.POST.get('valorGasolina', '0').strip()
+            receita_frete = request.POST.get('receita_frete', '0').strip() or request.POST.get('receita', '0').strip()
+            motorista = request.POST.get('motorista', '').strip() or request.POST.get('nomeMotorista', '').strip()
+            caminhao = request.POST.get('caminhao', '').strip() or request.POST.get('nomeCaminhao', '').strip()
+            salario_base = request.POST.get('salario_base', '0').strip()
+            bonus_viagens = request.POST.get('bonus_viagens', '0').strip()
+            desconto_faltas = request.POST.get('desconto_faltas', '0').strip()
             
             # Atualizar dados do relatório
             relatorio.data_viagem = data_viagem
@@ -1269,10 +1375,12 @@ def atualizar_relatorio(request, relatorio_id):
                 status_pagamento = request.POST.get(f'custo_{index}_status_pagamento', 'pago')
                 
                 if oficina_fornecedor and descricao and valor:
+                    # Converter data_viagem para objeto date
+                    data_obj = datetime.strptime(data_viagem, '%Y-%m-%d')
                     CustosGerais.objects.create(
                         relatorio=relatorio,
                         tipo_gasto=tipo_gasto,
-                        data=data_viagem,
+                        data=data_obj.date(),  # Converter para objeto date
                         veiculo_placa=caminhao,
                         oficina_fornecedor=oficina_fornecedor,
                         descricao=descricao,
@@ -1309,71 +1417,76 @@ def teste_abas(request):
 @login_required
 def custos_fixos(request):
     """View para gerenciar custos fixos mensais"""
-    if request.method == 'POST':
-        try:
-            descricao = request.POST.get('descricao', '').strip()
-            tipo_custo = request.POST.get('tipo_custo', '')
-            valor_mensal = request.POST.get('valor_mensal', '0')
-            data_inicio = request.POST.get('data_inicio')
-            data_fim = request.POST.get('data_fim') or None
-            status = request.POST.get('status', 'ativo')
-            observacoes = request.POST.get('observacoes', '').strip()
-            
-            if not descricao or not tipo_custo or not valor_mensal or not data_inicio:
-                return JsonResponse({'success': False, 'message': 'Preencha todos os campos obrigatórios!'})
-            
-            custo_fixo = CustoFixoMensal.objects.create(
-                descricao=descricao,
-                tipo_custo=tipo_custo,
-                valor_mensal=Decimal(valor_mensal),
-                data_inicio=data_inicio,
-                data_fim=data_fim,
-                status=status,
-                observacoes=observacoes
-            )
-            
-            mensagem = f'Custo fixo "{descricao}" cadastrado com sucesso!'
-            
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': mensagem})
-            else:
-                messages.success(request, mensagem)
-                return redirect('dashboard')
+    try:
+        if request.method == 'POST':
+            try:
+                descricao = request.POST.get('descricao', '').strip()
+                tipo_custo = request.POST.get('tipo_custo', '')
+                valor_mensal = request.POST.get('valor_mensal', '0')
+                data_inicio = request.POST.get('data_inicio')
+                data_fim = request.POST.get('data_fim') or None
+                status = request.POST.get('status', 'ativo')
+                observacoes = request.POST.get('observacoes', '').strip()
                 
-        except Exception as e:
-            logger.error(f'Erro ao salvar custo fixo: {e}')
+                if not descricao or not tipo_custo or not valor_mensal or not data_inicio:
+                    return JsonResponse({'success': False, 'message': 'Preencha todos os campos obrigatórios!'})
+                
+                custo_fixo = CustoFixoMensal.objects.create(
+                    descricao=descricao,
+                    tipo_custo=tipo_custo,
+                    valor_mensal=Decimal(valor_mensal),
+                    data_inicio=data_inicio,
+                    data_fim=data_fim,
+                    status=status,
+                    observacoes=observacoes
+                )
+                
+                mensagem = f'Custo fixo "{descricao}" cadastrado com sucesso!'
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'message': mensagem})
+                else:
+                    messages.success(request, mensagem)
+                    return redirect('dashboard')
+                    
+            except Exception as e:
+                logger.error(f'Erro ao salvar custo fixo: {e}')
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'message': f'Erro ao salvar custo fixo: {str(e)}'})
+                else:
+                    messages.error(request, f'Erro ao salvar custo fixo: {str(e)}')
+                    return redirect('dashboard')
+        
+        elif request.method == 'GET':
+            # Listar custos fixos
+            custos_fixos = CustoFixoMensal.objects.all().order_by('-data_inicio')
+            
+            custos_data = []
+            for custo in custos_fixos:
+                custos_data.append({
+                    'id': custo.id,
+                    'descricao': custo.descricao,
+                    'tipo_custo': custo.tipo_custo,
+                    'tipo_custo_display': custo.get_tipo_custo_display(),
+                    'valor_mensal': float(custo.valor_mensal),
+                    'data_inicio': custo.data_inicio.strftime('%Y-%m-%d'),
+                    'data_fim': custo.data_fim.strftime('%Y-%m-%d') if custo.data_fim else None,
+                    'status': custo.status,
+                    'status_display': custo.get_status_display(),
+                    'observacoes': custo.observacoes,
+                    'created_at': custo.created_at.strftime('%Y-%m-%d %H:%M')
+                })
+            
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'message': f'Erro ao salvar custo fixo: {str(e)}'})
+                return JsonResponse({'custos_fixos': custos_data})
             else:
-                messages.error(request, f'Erro ao salvar custo fixo: {str(e)}')
-                return redirect('dashboard')
-    
-    elif request.method == 'GET':
-        # Listar custos fixos
-        custos_fixos = CustoFixoMensal.objects.all().order_by('-data_inicio')
+                return render(request, 'login/custos_fixos.html', {'custos_fixos': custos_fixos})
         
-        custos_data = []
-        for custo in custos_fixos:
-            custos_data.append({
-                'id': custo.id,
-                'descricao': custo.descricao,
-                'tipo_custo': custo.tipo_custo,
-                'tipo_custo_display': custo.get_tipo_custo_display(),
-                'valor_mensal': float(custo.valor_mensal),
-                'data_inicio': custo.data_inicio.strftime('%Y-%m-%d'),
-                'data_fim': custo.data_fim.strftime('%Y-%m-%d') if custo.data_fim else None,
-                'status': custo.status,
-                'status_display': custo.get_status_display(),
-                'observacoes': custo.observacoes,
-                'created_at': custo.created_at.strftime('%Y-%m-%d %H:%M')
-            })
+        return JsonResponse({'success': False, 'message': 'Método não permitido'})
         
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'custos_fixos': custos_data})
-        else:
-            return render(request, 'login/custos_fixos.html', {'custos_fixos': custos_fixos})
-    
-    return JsonResponse({'success': False, 'message': 'Método não permitido'})
+    except Exception as e:
+        logger.error(f'Erro geral na view custos_fixos: {e}')
+        return JsonResponse({'success': False, 'message': f'Erro interno do servidor: {str(e)}'})
 
 @login_required
 def excluir_custo_fixo(request, custo_id):

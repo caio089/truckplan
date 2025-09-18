@@ -8,11 +8,39 @@ let custosGeraisRelatorio = [];
 // Carregar relatórios do servidor
 async function carregarRelatoriosDoServidor() {
     try {
+        console.log('=== CARREGANDO RELATÓRIOS DO SERVIDOR ===');
         const response = await fetch('/login/listar-relatorios/');
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('Dados recebidos do servidor:', data);
             reports = data.relatorios || [];
+            console.log('Relatórios carregados:', reports.length);
+            console.log('Primeiro relatório:', reports[0]);
+            
+            if (reports.length > 0) {
+                console.log('Estrutura do primeiro relatório:', Object.keys(reports[0]));
+                console.log('Valores do primeiro relatório:', {
+                    id: reports[0].id,
+                    date: reports[0].date,
+                    localPartida: reports[0].localPartida,
+                    localChegada: reports[0].localChegada,
+                    nomeMotorista: reports[0].nomeMotorista,
+                    nomeCaminhao: reports[0].nomeCaminhao,
+                    receita: reports[0].receita,
+                    valorGasolina: reports[0].valorGasolina,
+                    totalDiarias: reports[0].totalDiarias
+                });
+            }
+            
             updateWeekSummary();
+            updateMonthSummary();
+            updatePreviousReportsList();
+        } else {
+            console.error('Erro na resposta:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('Texto do erro:', errorText);
         }
     } catch (error) {
         console.error('Erro ao carregar relatórios:', error);
@@ -131,9 +159,17 @@ function buscarRelatoriosPorData() {
 }
 
 function mostrarResultadosBusca(relatorios) {
+    console.log('=== MOSTRANDO RESULTADOS BUSCA ===');
+    console.log('Relatórios recebidos:', relatorios.length);
+    console.log('Relatórios:', relatorios);
+    
     const container = document.getElementById('resultadosBusca');
     const resumo = document.getElementById('resumoResultados');
     const tabela = document.getElementById('tabelaResultados');
+    
+    console.log('Container encontrado:', !!container);
+    console.log('Resumo encontrado:', !!resumo);
+    console.log('Tabela encontrada:', !!tabela);
     
     if (relatorios.length === 0) {
         resumo.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Nenhum relatório encontrado no período selecionado</div>';
@@ -190,6 +226,8 @@ function mostrarResultadosBusca(relatorios) {
         `;
         
         // Gerar tabela
+        console.log('Gerando tabela com relatórios:', relatorios);
+        
         tabela.innerHTML = `
             <table class="w-full text-white">
                 <thead>
@@ -204,15 +242,29 @@ function mostrarResultadosBusca(relatorios) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${relatorios.map(report => `
+                    ${relatorios.map(report => {
+                        console.log('Processando relatório:', report);
+                        const receita = report.receita || 0;
+                        const valorGasolina = report.valorGasolina || 0;
+                        const totalDiarias = report.totalDiarias || 0;
+                        const totalCustosGerais = report.totalCustosGerais || 0;
+                        const salarioLiquido = report.salarioLiquido || 0;
+                        const totalGastos = valorGasolina + totalDiarias + totalCustosGerais + salarioLiquido;
+                        const lucro = receita - totalGastos;
+                        
+                        console.log('Valores calculados:', {
+                            receita, valorGasolina, totalDiarias, totalCustosGerais, salarioLiquido, totalGastos, lucro
+                        });
+                        
+                        return `
                         <tr class="border-b border-gray-700 hover:bg-gray-800/50">
                             <td class="py-3 px-4">${formatDate(report.date)}</td>
-                            <td class="py-3 px-4">${report.localPartida || ''} → ${report.localChegada || ''}</td>
-                            <td class="py-3 px-4">${report.nomeMotorista || ''}</td>
-                            <td class="py-3 px-4 text-green-400">R$ ${(report.receita || 0).toFixed(2).replace('.', ',')}</td>
-                            <td class="py-3 px-4 text-red-400">R$ ${((report.valorGasolina || 0) + (report.totalDiarias || 0) + (report.totalCustosGerais || 0) + (report.salarioLiquido || 0)).toFixed(2).replace('.', ',')}</td>
-                            <td class="py-3 px-4 ${(report.receita || 0) - ((report.valorGasolina || 0) + (report.totalDiarias || 0) + (report.totalCustosGerais || 0) + (report.salarioLiquido || 0)) >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                R$ ${((report.receita || 0) - ((report.valorGasolina || 0) + (report.totalDiarias || 0) + (report.totalCustosGerais || 0) + (report.salarioLiquido || 0))).toFixed(2).replace('.', ',')}
+                            <td class="py-3 px-4">${report.localPartida || 'N/A'} → ${report.localChegada || 'N/A'}</td>
+                            <td class="py-3 px-4">${report.nomeMotorista || 'N/A'}</td>
+                            <td class="py-3 px-4 text-green-400">R$ ${receita.toFixed(2).replace('.', ',')}</td>
+                            <td class="py-3 px-4 text-red-400">R$ ${totalGastos.toFixed(2).replace('.', ',')}</td>
+                            <td class="py-3 px-4 ${lucro >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                R$ ${lucro.toFixed(2).replace('.', ',')}
                             </td>
                             <td class="py-3 px-4">
                                 <button onclick="viewReportSummary(${report.id})" class="text-blue-400 hover:text-blue-300 mr-2">Ver</button>
@@ -220,7 +272,8 @@ function mostrarResultadosBusca(relatorios) {
                                 <button onclick="deleteReport(${report.id})" class="text-red-400 hover:text-red-300">Excluir</button>
                             </td>
                         </tr>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </tbody>
             </table>
         `;
@@ -232,43 +285,68 @@ function mostrarResultadosBusca(relatorios) {
 // ===== FUNÇÕES DE AÇÕES RÁPIDAS =====
 
 function mostrarRelatoriosHoje() {
-    const hoje = new Date().toISOString().split('T')[0];
-    const relatoriosHoje = reports.filter(report => report.date === hoje);
-    mostrarResultadosBusca(relatoriosHoje);
+    try {
+        const hoje = new Date().toISOString().split('T')[0];
+        const relatoriosHoje = reports.filter(report => report.date === hoje);
+        mostrarResultadosBusca(relatoriosHoje);
+    } catch (error) {
+        console.error('Erro em mostrarRelatoriosHoje:', error);
+        showNotification('Erro ao carregar relatórios de hoje', 'error');
+    }
 }
 
 function mostrarRelatoriosSemana() {
-    const hoje = new Date();
-    const inicioSemana = new Date(hoje);
-    inicioSemana.setDate(hoje.getDate() - hoje.getDay());
-    
-    const relatoriosSemana = reports.filter(report => {
-        const reportDate = new Date(report.date);
-        return reportDate >= inicioSemana && reportDate <= hoje;
-    });
-    
-    mostrarResultadosBusca(relatoriosSemana);
+    try {
+        const hoje = new Date();
+        const inicioSemana = new Date(hoje);
+        inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+        
+        const relatoriosSemana = reports.filter(report => {
+            const reportDate = new Date(report.date);
+            return reportDate >= inicioSemana && reportDate <= hoje;
+        });
+        
+        mostrarResultadosBusca(relatoriosSemana);
+    } catch (error) {
+        console.error('Erro em mostrarRelatoriosSemana:', error);
+        showNotification('Erro ao carregar relatórios da semana', 'error');
+    }
 }
 
 function mostrarRelatoriosMes() {
-    const hoje = new Date();
-    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    
-    const relatoriosMes = reports.filter(report => {
-        const reportDate = new Date(report.date);
-        return reportDate >= inicioMes && reportDate <= hoje;
-    });
-    
-    mostrarResultadosBusca(relatoriosMes);
+    try {
+        const hoje = new Date();
+        const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        
+        const relatoriosMes = reports.filter(report => {
+            const reportDate = new Date(report.date);
+            return reportDate >= inicioMes && reportDate <= hoje;
+        });
+        
+        mostrarResultadosBusca(relatoriosMes);
+    } catch (error) {
+        console.error('Erro em mostrarRelatoriosMes:', error);
+        showNotification('Erro ao carregar relatórios do mês', 'error');
+    }
 }
 
 // ===== MODAIS =====
 
 function openReportModal() {
-    limparFormularioViagem();
-    document.getElementById('reportModal').classList.remove('hidden');
-    document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
-    updateReportPreview();
+    try {
+        limparFormularioViagem();
+        const modal = document.getElementById('reportModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+        const dataField = document.getElementById('dataViagem');
+        if (dataField) {
+            dataField.value = new Date().toISOString().split('T')[0];
+        }
+        updateReportPreview();
+    } catch (error) {
+        console.error('Erro ao abrir modal de relatório:', error);
+    }
 }
 
 function closeReportModal() {
@@ -291,6 +369,14 @@ function salvarRelatorio() {
     const form = document.getElementById('reportForm');
     const formData = new FormData(form);
     
+    // Debug: Log do FormData
+    console.log('=== DEBUG FORMDATA ===');
+    console.log('FormData entries:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+    console.log('=====================');
+    
     // Validar campos obrigatórios
     const camposObrigatorios = ['dataViagem', 'localPartida', 'localChegada', 'quantidadeDiarias', 'litrosGasolina', 'valorGasolina', 'nomeMotorista', 'nomeCaminhao'];
     for (const campo of camposObrigatorios) {
@@ -302,20 +388,64 @@ function salvarRelatorio() {
         }
     }
     
-    // Coletar dados do formulário
+    // Coletar dados do formulário com validação para evitar NaN
+    const parseFloatSafe = (value) => {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? 0 : parsed;
+    };
+    
+    // Validar e formatar data
+    const dataViagem = formData.get('dataViagem');
+    
+    // Também verificar diretamente do elemento
+    const dataElement = document.getElementById('dataViagem');
+    const dataValue = dataElement ? dataElement.value : '';
+    
+    // Usar o valor do elemento se o FormData estiver vazio
+    const dataFinal = dataViagem || dataValue;
+    
+    // Debug temporário
+    console.log('=== DEBUG DATA ===');
+    console.log('dataViagem (FormData):', dataViagem);
+    console.log('dataValue (Element):', dataValue);
+    console.log('dataFinal (Final):', dataFinal);
+    console.log('Tipo da dataFinal:', typeof dataFinal);
+    console.log('Comprimento:', dataFinal ? dataFinal.length : 'undefined');
+    console.log('==================');
+    
+    if (!dataFinal || dataFinal.trim() === '') {
+        console.log('ERRO: Data vazia');
+        showNotification('Data da viagem é obrigatória!', 'error');
+        if (dataElement) dataElement.focus();
+        return;
+    }
+    
+    // Verificar se a data está no formato correto
+    const dataRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const isValidFormat = dataRegex.test(dataFinal);
+    console.log('Regex test result:', isValidFormat);
+    console.log('Data matches regex:', dataFinal.match(dataRegex));
+    
+    if (!isValidFormat) {
+        console.log('ERRO: Formato inválido');
+        showNotification(`Formato de data inválido. Use YYYY-MM-DD. Recebido: "${dataFinal}"`, 'error');
+        if (dataElement) dataElement.focus();
+        return;
+    }
+    
     const reportData = {
-        data: formData.get('dataViagem'),
+        date: dataFinal,  // Corrigido: usar 'date' em vez de 'data'
         localPartida: formData.get('localPartida'),
         localChegada: formData.get('localChegada'),
-        quantidadeDiarias: parseFloat(formData.get('quantidadeDiarias')),
-        litrosGasolina: parseFloat(formData.get('litrosGasolina')),
-        valorGasolina: parseFloat(formData.get('valorGasolina')),
+        quantidadeDiarias: parseFloatSafe(formData.get('quantidadeDiarias')),
+        litrosGasolina: parseFloatSafe(formData.get('litrosGasolina')),
+        valorGasolina: parseFloatSafe(formData.get('valorGasolina')),
         nomeMotorista: formData.get('nomeMotorista'),
         nomeCaminhao: formData.get('nomeCaminhao'),
-        receita: parseFloat(formData.get('receita') || 0),
-        salario_base: parseFloat(formData.get('salario_base') || 0),
-        bonus_viagens: parseFloat(formData.get('bonus_viagens') || 0),
-        desconto_faltas: parseFloat(formData.get('desconto_faltas') || 0),
+        receita: parseFloatSafe(formData.get('receita') || 0),
+        salarioBase: parseFloatSafe(formData.get('salario_base') || 0),  // Corrigido: usar camelCase
+        bonusViagens: parseFloatSafe(formData.get('bonus_viagens') || 0),  // Corrigido: usar camelCase
+        descontoFaltas: parseFloatSafe(formData.get('desconto_faltas') || 0),  // Corrigido: usar camelCase
         custosGerais: custosGeraisRelatorio
     };
     
@@ -568,18 +698,35 @@ function editReport(reportId) {
     document.getElementById('bonus_viagens').value = report.bonus_viagens || '';
     document.getElementById('desconto_faltas').value = report.desconto_faltas || '';
     
+    // Carregar custos gerais se existirem
+    if (report.custosGerais && Array.isArray(report.custosGerais)) {
+        custosGeraisRelatorio = [...report.custosGerais];
+    } else {
+        custosGeraisRelatorio = [];
+    }
+    atualizarListaCustosGerais();
+    
     // Abrir modal
     openReportModal();
 }
 
 async function deleteReport(reportId) {
+    console.log(`=== INÍCIO EXCLUSÃO RELATÓRIO ${reportId} ===`);
+    
     if (confirm('Tem certeza que deseja excluir este relatório?')) {
         try {
-            const csrfToken = getCookie('csrftoken');
+            console.log('Usuário confirmou exclusão');
+            
+            const csrfToken = getCSRFToken();
+            console.log('CSRF Token obtido:', csrfToken ? 'Sim' : 'Não');
+            
             if (!csrfToken) {
+                console.error('CSRF Token não encontrado');
                 showNotification('Erro de autenticação. Faça login novamente.', 'error');
                 return;
             }
+            
+            console.log(`Fazendo requisição para: /login/excluir-relatorio/${reportId}/`);
             
             const response = await fetch(`/login/excluir-relatorio/${reportId}/`, {
                 method: 'POST',
@@ -589,24 +736,51 @@ async function deleteReport(reportId) {
                 },
             });
             
+            console.log('Resposta recebida:', response.status, response.statusText);
+            
             if (response.ok) {
                 const result = await response.json();
+                console.log('Resultado da exclusão:', result);
+                
                 showNotification(result.message || 'Relatório excluído com sucesso!', 'success');
                 
                 // Remover da lista local
                 reports = reports.filter(r => r.id !== reportId);
+                console.log('Relatório removido da lista local');
                 
                 // Atualizar resumos
                 updateWeekSummary();
                 updateMonthSummary();
+                console.log('Resumos atualizados');
                 
                 // Atualizar resultados de busca se estiverem visíveis
                 const resultadosBusca = document.getElementById('resultadosBusca');
                 if (resultadosBusca && !resultadosBusca.classList.contains('hidden')) {
-                    // Recarregar resultados de busca
-                    buscarRelatoriosPorData();
+                    console.log('Atualizando resultados de busca...');
+                    
+                    // Recarregar todos os relatórios do servidor para garantir consistência
+                    await carregarRelatoriosDoServidor();
+                    
+                    // Verificar se há filtros de data aplicados
+                    const dataInicial = document.getElementById('dataInicial').value;
+                    const dataFinal = document.getElementById('dataFinal').value;
+                    if (dataInicial && dataFinal) {
+                        // Aplicar filtro de data
+                        const relatoriosFiltrados = reports.filter(report => {
+                            const reportDate = new Date(report.date);
+                            const inicio = new Date(dataInicial);
+                            const fim = new Date(dataFinal);
+                            return reportDate >= inicio && reportDate <= fim;
+                        });
+                        mostrarResultadosBusca(relatoriosFiltrados);
+                    } else {
+                        // Mostrar todos os relatórios
+                        mostrarResultadosBusca(reports);
+                    }
                 }
             } else {
+                console.error('Erro na resposta:', response.status, response.statusText);
+                
                 // Verificar se é erro de autenticação
                 if (response.status === 403) {
                     showNotification('Erro de autenticação. Faça login novamente.', 'error');
@@ -616,8 +790,10 @@ async function deleteReport(reportId) {
                 // Tentar ler como JSON, se falhar, mostrar erro genérico
                 try {
                     const result = await response.json();
+                    console.error('Erro detalhado:', result);
                     showNotification(result.message || 'Erro ao excluir relatório!', 'error');
                 } catch (jsonError) {
+                    console.error('Erro ao ler JSON da resposta:', jsonError);
                     showNotification(`Erro ao excluir relatório! (Status: ${response.status})`, 'error');
                 }
             }
@@ -625,7 +801,11 @@ async function deleteReport(reportId) {
             console.error('Erro ao excluir relatório:', error);
             showNotification('Erro de conexão ao excluir relatório!', 'error');
         }
+    } else {
+        console.log('Usuário cancelou exclusão');
     }
+    
+    console.log(`=== FIM EXCLUSÃO RELATÓRIO ${reportId} ===`);
 }
 
 // ===== FORMULÁRIOS =====
@@ -643,6 +823,7 @@ function limparFormularioViagem() {
     document.getElementById('editReportId').value = '';
     custosGeraisRelatorio = [];
     atualizarListaCustosGerais();
+    limparFormularioCusto();
 }
 
 function limparFormularioCustoFixo() {
@@ -651,12 +832,26 @@ function limparFormularioCustoFixo() {
 
 // ===== CÁLCULOS =====
 
+// Debounce para updateReportPreview
+let updatePreviewTimeout;
+function debouncedUpdateReportPreview() {
+    clearTimeout(updatePreviewTimeout);
+    updatePreviewTimeout = setTimeout(() => {
+        updateReportPreview();
+    }, 150);
+}
+
 function calcularDiarias() {
     const quantidade = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
     const valorDiaria = 70.00;
     const total = quantidade * valorDiaria;
-    document.getElementById('totalDiarias').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    updateReportPreview();
+    
+    const totalDiariasElement = document.getElementById('totalDiarias');
+    if (totalDiariasElement) {
+        totalDiariasElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+    
+    debouncedUpdateReportPreview();
 }
 
 function calcularGastosViagem() {
@@ -664,8 +859,13 @@ function calcularGastosViagem() {
     const diarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
     const totalDiarias = diarias * 70.00;
     const total = gasolina + totalDiarias;
-    document.getElementById('totalGastosViagem').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    updateReportPreview();
+    
+    const totalGastosViagemElement = document.getElementById('totalGastosViagem');
+    if (totalGastosViagemElement) {
+        totalGastosViagemElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+    
+    debouncedUpdateReportPreview();
 }
 
 function calcularSalarioMotorista() {
@@ -673,8 +873,13 @@ function calcularSalarioMotorista() {
     const bonus = parseFloat(document.getElementById('bonus_viagens').value) || 0;
     const desconto = parseFloat(document.getElementById('desconto_faltas').value) || 0;
     const salarioLiquido = salarioBase + bonus - desconto;
-    document.getElementById('salarioLiquido').textContent = `R$ ${salarioLiquido.toFixed(2).replace('.', ',')}`;
-    updateReportPreview();
+    
+    const salarioLiquidoElement = document.getElementById('salarioLiquido');
+    if (salarioLiquidoElement) {
+        salarioLiquidoElement.textContent = `R$ ${salarioLiquido.toFixed(2).replace('.', ',')}`;
+    }
+    
+    debouncedUpdateReportPreview();
 }
 
 function updateReportPreview() {
@@ -698,69 +903,188 @@ function updateReportPreview() {
     const totalDespesas = totalGastosViagem + totalCustosGerais + salarioLiquido;
     const lucroLiquido = receita - totalDespesas;
     
-    document.getElementById('previewDataViagem').textContent = dataViagem || 'Não informado';
-    document.getElementById('previewLocalPartida').textContent = localPartida || 'Não informado';
-    document.getElementById('previewLocalChegada').textContent = localChegada || 'Não informado';
-    document.getElementById('previewQuantidadeDiarias').textContent = quantidadeDiarias;
-    document.getElementById('previewTotalDiarias').textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
-    document.getElementById('previewLitrosGasolina').textContent = litrosGasolina;
-    document.getElementById('previewValorGasolina').textContent = `R$ ${valorGasolina.toFixed(2).replace('.', ',')}`;
-    document.getElementById('previewNomeMotorista').textContent = nomeMotorista || 'Não informado';
-    document.getElementById('previewNomeCaminhao').textContent = nomeCaminhao || 'Não informado';
-    document.getElementById('previewReceita').textContent = `R$ ${receita.toFixed(2).replace('.', ',')}`;
-    document.getElementById('previewTotalGastosViagem').textContent = `R$ ${totalGastosViagem.toFixed(2).replace('.', ',')}`;
-    document.getElementById('previewTotalCustosGerais').textContent = `R$ ${totalCustosGerais.toFixed(2).replace('.', ',')}`;
-    document.getElementById('previewSalarioLiquido').textContent = `R$ ${salarioLiquido.toFixed(2).replace('.', ',')}`;
-    document.getElementById('previewTotalDespesas').textContent = `R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
-    document.getElementById('previewLucroLiquido').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+    // Atualizar preview apenas se os elementos existirem
+    const previewDataViagem = document.getElementById('previewDataViagem');
+    if (previewDataViagem) previewDataViagem.textContent = dataViagem || 'Não informado';
+    
+    const previewLocalPartida = document.getElementById('previewLocalPartida');
+    if (previewLocalPartida) previewLocalPartida.textContent = localPartida || 'Não informado';
+    
+    const previewLocalChegada = document.getElementById('previewLocalChegada');
+    if (previewLocalChegada) previewLocalChegada.textContent = localChegada || 'Não informado';
+    
+    const previewQuantidadeDiarias = document.getElementById('previewQuantidadeDiarias');
+    if (previewQuantidadeDiarias) previewQuantidadeDiarias.textContent = quantidadeDiarias;
+    
+    const previewTotalDiarias = document.getElementById('previewTotalDiarias');
+    if (previewTotalDiarias) previewTotalDiarias.textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
+    
+    const previewLitrosGasolina = document.getElementById('previewLitrosGasolina');
+    if (previewLitrosGasolina) previewLitrosGasolina.textContent = litrosGasolina;
+    
+    const previewValorGasolina = document.getElementById('previewValorGasolina');
+    if (previewValorGasolina) previewValorGasolina.textContent = `R$ ${valorGasolina.toFixed(2).replace('.', ',')}`;
+    
+    const previewNomeMotorista = document.getElementById('previewNomeMotorista');
+    if (previewNomeMotorista) previewNomeMotorista.textContent = nomeMotorista || 'Não informado';
+    
+    const previewNomeCaminhao = document.getElementById('previewNomeCaminhao');
+    if (previewNomeCaminhao) previewNomeCaminhao.textContent = nomeCaminhao || 'Não informado';
+    
+    const previewReceita = document.getElementById('previewReceita');
+    if (previewReceita) previewReceita.textContent = `R$ ${receita.toFixed(2).replace('.', ',')}`;
+    
+    const previewTotalGastosViagem = document.getElementById('previewTotalGastosViagem');
+    if (previewTotalGastosViagem) previewTotalGastosViagem.textContent = `R$ ${totalGastosViagem.toFixed(2).replace('.', ',')}`;
+    // Atualizar preview dos custos gerais
+    const previewCustosGerais = document.getElementById('previewTotalCustosGerais');
+    if (previewCustosGerais) {
+        previewCustosGerais.textContent = `R$ ${totalCustosGerais.toFixed(2).replace('.', ',')}`;
+    }
+    
+    const previewSalarioLiquido = document.getElementById('previewSalarioLiquido');
+    if (previewSalarioLiquido) {
+        previewSalarioLiquido.textContent = `R$ ${salarioLiquido.toFixed(2).replace('.', ',')}`;
+    }
+    
+    const previewTotalDespesas = document.getElementById('previewTotalDespesas');
+    if (previewTotalDespesas) {
+        previewTotalDespesas.textContent = `R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
+    }
+    
+    const previewLucroLiquido = document.getElementById('previewLucroLiquido');
+    if (previewLucroLiquido) {
+        previewLucroLiquido.textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Atualizar resumo dos gastos no modal
+    const resumoGastos = document.getElementById('resumoGastos');
+    if (resumoGastos) {
+        resumoGastos.innerHTML = `
+            <div class="bg-gray-800/30 rounded-xl p-4 border border-gray-600/30">
+                <h4 class="text-lg font-semibold text-white mb-3">💰 Resumo dos Gastos</h4>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">⛽ Gasolina:</span>
+                        <span class="text-red-400 font-semibold">R$ ${valorGasolina.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">🏨 Diárias (${quantidadeDiarias} dias):</span>
+                        <span class="text-red-400 font-semibold">R$ ${totalDiarias.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">🔧 Custos Gerais:</span>
+                        <span class="text-red-400 font-semibold">R$ ${totalCustosGerais.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-300">👨‍💼 Salário Motorista:</span>
+                        <span class="text-red-400 font-semibold">R$ ${salarioLiquido.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <hr class="border-gray-600">
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span class="text-white">💸 Total de Gastos:</span>
+                        <span class="text-red-300">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span class="text-white">💰 Receita:</span>
+                        <span class="text-green-400">R$ ${receita.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xl font-bold">
+                        <span class="text-white">📈 Lucro Líquido:</span>
+                        <span class="${lucroLiquido >= 0 ? 'text-green-400' : 'text-red-400'}">R$ ${lucroLiquido.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 }
 
 // ===== CUSTOS GERAIS =====
 
-function adicionarCustoGeral() {
-    const tipoGasto = document.getElementById('tipoGasto').value;
-    const dataCusto = document.getElementById('dataCusto').value;
-    const placaCusto = document.getElementById('placaCusto').value;
-    const oficinaFornecedor = document.getElementById('oficinaFornecedor').value;
-    const descricaoCusto = document.getElementById('descricaoCusto').value;
-    const valorCusto = document.getElementById('valorCusto').value;
-    const formaPagamento = document.getElementById('formaPagamento').value;
-    const statusPagamento = document.getElementById('statusPagamento').value;
-    const dataVencimento = document.getElementById('dataVencimento').value;
-    const comprovante = document.getElementById('comprovante').files[0];
+// Variável para controlar se está processando adição de custo
+let processandoCusto = false;
 
-    if (!tipoGasto || !dataCusto || !placaCusto || !oficinaFornecedor || !descricaoCusto || !valorCusto || !formaPagamento || !statusPagamento) {
-        showNotification('Preencha todos os campos obrigatórios!', 'error');
+function adicionarCustoGeral() {
+    // Evitar múltiplas execuções simultâneas
+    if (processandoCusto) {
+        console.log('Já está processando um custo, aguarde...');
         return;
     }
+    
+    processandoCusto = true;
+    
+    // Desabilitar botão durante processamento
+    const btnAdicionarCusto = document.getElementById('btnAdicionarCusto');
+    if (btnAdicionarCusto) {
+        btnAdicionarCusto.disabled = true;
+        btnAdicionarCusto.textContent = '⏳ Processando...';
+    }
+    
+    try {
+        const tipoGasto = document.getElementById('tipoGasto').value;
+        const dataCusto = document.getElementById('dataCusto').value;
+        const placaCusto = document.getElementById('placaCusto').value;
+        const oficinaFornecedor = document.getElementById('oficinaFornecedor').value;
+        const descricaoCusto = document.getElementById('descricaoCusto').value;
+        const valorCusto = document.getElementById('valorCusto').value;
+        const formaPagamento = document.getElementById('formaPagamento').value;
+        const statusPagamento = document.getElementById('statusPagamento').value;
+        const dataVencimento = document.getElementById('dataVencimento').value;
+        const comprovante = document.getElementById('comprovante').files[0];
 
-    const novoCusto = {
-        id: Date.now(),
-        tipo: tipoGasto,
-        data: dataCusto,
-        placa: placaCusto.toUpperCase(),
-        oficina: oficinaFornecedor,
-        descricao: descricaoCusto,
-        valor: parseFloat(valorCusto),
-        formaPagamento: formaPagamento,
-        statusPagamento: statusPagamento,
-        dataVencimento: dataVencimento || null,
-        comprovante: comprovante ? comprovante.name : null,
-        isNew: true
-    };
+        // Validação mínima - apenas campos essenciais
+        if (!tipoGasto || !descricaoCusto || !valorCusto) {
+            showNotification('Preencha pelo menos: Tipo, Descrição e Valor!', 'error');
+            return;
+        }
 
-    custosGeraisRelatorio.push(novoCusto);
-    atualizarListaCustosGerais();
-    limparFormularioCusto();
-    updateReportPreview();
-    showNotification('Custo adicionado com sucesso!', 'success');
+        const novoCusto = {
+            id: Date.now(),
+            tipo: tipoGasto,
+            data: dataCusto || new Date().toISOString().split('T')[0],
+            placa: placaCusto ? placaCusto.toUpperCase() : 'N/A',
+            oficina: oficinaFornecedor || 'Não informado',
+            descricao: descricaoCusto,
+            valor: parseFloat(valorCusto),
+            formaPagamento: formaPagamento || 'Não informado',
+            statusPagamento: statusPagamento || 'Pendente',
+            dataVencimento: dataVencimento || null,
+            comprovante: comprovante || null,
+            isNew: true
+        };
+
+        custosGeraisRelatorio.push(novoCusto);
+        atualizarListaCustosGerais();
+        limparFormularioCusto();
+        
+        // Atualizar preview com debounce para evitar loops
+        debouncedUpdateReportPreview();
+        
+        showNotification('Custo adicionado com sucesso!', 'success');
+        
+    } catch (error) {
+        console.error('Erro ao adicionar custo:', error);
+        showNotification('Erro ao adicionar custo!', 'error');
+    } finally {
+        // Liberar o controle após um pequeno delay
+        setTimeout(() => {
+            processandoCusto = false;
+            
+            // Reabilitar botão
+            const btnAdicionarCusto = document.getElementById('btnAdicionarCusto');
+            if (btnAdicionarCusto) {
+                btnAdicionarCusto.disabled = false;
+                btnAdicionarCusto.textContent = '➕ Adicionar Custo';
+            }
+        }, 500);
+    }
 }
 
 function atualizarListaCustosGerais() {
-    const container = document.getElementById('listaCustosGerais');
+    const container = document.getElementById('listaCustosGeraisContent');
     
     if (!container) {
-        console.log('Elemento listaCustosGerais não encontrado');
+        console.log('Elemento listaCustosGeraisContent não encontrado');
         return;
     }
     
@@ -809,7 +1133,7 @@ function atualizarListaCustosGerais() {
 function removerCustoGeral(index) {
     custosGeraisRelatorio.splice(index, 1);
     atualizarListaCustosGerais();
-    updateReportPreview();
+    debouncedUpdateReportPreview();
     showNotification('Custo removido!', 'info');
 }
 
@@ -824,6 +1148,16 @@ function limparFormularioCusto() {
     document.getElementById('statusPagamento').value = '';
     document.getElementById('dataVencimento').value = '';
     document.getElementById('comprovante').value = '';
+    
+    // Limpar campos de parcelas
+    document.getElementById('quantidadeParcelas').value = '';
+    document.getElementById('valorParcela').value = '';
+    document.getElementById('dataPrimeiraParcela').value = '';
+    document.getElementById('diaVencimento').value = '15';
+    
+    // Ocultar campos de parcelas
+    document.getElementById('camposParcelas').classList.add('hidden');
+    document.getElementById('previewParcelas').classList.add('hidden');
 }
 
 // ===== PARCELAS =====
@@ -913,7 +1247,7 @@ async function salvarCustoFixo() {
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': getCSRFToken(),
                 'X-Requested-With': 'XMLHttpRequest'
             }
         });
@@ -995,10 +1329,16 @@ function editarCustoFixo(custoId) {
 async function excluirCustoFixo(custoId) {
     if (confirm('Tem certeza que deseja excluir este custo fixo?')) {
         try {
+            const csrfToken = getCSRFToken();
+            if (!csrfToken) {
+                showNotification('Erro de autenticação. Faça login novamente.', 'error');
+                return;
+            }
+            
             const response = await fetch(`/login/excluir-custo-fixo/${custoId}/`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-CSRFToken': csrfToken,
                     'Content-Type': 'application/json',
                 },
             });
@@ -1024,39 +1364,68 @@ async function excluirCustoFixo(custoId) {
 
 async function salvarRelatorioNoServidor(reportData, isEdit) {
     try {
+        console.log('=== DEBUG SALVAR RELATÓRIO ===');
+        console.log('reportData recebido:', reportData);
+        console.log('isEdit:', isEdit);
+        
         const formData = new FormData();
         
+        // Enviar tanto data_viagem quanto dataViagem para compatibilidade
         formData.append('data_viagem', reportData.date);
+        formData.append('dataViagem', reportData.date);
+        
+        console.log('Data sendo enviada:', reportData.date);
+        console.log('Tipo da data:', typeof reportData.date);
         formData.append('partida', reportData.localPartida);
+        formData.append('localPartida', reportData.localPartida);
         formData.append('chegada', reportData.localChegada);
+        formData.append('localChegada', reportData.localChegada);
         formData.append('diarias', reportData.quantidadeDiarias);
+        formData.append('quantidadeDiarias', reportData.quantidadeDiarias);
         formData.append('litros_gasolina', reportData.litrosGasolina);
+        formData.append('litrosGasolina', reportData.litrosGasolina);
         formData.append('gasto_gasolina', reportData.valorGasolina);
+        formData.append('valorGasolina', reportData.valorGasolina);
         formData.append('receita_frete', reportData.receita);
+        formData.append('receita', reportData.receita);
         formData.append('motorista', reportData.nomeMotorista);
+        formData.append('nomeMotorista', reportData.nomeMotorista);
         formData.append('caminhao', reportData.nomeCaminhao);
+        formData.append('nomeCaminhao', reportData.nomeCaminhao);
         formData.append('salario_base', reportData.salarioBase);
         formData.append('bonus_viagens', reportData.bonusViagens);
         formData.append('desconto_faltas', reportData.descontoFaltas);
         
         custosGeraisRelatorio.forEach((custo, index) => {
             formData.append(`custo_${index}_tipo_gasto`, custo.tipo);
+            formData.append(`custo_${index}_data_custo`, custo.data || '');
+            formData.append(`custo_${index}_placa`, custo.placa || '');
             formData.append(`custo_${index}_oficina_fornecedor`, custo.oficina || '');
             formData.append(`custo_${index}_descricao`, custo.descricao || '');
             formData.append(`custo_${index}_valor`, custo.valor || '0');
             formData.append(`custo_${index}_forma_pagamento`, custo.formaPagamento || 'vista');
             formData.append(`custo_${index}_status_pagamento`, custo.statusPagamento || 'pago');
+            formData.append(`custo_${index}_data_vencimento`, custo.dataVencimento || '');
+            if (custo.comprovante) {
+                formData.append(`custo_${index}_comprovante`, custo.comprovante);
+            }
         });
         
         const editReportId = document.getElementById('editReportId').value;
-        const isEdit = editReportId && editReportId !== '';
         const url = isEdit ? `/login/atualizar-relatorio/${editReportId}/` : '/login/cadastrar-viagem/';
+        
+        console.log('URL da requisição:', url);
+        console.log('FormData entries:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        console.log('========================');
         
         const response = await fetch(url, {
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': getCSRFToken(),
                 'X-Requested-With': 'XMLHttpRequest'
             }
         });
@@ -1100,6 +1469,23 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function getCSRFToken() {
+    // Primeiro tenta obter do input hidden
+    const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (tokenInput && tokenInput.value) {
+        return tokenInput.value;
+    }
+    
+    // Se não encontrar, tenta obter do cookie
+    const cookieToken = getCookie('csrftoken');
+    if (cookieToken) {
+        return cookieToken;
+    }
+    
+    // Se não encontrar nenhum, retorna null
+    return null;
+}
+
 function showNotification(message, type) {
     const notification = document.createElement('div');
     notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
@@ -1118,8 +1504,19 @@ function showNotification(message, type) {
 }
 
 function formatDate(dateString) {
+    console.log('Formatando data:', dateString, 'tipo:', typeof dateString);
+    if (!dateString) {
+        console.log('Data vazia ou undefined');
+        return 'N/A';
+    }
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    if (isNaN(date.getTime())) {
+        console.log('Data inválida:', dateString);
+        return 'Data inválida';
+    }
+    const formatted = date.toLocaleDateString('pt-BR');
+    console.log('Data formatada:', formatted);
+    return formatted;
 }
 
 function getTipoDisplay(tipo) {
@@ -1137,6 +1534,9 @@ function getTipoDisplay(tipo) {
 // ===== FUNÇÕES ADICIONAIS =====
 
 function updatePreviousReportsList() {
+    console.log('=== ATUALIZANDO LISTA DE RELATÓRIOS ANTERIORES ===');
+    console.log('Total de relatórios:', reports.length);
+    
     // Atualizar lista de relatórios anteriores
     // Esta função é chamada quando os relatórios são carregados
     // A lista é atualizada automaticamente pela função mostrarResultadosBusca
@@ -1150,6 +1550,11 @@ function updatePreviousReportsList() {
                 </div>
             `;
         }
+        
+        // Mostrar todos os relatórios na seção de resultados
+        mostrarResultadosBusca(reports);
+    } else {
+        console.log('Nenhum relatório para exibir');
     }
 }
 
@@ -1161,6 +1566,23 @@ function atualizarTodasAsSecoes() {
 
 // ===== INICIALIZAÇÃO =====
 
+// Expor funções globalmente imediatamente (fora do DOMContentLoaded)
+window.mostrarRelatoriosHoje = mostrarRelatoriosHoje;
+window.mostrarRelatoriosSemana = mostrarRelatoriosSemana;
+window.mostrarRelatoriosMes = mostrarRelatoriosMes;
+window.openReportModal = openReportModal;
+window.closeReportModal = closeReportModal;
+window.openCustosFixosModal = openCustosFixosModal;
+window.closeCustosFixosModal = closeCustosFixosModal;
+window.buscarRelatoriosPorData = buscarRelatoriosPorData;
+window.showPreviousReports = showPreviousReports;
+window.irParaRelatorioSemanal = irParaRelatorioSemanal;
+window.irParaRelatorioMensal = irParaRelatorioMensal;
+window.alternarResumo = alternarResumo;
+window.viewReportSummary = viewReportSummary;
+window.editReport = editReport;
+window.deleteReport = deleteReport;
+
 document.addEventListener('DOMContentLoaded', function() {
     carregarRelatoriosDoServidor();
     
@@ -1171,7 +1593,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputs.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.addEventListener('input', updateReportPreview);
+            element.addEventListener('input', debouncedUpdateReportPreview);
         }
     });
     
@@ -1190,3 +1612,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Verificação adicional para garantir que as funções estão disponíveis
+if (typeof window.openReportModal === 'undefined') {
+    console.error('openReportModal não foi definida!');
+    window.openReportModal = function() {
+        console.error('openReportModal chamada mas não definida!');
+    };
+}

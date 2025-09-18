@@ -305,7 +305,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem *</label>
-                                <input type="date" id="dataViagem" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
+                                <input type="date" id="dataViagem" name="dataViagem" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
                             </div>
                             
                             <div>
@@ -376,6 +376,140 @@
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Desconto por Faltas (R$)</label>
                                 <input type="number" id="desconto_faltas" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custos Adicionais -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">🔧 Custos Adicionais (Opcional)</h4>
+                        <p class="text-gray-400 text-sm mb-4">Adicione custos extras como manutenção, pedágios, multas, etc. Apenas os campos marcados com * são obrigatórios.</p>
+                        
+                        <!-- Formulário para Adicionar Custo -->
+                        <div class="bg-gray-800/30 rounded-xl p-4 border border-gray-600/30 mb-4">
+                            <h5 class="text-md font-semibold text-white mb-3">➕ Adicionar Novo Custo</h5>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Tipo de Gasto *</label>
+                                    <select id="tipoGasto" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                        <option value="">Selecione</option>
+                                        <option value="manutencao">Manutenção</option>
+                                        <option value="combustivel">Combustível</option>
+                                        <option value="pedagio">Pedágio</option>
+                                        <option value="alimentacao">Alimentação</option>
+                                        <option value="hospedagem">Hospedagem</option>
+                                        <option value="outros">Outros</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data do Custo</label>
+                                    <input type="date" id="dataCusto" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Placa do Veículo</label>
+                                    <input type="text" id="placaCusto" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="ABC-1234 (opcional)">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Oficina/Fornecedor</label>
+                                    <input type="text" id="oficinaFornecedor" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="Nome da oficina ou fornecedor (opcional)">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Descrição *</label>
+                                    <input type="text" id="descricaoCusto" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="Descrição do gasto">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Valor (R$) *</label>
+                                    <input type="number" id="valorCusto" step="0.01" min="0" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="0,00">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Forma de Pagamento</label>
+                                    <select id="formaPagamento" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" onchange="toggleParcelas()">
+                                        <option value="">Selecione (opcional)</option>
+                                        <option value="vista">À Vista</option>
+                                        <option value="credito">Cartão de Crédito</option>
+                                        <option value="debito">Cartão de Débito</option>
+                                        <option value="pix">PIX</option>
+                                        <option value="parcelado">Parcelado</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Status do Pagamento</label>
+                                    <select id="statusPagamento" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                        <option value="">Selecione (opcional)</option>
+                                        <option value="pago">Pago</option>
+                                        <option value="pendente">Pendente</option>
+                                        <option value="vencido">Vencido</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data de Vencimento</label>
+                                    <input type="date" id="dataVencimento" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Comprovante</label>
+                                    <input type="file" id="comprovante" accept="image/*,.pdf" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                </div>
+                            </div>
+                            
+                            <!-- Campos de Parcelas (ocultos por padrão) -->
+                            <div id="camposParcelas" class="hidden mt-4 p-4 bg-gray-700/30 rounded-lg">
+                                <h6 class="text-white font-semibold mb-3">📅 Configuração de Parcelas</h6>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-200 text-sm font-semibold mb-2">Quantidade de Parcelas</label>
+                                        <input type="number" id="quantidadeParcelas" min="1" max="24" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="1">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-200 text-sm font-semibold mb-2">Valor da Parcela (R$)</label>
+                                        <input type="number" id="valorParcela" step="0.01" min="0" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="0,00">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Primeira Parcela</label>
+                                        <input type="date" id="dataPrimeiraParcela" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-200 text-sm font-semibold mb-2">Dia de Vencimento</label>
+                                        <input type="number" id="diaVencimento" min="1" max="31" value="15" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="15">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <button type="button" onclick="calcularParcelas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                                        📊 Calcular Parcelas
+                                    </button>
+                                </div>
+                                
+                                <!-- Preview das Parcelas -->
+                                <div id="previewParcelas" class="hidden mt-4">
+                                    <h6 class="text-white font-semibold mb-2">📋 Cronograma de Parcelas</h6>
+                                    <div id="listaParcelas" class="space-y-2 max-h-40 overflow-y-auto">
+                                        <!-- Parcelas serão exibidas aqui -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" id="btnAdicionarCusto" onclick="adicionarCustoGeral()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    ➕ Adicionar Custo
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Lista de Custos Adicionados -->
+                        <div id="listaCustosGerais" class="bg-gray-800/30 rounded-xl p-4 border border-gray-600/30">
+                            <h5 class="text-md font-semibold text-white mb-3">📋 Custos Adicionados</h5>
+                            <div id="listaCustosGeraisContent">
+                                <p class="text-gray-400 text-sm text-center py-4">Nenhum custo adicionado</p>
                             </div>
                         </div>
                     </div>
