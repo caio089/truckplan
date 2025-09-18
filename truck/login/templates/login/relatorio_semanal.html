@@ -64,10 +64,10 @@
                         <input type="date" name="data_fim" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
                     </div>
                 </div>
-                <button type="button" onclick="gerarRelatorio()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                <button type="button" onclick="gerarRelatorioSemanal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
                     Gerar Relatório
                 </button>
-                <button type="button" onclick="limparRelatorio()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 ml-4">
+                <button type="button" onclick="limparRelatorioSemanal()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 ml-4">
                     Limpar
                 </button>
             </form>
@@ -231,9 +231,6 @@
         {% endif %}
     </div>
 
-    <!-- Incluir o arquivo JavaScript de relatórios -->
-    <script src="{% static 'login/js/relatorios-debug.js' %}"></script>
-    
     <script>
         // Definir data padrão (última semana)
         document.addEventListener('DOMContentLoaded', function() {
@@ -250,7 +247,37 @@
             document.querySelector('input[name="data_fim"]').value = fimSemana.toISOString().split('T')[0];
         });
         
-        // Funções movidas para relatorios-debug.js
+        // Função para gerar relatório semanal
+        function gerarRelatorioSemanal() {
+            const dataInicio = document.querySelector('input[name="data_inicio"]').value;
+            const dataFim = document.querySelector('input[name="data_fim"]').value;
+            
+            if (!dataInicio || !dataFim) {
+                alert('Por favor, selecione as datas de início e fim!');
+                return;
+            }
+            
+            if (new Date(dataInicio) > new Date(dataFim)) {
+                alert('A data de início deve ser anterior à data de fim!');
+                return;
+            }
+            
+            // Redirecionar para a mesma página com os parâmetros
+            const url = new URL(window.location);
+            url.searchParams.set('data_inicio', dataInicio);
+            url.searchParams.set('data_fim', dataFim);
+            window.location.href = url.toString();
+        }
+        
+        // Função para limpar relatório semanal
+        function limparRelatorioSemanal() {
+            // Limpar os campos de data
+            document.querySelector('input[name="data_inicio"]').value = '';
+            document.querySelector('input[name="data_fim"]').value = '';
+            
+            // Recarregar a página sem parâmetros
+            window.location.href = window.location.pathname;
+        }
     </script>
 </body>
 </html>

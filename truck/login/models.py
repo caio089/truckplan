@@ -54,8 +54,8 @@ class DailyReport(models.Model):
         return self.receita_frete - self.gasto_gasolina - self.valor_diarias
 
     def save(self, *args, **kwargs):
-        # Calcular valor das diárias automaticamente (assumindo R$ 50 por diária)
-        self.valor_diarias = self.diarias * Decimal('50.00')
+        # Calcular valor das diárias automaticamente (R$ 70 por diária)
+        self.valor_diarias = self.diarias * Decimal('70.00')
         super().save(*args, **kwargs)
 
 class MonthlyCost(models.Model):
@@ -169,6 +169,14 @@ class CustosGerais(models.Model):
         ('parcial', 'Parcialmente Pago'),
     ]
 
+    relatorio = models.ForeignKey(
+        DailyReport, 
+        on_delete=models.CASCADE, 
+        related_name='custos_gerais',
+        verbose_name="Relatório",
+        null=True,
+        blank=True
+    )
     tipo_gasto = models.CharField(
         max_length=20, 
         choices=TIPO_GASTO_CHOICES, 
@@ -222,3 +230,106 @@ class CustosGerais(models.Model):
 
     def get_status_pagamento_display(self):
         return dict(self.STATUS_PAGAMENTO_CHOICES).get(self.status_pagamento, self.status_pagamento)
+
+
+class ParcelaCusto(models.Model):
+    """Modelo para parcelas de custos"""
+    custo_geral = models.ForeignKey(
+        CustosGerais, 
+        on_delete=models.CASCADE, 
+        related_name='parcelas',
+        verbose_name="Custo Geral"
+    )
+    numero_parcela = models.PositiveIntegerField(verbose_name="Número da Parcela")
+    valor_parcela = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        verbose_name="Valor da Parcela"
+    )
+    data_vencimento = models.DateField(verbose_name="Data de Vencimento")
+    status_pagamento = models.CharField(
+        max_length=20,
+        choices=CustosGerais.STATUS_PAGAMENTO_CHOICES,
+        default='pendente',
+        verbose_name="Status do Pagamento"
+    )
+    data_pagamento = models.DateField(null=True, blank=True, verbose_name="Data do Pagamento")
+    observacoes = models.TextField(blank=True, verbose_name="Observações")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    class Meta:
+        verbose_name = "Parcela de Custo"
+        verbose_name_plural = "Parcelas de Custos"
+        ordering = ['custo_geral', 'numero_parcela']
+
+    def __str__(self):
+        return f"Parcela {self.numero_parcela} - {self.custo_geral.descricao} - R$ {self.valor_parcela}"
+
+    def get_status_pagamento_display(self):
+        return dict(CustosGerais.STATUS_PAGAMENTO_CHOICES).get(self.status_pagamento, self.status_pagamento)
+
+
+class CustoFixoMensal(models.Model):
+    """Modelo para custos fixos mensais (parcela do caminhão, seguro, IPVA, etc.)"""
+    TIPO_CUSTO_CHOICES = [
+        ('parcela_caminhao', 'Parcela do Caminhão'),
+        ('seguro', 'Seguro'),
+        ('ipva', 'IPVA'),
+        ('licenciamento', 'Licenciamento'),
+        ('manutencao_preventiva', 'Manutenção Preventiva'),
+        ('outros', 'Outros'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('ativo', 'Ativo'),
+        ('inativo', 'Inativo'),
+        ('finalizado', 'Finalizado'),
+    ]
+
+    descricao = models.CharField(max_length=200, verbose_name="Descrição")
+    tipo_custo = models.CharField(
+        max_length=30,
+        choices=TIPO_CUSTO_CHOICES,
+        verbose_name="Tipo de Custo"
+    )
+    valor_mensal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Valor Mensal"
+    )
+    data_inicio = models.DateField(verbose_name="Data de Início")
+    data_fim = models.DateField(null=True, blank=True, verbose_name="Data de Fim")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ativo',
+        verbose_name="Status"
+    )
+    observacoes = models.TextField(blank=True, verbose_name="Observações")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    class Meta:
+        verbose_name = "Custo Fixo Mensal"
+        verbose_name_plural = "Custos Fixos Mensais"
+        ordering = ['-data_inicio', 'descricao']
+
+    def __str__(self):
+        return f"{self.get_tipo_custo_display()} - {self.descricao} - R$ {self.valor_mensal}/mês"
+
+    def get_tipo_custo_display(self):
+        return dict(self.TIPO_CUSTO_CHOICES).get(self.tipo_custo, self.tipo_custo)
+
+    def get_status_display(self):
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)
+
+    def is_ativo_em(self, data):
+        """Verifica se o custo está ativo em uma data específica"""
+        if self.status != 'ativo':
+            return False
+        if data < self.data_inicio:
+            return False
+        if self.data_fim and data > self.data_fim:
+            return False
+        return True

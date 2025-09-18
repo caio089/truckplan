@@ -308,9 +308,6 @@
         {% endif %}
     </div>
 
-    <!-- Incluir o arquivo JavaScript de relatórios -->
-    <script src="{% static 'login/js/relatorios-debug.js' %}"></script>
-    
     <script>
         // Definir mês atual como padrão
         document.addEventListener('DOMContentLoaded', function() {
@@ -319,7 +316,28 @@
             document.querySelector('input[name="ano_mes"]').value = mesAtual;
         });
         
-        // Funções movidas para relatorios-debug.js
+        // Função para gerar relatório mensal
+        function gerarRelatorioMensal() {
+            const anoMes = document.querySelector('input[name="ano_mes"]').value;
+            if (!anoMes) {
+                alert('Por favor, selecione um mês!');
+                return;
+            }
+            
+            // Redirecionar para a mesma página com o parâmetro do mês
+            const url = new URL(window.location);
+            url.searchParams.set('ano_mes', anoMes);
+            window.location.href = url.toString();
+        }
+        
+        // Função para limpar relatório mensal
+        function limparRelatorioMensal() {
+            // Limpar o campo de mês
+            document.querySelector('input[name="ano_mes"]').value = '';
+            
+            // Recarregar a página sem parâmetros
+            window.location.href = window.location.pathname;
+        }
     </script>
 </body>
 </html>

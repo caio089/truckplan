@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruckPlan - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- JavaScript Simplificado -->
-    <script src="{% static 'login/js/dashboard-simple.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}">
     
     <script>
         tailwind.config = {
@@ -15,28 +14,14 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f8fafc',
-                            100: '#f1f5f9',
-                            200: '#e2e8f0',
-                            300: '#cbd5e1',
-                            400: '#94a3b8',
-                            500: '#64748b',
-                            600: '#475569',
-                            700: '#334155',
-                            800: '#1e293b',
-                            900: '#0f172a'
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+                            400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
+                            800: '#1e293b', 900: '#0f172a'
                         },
                         secondary: {
-                            50: '#f9fafb',
-                            100: '#f3f4f6',
-                            200: '#e5e7eb',
-                            300: '#d1d5db',
-                            400: '#9ca3af',
-                            500: '#6b7280',
-                            600: '#4b5563',
-                            700: '#374151',
-                            800: '#1f2937',
-                            900: '#111827'
+                            50: '#f9fafb', 100: '#f3f4f6', 200: '#e5e7eb', 300: '#d1d5db',
+                            400: '#9ca3af', 500: '#6b7280', 600: '#4b5563', 700: '#374151',
+                            800: '#1f2937', 900: '#111827'
                         }
                     },
                     animation: {
@@ -46,41 +31,19 @@
                         'pulse-slow': 'pulse 3s infinite'
                     },
                     keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' }
-                        },
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(30px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        bounceGentle: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        }
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        bounceGentle: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } }
                     }
                 }
             }
         }
     </script>
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .text-gradient {
-            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-    </style>
 </head>
 <body class="gradient-bg min-h-screen">
+    <!-- CSRF Token -->
+    {% csrf_token %}
+    
     <!-- Background Animation -->
     <div class="absolute inset-0 overflow-hidden">
         <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full animate-pulse-slow"></div>
@@ -142,7 +105,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
-                            <p class="text-3xl font-bold" id="totalReceitasSemanal">R$ 0,00</p>
+                            <p class="text-3xl font-bold" id="totalLucrosSemanal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Esta semana</p>
                         </div>
                         <div class="text-4xl opacity-80">📈</div>
@@ -188,7 +151,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
-                            <p class="text-3xl font-bold" id="totalReceitasMensal">R$ 0,00</p>
+                            <p class="text-3xl font-bold" id="totalLucrosMensal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Este mês</p>
                         </div>
                         <div class="text-4xl opacity-80">📈</div>
@@ -222,6 +185,23 @@
         <!-- Busca por Data -->
         <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
             <h3 class="text-2xl font-bold text-white mb-6">🔍 Buscar Relatórios por Data</h3>
+            
+            <!-- Botões de Navegação para Relatórios -->
+            <div class="flex flex-wrap gap-4 mb-6">
+                <button onclick="irParaRelatorioSemanal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
+                    <span class="mr-2">📊</span>
+                    Relatório Semanal
+                </button>
+                <button onclick="irParaRelatorioMensal()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
+                    <span class="mr-2">📈</span>
+                    Relatório Mensal
+                </button>
+                <button onclick="showPreviousReports()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
+                    <span class="mr-2">📋</span>
+                    Relatórios Anteriores
+                </button>
+            </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-gray-200 text-sm font-semibold mb-2">Data Inicial</label>
@@ -271,14 +251,6 @@
                     </div>
                 </button>
             </div>
-            
-            <!-- Botão para limpar dados de teste -->
-            <div class="mt-6 text-center">
-                <button onclick="clearAllTestData()" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 border border-red-500">
-                    <i class="fas fa-trash mr-2"></i>
-                    Limpar Dados de Teste
-                </button>
-            </div>
         </div>
 
         <!-- Resultados da Busca -->
@@ -294,1617 +266,226 @@
             </div>
         </div>
 
+        <!-- Custos Fixos Mensais -->
+        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">💰 Custos Fixos Mensais</h3>
+                <button onclick="openCustosFixosModal()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                    ➕ Adicionar Custo Fixo
+                </button>
+            </div>
+            
+            <div id="custosFixosList" class="space-y-4">
+                <!-- Custos fixos serão carregados aqui via JavaScript -->
+                <div class="text-center text-gray-400 py-8">
+                    <span class="text-4xl">💳</span>
+                    <p class="mt-2">Nenhum custo fixo cadastrado</p>
+                    <p class="text-sm">Adicione parcelas do caminhão, seguro, IPVA, etc.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Modal para Gerar Novo Relatório -->
+    <!-- Modais serão adicionados aqui via JavaScript -->
     <div id="reportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="glass-effect rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white">Gerar Novo Relatório</h3>
                 <button onclick="closeReportModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
             </div>
-            
-            <form id="reportForm" class="space-y-6">
-                <!-- Cadastro de Viagem (Relatório Diário) -->
-                <div class="space-y-4">
-                    <h4 class="text-lg font-semibold text-white">Cadastro de Viagem (Relatório Diário)</h4>
+            <div id="reportFormContainer">
+                <form id="reportForm" class="space-y-6">
+                    <!-- Campo oculto para ID do relatório sendo editado -->
+                    <input type="hidden" id="editReportId" name="editReportId" value="">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem *</label>
-                            <input type="date" id="dataViagem" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Partida *</label>
-                            <input type="text" id="localPartida" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: São Paulo - SP" required>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Chegada *</label>
-                            <input type="text" id="localChegada" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Rio de Janeiro - RJ" required>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Quantidade de Diárias *</label>
-                            <input type="number" id="quantidadeDiarias" min="1" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="1" oninput="calcularDiarias()" required>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Motorista *</label>
-                            <input type="text" id="nomeMotorista" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Nome completo do motorista" required>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Caminhão *</label>
-                            <input type="text" id="nomeCaminhao" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Volvo FH 540" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Despesas da Viagem -->
-                <div class="space-y-4">
-                    <h4 class="text-lg font-semibold text-white">Despesas da Viagem</h4>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de Gasolina Gastos *</label>
-                            <input type="number" id="litrosGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" oninput="calcularGastosViagem()" required>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Valor Gasto com Gasolina (R$) *</label>
-                            <input type="number" id="valorGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" oninput="calcularGastosViagem()" required>
-                        </div>
-                    </div>
-                    
-                    <!-- Cálculo Automático de Diárias -->
-                    <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-600/30">
-                        <h5 class="text-md font-semibold text-blue-300 mb-3">💰 Cálculo Automático de Diárias</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Quantidade de Diárias:</span>
-                                <span class="text-white font-semibold" id="quantidadeDiariasDisplay">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Valor por Diária:</span>
-                                <span class="text-white font-semibold">R$ 70,00</span>
-                            </div>
-                            <div class="flex justify-between col-span-2 border-t border-blue-600/30 pt-2">
-                                <span class="text-blue-300 font-semibold">Total de Diárias:</span>
-                                <span class="text-blue-400 font-bold text-lg" id="totalDiariasDisplay">R$ 0,00</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Resumo de Gastos da Viagem -->
-                    <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
-                        <h5 class="text-md font-semibold text-white mb-3">📊 Resumo de Gastos da Viagem</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Gasto com Gasolina:</span>
-                                <span class="text-white font-semibold" id="gastoGasolinaDisplay">R$ 0,00</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Total de Diárias:</span>
-                                <span class="text-white font-semibold" id="totalDiariasResumo">R$ 0,00</span>
-                            </div>
-                            <div class="flex justify-between col-span-2 border-t border-gray-600 pt-2">
-                                <span class="text-gray-300 font-semibold">Total de Gastos da Viagem:</span>
-                                <span class="text-red-400 font-bold text-lg" id="totalGastosViagemDisplay">R$ 0,00</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 1.1 Custos Gerais -->
-                <div class="space-y-4">
-                    <h4 class="text-lg font-semibold text-white">1.1 Custos Gerais</h4>
-                    
-                    <!-- Busca e Filtros -->
-                    <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
-                        <h5 class="text-md font-semibold text-white mb-3">Buscar Custos Existentes</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Buscar por Placa</label>
-                                <input type="text" id="buscarPlaca" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="ABC-1234" oninput="buscarCustosPorPlaca()">
-                            </div>
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Filtrar por Tipo</label>
-                                <select id="filtrarTipo" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" onchange="filtrarCustosPorTipo()">
-                                    <option value="">Todos os tipos</option>
-                                    <option value="manutencao">Manutenção</option>
-                                    <option value="ipva">IPVA</option>
-                                    <option value="seguro">Seguro</option>
-                                    <option value="batida">Batida</option>
-                                    <option value="pecas">Peças</option>
-                                    <option value="acessorios">Acessórios</option>
-                                    <option value="combustivel">Combustível</option>
-                                    <option value="documentacao">Documentação</option>
-                                    <option value="multas">Multas</option>
-                                    <option value="estacionamento">Estacionamento</option>
-                                    <option value="pedagio">Pedágio</option>
-                                    <option value="outros">Outros</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div id="custosEncontrados" class="space-y-2 max-h-40 overflow-y-auto">
-                            <!-- Custos encontrados serão exibidos aqui -->
-                        </div>
-                    </div>
-                    
-                    <!-- Adicionar Novo Custo -->
-                    <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
-                        <h5 class="text-md font-semibold text-white mb-3">Adicionar Novo Custo</h5>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Tipo de Gasto *</label>
-                                <select id="tipoGasto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
-                                    <option value="">Selecione o tipo</option>
-                                    <option value="manutencao">Manutenção</option>
-                                    <option value="ipva">IPVA</option>
-                                    <option value="seguro">Seguro</option>
-                                    <option value="batida">Batida</option>
-                                    <option value="pecas">Peças</option>
-                                    <option value="acessorios">Acessórios</option>
-                                    <option value="combustivel">Combustível</option>
-                                    <option value="documentacao">Documentação</option>
-                                    <option value="multas">Multas</option>
-                                    <option value="estacionamento">Estacionamento</option>
-                                    <option value="pedagio">Pedágio</option>
-                                    <option value="outros">Outros</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Data *</label>
-                                <input type="date" id="dataCusto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Veículo (Placa) *</label>
-                                <input type="text" id="placaCusto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="ABC-1234" maxlength="8" oninput="formatPlaca(this)">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Oficina/Fornecedor *</label>
-                                <input type="text" id="oficinaFornecedor" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="Nome da oficina ou fornecedor">
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Descrição do Serviço/Peça *</label>
-                            <textarea id="descricaoCusto" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" rows="2" placeholder="Descreva o serviço realizado ou peça adquirida"></textarea>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Valor (R$) *</label>
-                                <input type="number" id="valorCusto" step="0.01" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="0,00">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Forma de Pagamento *</label>
-                                <select id="formaPagamento" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
-                                    <option value="">Selecione</option>
-                                    <option value="boleto">Boleto</option>
-                                    <option value="vista">À Vista</option>
-                                    <option value="fiado">Fiado</option>
-                                    <option value="aberto">Em Aberto</option>
-                                    <option value="credito">Cartão de Crédito</option>
-                                    <option value="debito">Cartão de Débito</option>
-                                    <option value="pix">PIX</option>
-                                    <option value="transferencia">Transferência</option>
-                                    <option value="cheque">Cheque</option>
-                                    <option value="parcelado">Parcelado</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Status de Pagamento *</label>
-                                <select id="statusPagamento" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
-                                    <option value="">Selecione</option>
-                                    <option value="pago">Pago</option>
-                                    <option value="nao_pago">Não Pago</option>
-                                    <option value="parcial">Parcialmente Pago</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Data de Vencimento</label>
-                                <input type="date" id="dataVencimento" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Comprovante/Boleto</label>
-                                <input type="file" id="comprovante" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-end space-x-2">
-                            <button type="button" onclick="adicionarCustoGeral()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300">
-                                Adicionar Custo
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Lista de Custos Adicionados -->
-                    <div id="listaCustosGerais" class="space-y-2">
-                        <!-- Custos adicionados serão exibidos aqui -->
-                    </div>
-                </div>
-
-                <!-- Receita -->
-                <div>
-                    <h4 class="text-lg font-semibold text-white mb-4">Receita</h4>
-                    <div>
-                        <label class="block text-gray-200 text-sm font-semibold mb-2">Receita/Frete (R$)</label>
-                        <input type="number" id="receita" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
-                    </div>
-                </div>
-
-                <!-- Resumo Automático -->
-                <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
-                    <h4 class="text-lg font-semibold text-white mb-3">Resumo Automático</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Total Despesas:</span>
-                            <span class="text-white font-semibold" id="totalDespesasPreview">R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Receita:</span>
-                            <span class="text-white font-semibold" id="receitaPreview">R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between col-span-2 border-t border-gray-600 pt-2">
-                            <span class="text-gray-300">Lucro Líquido:</span>
-                            <span class="text-green-400 font-bold text-lg" id="lucroLiquidoPreview">R$ 0,00</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botões -->
-                <div class="flex space-x-4">
-                    <button type="button" onclick="closeReportModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 border border-gray-600">
-                        Salvar Relatório
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Ver Resumo de Relatório -->
-    <div id="reportSummaryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-effect rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white">Resumo do Relatório</h3>
-                <button onclick="closeReportSummaryModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
-            </div>
-            
-            <div id="reportSummaryContent">
-                <!-- Conteúdo será preenchido via JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para Relatórios Anteriores -->
-    <div id="previousReportsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-effect rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white">Relatórios Anteriores</h3>
-                <button onclick="closePreviousReportsModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="block text-gray-200 text-sm font-semibold mb-2">Filtrar por Período</label>
-                        <select id="periodSelect" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
-                            <option value="day">Por Dia</option>
-                            <option value="week">Por Semana</option>
-                            <option value="month">Por Mês</option>
-                            <option value="custom">Data Específica</option>
-                        </select>
-                    </div>
-                    
-                    <div id="customDateContainer" class="hidden">
-                        <label class="block text-gray-200 text-sm font-semibold mb-2">Selecionar Data</label>
-                        <input type="date" id="customDate" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
-                    </div>
-                </div>
-                
-                <div class="flex space-x-4 mb-6">
-                    <button onclick="generatePeriodReport()" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
-                        Gerar Relatório
-                    </button>
-                    <button onclick="clearFilters()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
-                        Limpar Filtros
-                    </button>
-                </div>
-                
-                <div id="periodReportContent" class="space-y-4">
-                    <!-- Conteúdo será preenchido via JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmação de Exclusão -->
-    <div id="confirmDeleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-effect rounded-2xl p-8 w-full max-w-md">
-            <div class="text-center">
-                <div class="text-6xl mb-4">⚠️</div>
-                <h3 class="text-2xl font-bold text-white mb-4">Confirmar Exclusão</h3>
-                <p class="text-gray-300 mb-6" id="confirmDeleteMessage">
-                    Tem certeza que deseja excluir este relatório?
-                </p>
-                <div class="flex space-x-4">
-                    <button onclick="closeConfirmDeleteModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                        Cancelar
-                    </button>
-                    <button onclick="confirmDelete()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                        Excluir
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para Configurações -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="glass-effect rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white">Configurações</h3>
-                <button onclick="closeSettingsModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
-            </div>
-            
-            <div class="space-y-6">
-                <div>
-                    <h4 class="text-lg font-semibold text-white mb-4">Alterar Senha/Login</h4>
+                    <!-- Cadastro de Viagem -->
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Nova Senha</label>
-                            <input type="password" id="newPassword" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
-                        </div>
-                        <div>
-                            <label class="block text-gray-200 text-sm font-semibold mb-2">Confirmar Nova Senha</label>
-                            <input type="password" id="confirmPassword" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                        <h4 class="text-lg font-semibold text-white">Cadastro de Viagem</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem *</label>
+                                <input type="date" id="dataViagem" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Partida *</label>
+                                <input type="text" id="localPartida" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: São Paulo - SP" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Chegada *</label>
+                                <input type="text" id="localChegada" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Rio de Janeiro - RJ" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Quantidade de Diárias *</label>
+                                <input type="number" id="quantidadeDiarias" min="1" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="1" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Motorista *</label>
+                                <input type="text" id="nomeMotorista" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Nome completo do motorista" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Caminhão *</label>
+                                <input type="text" id="nomeCaminhao" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Volvo FH 540" required>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div>
-                    <h4 class="text-lg font-semibold text-white mb-4">Backup e Restauração</h4>
+
+                    <!-- Despesas da Viagem -->
                     <div class="space-y-4">
-                        <button onclick="exportData()" class="w-full bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                            Exportar Dados (JSON)
+                        <h4 class="text-lg font-semibold text-white">Despesas da Viagem</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de Gasolina Gastos *</label>
+                                <input type="number" id="litrosGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Valor Gasto com Gasolina (R$) *</label>
+                                <input type="number" id="valorGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receita -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">Receita</h4>
+                        <div>
+                            <label class="block text-gray-200 text-sm font-semibold mb-2">Receita/Frete (R$)</label>
+                            <input type="number" id="receita" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                        </div>
+                    </div>
+
+                    <!-- Salário do Motorista -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">Salário do Motorista</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Salário Base (R$)</label>
+                                <input type="number" id="salario_base" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                            </div>
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Bônus por Viagens (R$)</label>
+                                <input type="number" id="bonus_viagens" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                            </div>
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Desconto por Faltas (R$)</label>
+                                <input type="number" id="desconto_faltas" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="flex space-x-4">
+                        <button type="button" onclick="closeReportModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
+                            Cancelar
                         </button>
-                        <button onclick="importData()" class="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                            Importar Dados
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 border border-gray-600">
+                            Salvar Relatório
                         </button>
                     </div>
-                </div>
-                
-                <div>
-                    <h4 class="text-lg font-semibold text-white mb-4">Preferências de Exibição</h4>
-                    <div class="space-y-4">
-                        <label class="flex items-center space-x-3">
-                            <input type="checkbox" id="darkMode" checked class="w-4 h-4 text-gray-600 bg-gray-800 border-gray-600 rounded focus:ring-gray-500">
-                            <span class="text-gray-200">Modo Escuro (Atual)</span>
-                        </label>
-                        <label class="flex items-center space-x-3">
-                            <input type="checkbox" id="notifications" checked class="w-4 h-4 text-gray-600 bg-gray-800 border-gray-600 rounded focus:ring-gray-500">
-                            <span class="text-gray-200">Notificações</span>
-                        </label>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Custos Fixos Mensais -->
+    <div id="custosFixosModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">💰 Custos Fixos Mensais</h3>
+                <button onclick="closeCustosFixosModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
+            </div>
+            <div id="custosFixosFormContainer">
+                <div class="space-y-6">
+                    <!-- Formulário para Adicionar Custo Fixo -->
+                    <div class="bg-gray-800/30 rounded-xl p-6 border border-gray-600/30">
+                        <h4 class="text-lg font-semibold text-white mb-4">➕ Adicionar Novo Custo Fixo</h4>
+                        
+                        <form id="custoFixoForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Descrição *</label>
+                                    <input type="text" id="descricaoCustoFixo" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="Ex: Parcela do Caminhão Volvo">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Tipo de Custo *</label>
+                                    <select id="tipoCustoFixo" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                        <option value="">Selecione</option>
+                                        <option value="parcela_caminhao">Parcela do Caminhão</option>
+                                        <option value="seguro">Seguro</option>
+                                        <option value="ipva">IPVA</option>
+                                        <option value="licenciamento">Licenciamento</option>
+                                        <option value="manutencao_preventiva">Manutenção Preventiva</option>
+                                        <option value="outros">Outros</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Valor Mensal (R$) *</label>
+                                    <input type="number" id="valorMensalCustoFixo" step="0.01" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="0,00">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data de Início *</label>
+                                    <input type="date" id="dataInicioCustoFixo" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data de Fim (opcional)</label>
+                                    <input type="date" id="dataFimCustoFixo" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Status</label>
+                                    <select id="statusCustoFixo" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
+                                        <option value="ativo">Ativo</option>
+                                        <option value="inativo">Inativo</option>
+                                        <option value="finalizado">Finalizado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Observações</label>
+                                <textarea id="observacoesCustoFixo" rows="3" class="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20" placeholder="Observações adicionais..."></textarea>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" onclick="closeCustosFixosModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                                    Cancelar
+                                </button>
+                                <button type="button" onclick="salvarCustoFixo()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300">
+                                    💾 Salvar Custo Fixo
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </div>
-                
-                <div class="flex space-x-4">
-                    <button onclick="closeSettingsModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                        Fechar
-                    </button>
-                    <button onclick="saveSettings()" class="flex-1 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                        Salvar Configurações
-                    </button>
+                    
+                    <!-- Lista de Custos Fixos Existentes -->
+                    <div class="bg-gray-800/30 rounded-xl p-6 border border-gray-600/30">
+                        <h4 class="text-lg font-semibold text-white mb-4">📋 Custos Fixos Cadastrados</h4>
+                        <div id="listaCustosFixos" class="space-y-3">
+                            <!-- Custos fixos serão carregados aqui via JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="{% static 'login/js/scripts.js' %}"></script>
     <script>
-        // Dados armazenados localmente
-        // Limpar todos os dados de teste
+        // Limpar dados de teste
         localStorage.removeItem('truckReports');
         localStorage.removeItem('truckCosts');
-        
-        let reports = [];
-        let currentWeekData = { gastos: 0, lucros: 0, lucroLiquido: 0 };
-
-        // Função para limpar todos os dados de teste
-        function clearAllTestData() {
-            // Limpar localStorage
-            localStorage.removeItem('truckReports');
-            localStorage.removeItem('truckCosts');
-            localStorage.removeItem('truckReportsBackup');
-            
-            // Limpar arrays
-            reports = [];
-            custosGerais = [];
-            custosGeraisRelatorio = [];
-            
-            // Limpar interface sem recarregar dados
-            limparInterface();
-            
-            console.log('Todos os dados de teste foram removidos!');
-        }
-        
-        // Função para limpar interface sem recarregar dados
-        function limparInterface() {
-            // Limpar resumo semanal
-            const totalGastosElement = document.getElementById('totalGastosSemanal');
-            const totalReceitasElement = document.getElementById('totalReceitasSemanal');
-            const lucroLiquidoElement = document.getElementById('lucroLiquidoSemanal');
-            const mediaDiariaElement = document.getElementById('mediaDiariaSemanal');
-            
-            if (totalGastosElement) totalGastosElement.textContent = 'R$ 0,00';
-            if (totalReceitasElement) totalReceitasElement.textContent = 'R$ 0,00';
-            if (lucroLiquidoElement) {
-                lucroLiquidoElement.textContent = 'R$ 0,00';
-                lucroLiquidoElement.className = 'text-3xl font-bold text-gray-300';
-            }
-            if (mediaDiariaElement) mediaDiariaElement.textContent = 'R$ 0,00';
-            
-            // Limpar resumo mensal
-            const totalGastosMensalElement = document.getElementById('totalGastosMensal');
-            const totalReceitasMensalElement = document.getElementById('totalReceitasMensal');
-            const lucroLiquidoMensalElement = document.getElementById('lucroLiquidoMensal');
-            const mediaDiariaMensalElement = document.getElementById('mediaDiariaMensal');
-            
-            if (totalGastosMensalElement) totalGastosMensalElement.textContent = 'R$ 0,00';
-            if (totalReceitasMensalElement) totalReceitasMensalElement.textContent = 'R$ 0,00';
-            if (lucroLiquidoMensalElement) {
-                lucroLiquidoMensalElement.textContent = 'R$ 0,00';
-                lucroLiquidoMensalElement.className = 'text-3xl font-bold text-gray-300';
-            }
-            if (mediaDiariaMensalElement) mediaDiariaMensalElement.textContent = 'R$ 0,00';
-            
-            // Ocultar resultados de busca
-            const resultadosDiv = document.getElementById('resultadosBusca');
-            if (resultadosDiv) {
-                resultadosDiv.classList.add('hidden');
-            }
-        }
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            // Limpar todos os dados de teste
-            clearAllTestData();
-            
-            // Definir data atual como padrão
-            document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
-            
-            // NÃO atualizar resumo da semana automaticamente para manter sistema limpo
-            // updateWeekSummary(); // Removido para evitar recarregamento
-            
-            // Adicionar listeners para cálculo automático
-            setupReportFormListeners();
-            
-            // Animações de entrada
-            const cards = document.querySelectorAll('.animate-fade-in');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
-            });
-        });
-
-        // Configurar listeners do formulário de relatório
-        function setupReportFormListeners() {
-            const inputs = ['quantidadeDiarias', 'litrosGasolina', 'valorGasolina', 'receita'];
-            inputs.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('input', updateReportPreview);
-                }
-            });
-        }
-
-        // ========== FUNÇÕES PARA CÁLCULO DE VIAGEM ==========
-        
-        // Calcular diárias automaticamente
-        function calcularDiarias() {
-            const quantidade = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
-            const valorPorDiaria = 70.00;
-            const totalDiarias = quantidade * valorPorDiaria;
-            
-            // Atualizar displays
-            document.getElementById('quantidadeDiariasDisplay').textContent = quantidade;
-            document.getElementById('totalDiariasDisplay').textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
-            document.getElementById('totalDiariasResumo').textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
-            
-            // Atualizar preview geral diretamente (evitar loop)
-            updateReportPreview();
-        }
-        
-        // Calcular gastos da viagem
-        function calcularGastosViagem() {
-            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
-            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
-            const totalDiarias = quantidadeDiarias * 70.00;
-            const totalGastosViagem = valorGasolina + totalDiarias;
-            
-            // Atualizar displays
-            document.getElementById('gastoGasolinaDisplay').textContent = `R$ ${valorGasolina.toFixed(2).replace('.', ',')}`;
-            document.getElementById('totalGastosViagemDisplay').textContent = `R$ ${totalGastosViagem.toFixed(2).replace('.', ',')}`;
-            
-            // Atualizar preview geral (sem recursão)
-            updateReportPreview();
-        }
-
-        // Atualizar preview do relatório
-        function updateReportPreview() {
-            // Dados da viagem
-            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
-            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
-            const receita = parseFloat(document.getElementById('receita').value) || 0;
-
-            // Calcular totais
-            const totalDiarias = quantidadeDiarias * 70.00;
-            const totalCustosGerais = custosGeraisRelatorio.reduce((sum, custo) => sum + custo.valor, 0);
-            const totalGastosViagem = valorGasolina + totalDiarias;
-            const totalDespesas = totalGastosViagem + totalCustosGerais;
-            const lucroLiquido = receita - totalDespesas;
-
-            document.getElementById('totalDespesasPreview').textContent = `R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
-            document.getElementById('receitaPreview').textContent = `R$ ${receita.toFixed(2).replace('.', ',')}`;
-            document.getElementById('lucroLiquidoPreview').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
-            
-            // Mudar cor do lucro
-            const lucroElement = document.getElementById('lucroLiquidoPreview');
-            if (lucroLiquido >= 0) {
-                lucroElement.className = 'text-green-400 font-bold text-lg';
-            } else {
-                lucroElement.className = 'text-red-400 font-bold text-lg';
-            }
-        }
-
-        // Atualizar resumo da semana
-        function updateWeekSummary() {
-            console.log('Atualizando resumo da semana...');
-            console.log('Total de relatórios:', reports.length);
-            
-            const currentWeek = getCurrentWeek();
-            const weekReports = reports.filter(report => {
-                const reportDate = new Date(report.date);
-                return isSameWeek(reportDate, currentWeek);
-            });
-
-            console.log('Relatórios da semana atual:', weekReports.length);
-
-            let totalGastos = 0;
-            let totalLucros = 0;
-
-            weekReports.forEach(report => {
-                totalGastos += report.totalDespesas || 0;
-                totalLucros += report.receita || 0;
-                console.log('Relatório:', report.date, 'Receita:', report.receita, 'Despesas:', report.totalDespesas);
-            });
-
-            const lucroLiquido = totalLucros - totalGastos;
-
-            console.log('Totais calculados:', { totalGastos, totalLucros, lucroLiquido });
-
-            // Atualizar elementos do resumo semanal
-            const totalGastosElement = document.getElementById('totalGastosSemanal');
-            const totalLucrosElement = document.getElementById('totalReceitasSemanal');
-            const lucroLiquidoElement = document.getElementById('lucroLiquidoSemanal');
-
-            if (totalGastosElement) {
-                totalGastosElement.textContent = `R$ ${totalGastos.toFixed(2).replace('.', ',')}`;
-            }
-            if (totalLucrosElement) {
-                totalLucrosElement.textContent = `R$ ${totalLucros.toFixed(2).replace('.', ',')}`;
-            }
-            if (lucroLiquidoElement) {
-                lucroLiquidoElement.textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
-                
-                // Atualizar cor do lucro líquido
-                if (lucroLiquido >= 0) {
-                    lucroLiquidoElement.className = 'text-3xl font-bold text-green-300';
-                } else {
-                    lucroLiquidoElement.className = 'text-3xl font-bold text-red-300';
-                }
-            }
-        }
-
-        // Funções de modal
-        function openReportModal() {
-            // Limpar formulário ao abrir
-            limparFormularioViagem();
-            
-            document.getElementById('reportModal').classList.remove('hidden');
-            document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
-            updateReportPreview();
-        }
-
-        function closeReportModal() {
-            document.getElementById('reportModal').classList.add('hidden');
-            // Não limpar o formulário aqui - será feito após salvar
-        }
-
-
-        function showPreviousReports() {
-            document.getElementById('previousReportsModal').classList.remove('hidden');
-            // Configurar listener para mostrar/ocultar campo de data personalizada
-            setupPeriodSelectListener();
-        }
-
-        function closePreviousReportsModal() {
-            document.getElementById('previousReportsModal').classList.add('hidden');
-        }
-
-        function showSettings() {
-            document.getElementById('settingsModal').classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            document.getElementById('settingsModal').classList.add('hidden');
-        }
-
-        // Salvar relatório
-        document.getElementById('reportForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validar formulário
-            if (!validateReportForm()) {
-                return;
-            }
-            
-            // Dados da viagem
-            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
-            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
-            const totalDiarias = quantidadeDiarias * 70.00;
-            const totalCustosGerais = custosGeraisRelatorio.reduce((sum, custo) => sum + custo.valor, 0);
-            const totalGastosViagem = valorGasolina + totalDiarias;
-            const totalDespesas = totalGastosViagem + totalCustosGerais;
-            const receita = parseFloat(document.getElementById('receita').value) || 0;
-            const lucroLiquido = receita - totalDespesas;
-
-            // Verificar se é edição ou criação
-            const editId = document.getElementById('reportForm').dataset.editId;
-            const isEdit = editId && editId !== '';
-            
-            const reportData = {
-                id: isEdit ? parseInt(editId) : Date.now(),
-                date: document.getElementById('dataViagem').value,
-                localPartida: document.getElementById('localPartida').value.trim(),
-                localChegada: document.getElementById('localChegada').value.trim(),
-                quantidadeDiarias: quantidadeDiarias,
-                totalDiarias: totalDiarias,
-                litrosGasolina: parseFloat(document.getElementById('litrosGasolina').value) || 0,
-                valorGasolina: valorGasolina,
-                nomeMotorista: document.getElementById('nomeMotorista').value.trim(),
-                nomeCaminhao: document.getElementById('nomeCaminhao').value.trim(),
-                receita: receita,
-                totalGastosViagem: totalGastosViagem,
-                totalCustosGerais: totalCustosGerais,
-                totalDespesas: totalDespesas,
-                lucroLiquido: lucroLiquido,
-                custosGerais: [...custosGeraisRelatorio] // Copiar array de custos gerais
-            };
-
-            console.log('Salvando relatório:', reportData);
-            console.log('Receita capturada:', receita);
-            console.log('Total de despesas:', totalDespesas);
-            console.log('Lucro líquido:', lucroLiquido);
-
-            if (isEdit) {
-                // Atualizar relatório existente
-                const index = reports.findIndex(r => r.id == editId);
-                if (index !== -1) {
-                    reports[index] = reportData;
-                }
-            } else {
-                // Adicionar novo relatório
-                reports.unshift(reportData);
-            }
-            
-            localStorage.setItem('truckReports', JSON.stringify(reports));
-
-            console.log('Relatórios salvos no localStorage:', reports.length);
-
-            // Fechar modal primeiro
-            closeReportModal();
-            
-            // Limpar formulário após fechar modal
-            setTimeout(() => {
-                limparFormularioViagem();
-                updateWeekSummary();
-                const mensagem = isEdit ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!';
-                showNotification(mensagem, 'success');
-                
-                // Limpar ID de edição
-                document.getElementById('reportForm').dataset.editId = '';
-            }, 300);
-        });
-
-        // Limpar formulário de viagem
-        function limparFormularioViagem() {
-            document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
-            document.getElementById('localPartida').value = '';
-            document.getElementById('localChegada').value = '';
-            document.getElementById('quantidadeDiarias').value = '';
-            document.getElementById('litrosGasolina').value = '';
-            document.getElementById('valorGasolina').value = '';
-            document.getElementById('nomeMotorista').value = '';
-            document.getElementById('nomeCaminhao').value = '';
-            document.getElementById('receita').value = '';
-            
-            // Limpar custos gerais
-            custosGeraisRelatorio = [];
-            atualizarListaCustosGerais();
-            
-            // Limpar busca de custos
-            document.getElementById('buscarPlaca').value = '';
-            document.getElementById('filtrarTipo').value = '';
-            document.getElementById('custosEncontrados').innerHTML = '';
-            
-            // Limpar formulário de custo
-            limparFormularioCusto();
-            
-            // Atualizar preview
-            updateReportPreview();
-        }
-
-
-        // Ver resumo do relatório
-        function viewReportSummary(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (!report) return;
-
-            const content = document.getElementById('reportSummaryContent');
-            content.innerHTML = `
-                <div class="space-y-6">
-                    <div class="bg-gray-800/30 p-6 rounded-xl border border-gray-600/30">
-                        <h4 class="text-xl font-bold text-white mb-4">Data: ${formatDate(report.date)}</h4>
-                        
-                        <!-- Informações do Veículo e Motorista -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-700/30 rounded-lg">
-                            <div>
-                                <span class="text-gray-300 text-sm">Motorista:</span>
-                                <p class="text-white font-semibold">${report.nomeMotorista || 'Não informado'}</p>
-                            </div>
-                            <div>
-                                <span class="text-gray-300 text-sm">Caminhão:</span>
-                                <p class="text-white font-semibold">${report.nomeCaminhao || 'Não informado'}</p>
-                            </div>
-                            <div>
-                                <span class="text-gray-300 text-sm">Rota:</span>
-                                <p class="text-white font-semibold">${report.localPartida || ''} → ${report.localChegada || ''}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h5 class="text-lg font-semibold text-white mb-3">Despesas Detalhadas</h5>
-                                <div class="space-y-2 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Gasolina:</span>
-                                        <span class="text-white">R$ ${(report.valorGasolina || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Diárias (${report.quantidadeDiarias || 0} x R$ 70,00):</span>
-                                        <span class="text-white">R$ ${(report.totalDiarias || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Custos Gerais:</span>
-                                        <span class="text-white">R$ ${(report.totalCustosGerais || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between border-t border-gray-600 pt-2">
-                                        <span class="text-gray-300 font-semibold">Total Despesas:</span>
-                                        <span class="text-white font-bold">R$ ${(report.totalDespesas || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <h5 class="text-lg font-semibold text-white mb-3">Receita e Lucro</h5>
-                                <div class="space-y-2 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-300">Receita/Frete:</span>
-                                        <span class="text-white">R$ ${(report.receita || 0).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                    <div class="flex justify-between border-t border-gray-600 pt-2">
-                                        <span class="text-gray-300 font-semibold">Lucro Líquido:</span>
-                                        <span class="font-bold text-lg ${(report.lucroLiquido || 0) >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                            R$ ${(report.lucroLiquido || 0).toFixed(2).replace('.', ',')}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-800/30 p-6 rounded-xl border border-gray-600/30">
-                            <h5 class="text-lg font-semibold text-white mb-4">Gráfico de Pizza - Gastos por Categoria</h5>
-                            <div id="pieChart" class="h-64 flex items-center justify-center">
-                                <canvas id="pieChartCanvas" width="200" height="200"></canvas>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-gray-800/30 p-6 rounded-xl border border-gray-600/30">
-                            <h5 class="text-lg font-semibold text-white mb-4">Gráfico de Barra - Lucro vs Despesa</h5>
-                            <div id="barChart" class="h-64 flex items-center justify-center">
-                                <canvas id="barChartCanvas" width="300" height="200"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Botões de Ação -->
-                    <div class="flex justify-center space-x-4 mt-6">
-                        <button onclick="closeReportSummaryModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
-                            Fechar
-                        </button>
-                        <button onclick="deleteReport(${report.id}); closeReportSummaryModal();" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
-                            Excluir Relatório
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            // Gerar gráficos
-            generatePieChart(report);
-            generateBarChart(report);
-            
-            document.getElementById('reportSummaryModal').classList.remove('hidden');
-        }
-
-        function closeReportSummaryModal() {
-            document.getElementById('reportSummaryModal').classList.add('hidden');
-        }
-
-        // Variável para armazenar o ID do relatório a ser excluído
-        let reportToDelete = null;
-
-        // Excluir relatório
-        function deleteReport(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (!report) return;
-
-            reportToDelete = reportId;
-            
-            // Configurar mensagem de confirmação
-            const confirmMessage = `Relatório de ${formatDate(report.date)}\n\n` +
-                                 `Motorista: ${report.nomeMotorista || 'Não informado'}\n` +
-                                 `Caminhão: ${report.nomeCaminhao || 'Não informado'}\n` +
-                                 `Despesas: R$ ${(report.totalDespesas || 0).toFixed(2).replace('.', ',')}\n` +
-                                 `Receita: R$ ${(report.receita || 0).toFixed(2).replace('.', ',')}\n` +
-                                 `Lucro: R$ ${(report.lucroLiquido || 0).toFixed(2).replace('.', ',')}\n\n` +
-                                 `Esta ação não pode ser desfeita!`;
-
-            document.getElementById('confirmDeleteMessage').textContent = confirmMessage;
-            document.getElementById('confirmDeleteModal').classList.remove('hidden');
-        }
-
-        // Confirmar exclusão
-        function confirmDelete() {
-            if (reportToDelete) {
-                // Remover relatório da lista
-                reports = reports.filter(r => r.id !== reportToDelete);
-                
-                // Salvar no localStorage
-                localStorage.setItem('truckReports', JSON.stringify(reports));
-                
-                // Atualizar interface
-                updateWeekSummary();
-                
-                // Fechar modais
-                closeConfirmDeleteModal();
-                closeReportSummaryModal();
-                closePreviousReportsModal();
-                
-                showNotification('Relatório excluído com sucesso!', 'success');
-                
-                reportToDelete = null;
-            }
-        }
-
-        // Fechar modal de confirmação
-        function closeConfirmDeleteModal() {
-            document.getElementById('confirmDeleteModal').classList.add('hidden');
-            reportToDelete = null;
-        }
-
-        // Configurar listener para o seletor de período
-        function setupPeriodSelectListener() {
-            const periodSelect = document.getElementById('periodSelect');
-            const customDateContainer = document.getElementById('customDateContainer');
-            
-            periodSelect.addEventListener('change', function() {
-                if (this.value === 'custom') {
-                    customDateContainer.classList.remove('hidden');
-                    // Definir data atual como padrão
-                    document.getElementById('customDate').value = new Date().toISOString().split('T')[0];
-                } else {
-                    customDateContainer.classList.add('hidden');
-                }
-            });
-        }
-
-        // Limpar filtros
-        function clearFilters() {
-            document.getElementById('periodSelect').value = 'day';
-            document.getElementById('customDateContainer').classList.add('hidden');
-            document.getElementById('periodReportContent').innerHTML = '';
-        }
-
-        // Gerar relatório por período
-        function generatePeriodReport() {
-            console.log('Gerando relatório por período...');
-            console.log('Total de relatórios disponíveis:', reports.length);
-            
-            const period = document.getElementById('periodSelect').value;
-            const content = document.getElementById('periodReportContent');
-            
-            let filteredReports = [];
-            const now = new Date();
-            
-            switch(period) {
-                case 'day':
-                    filteredReports = reports.filter(r => {
-                        const reportDate = new Date(r.date);
-                        return reportDate.toDateString() === now.toDateString();
-                    });
-                    break;
-                case 'week':
-                    const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
-                    filteredReports = reports.filter(r => {
-                        const reportDate = new Date(r.date);
-                        return reportDate >= weekStart;
-                    });
-                    break;
-                case 'month':
-                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                    filteredReports = reports.filter(r => {
-                        const reportDate = new Date(r.date);
-                        return reportDate >= monthStart;
-                    });
-                    break;
-                case 'custom':
-                    const customDate = document.getElementById('customDate').value;
-                    if (!customDate) {
-                        showNotification('Por favor, selecione uma data!', 'error');
-                        return;
-                    }
-                    filteredReports = reports.filter(r => {
-                        return r.date === customDate;
-                    });
-                    break;
-            }
-            
-            console.log('Relatórios filtrados:', filteredReports.length);
-            console.log('Relatórios encontrados:', filteredReports);
-
-            if (filteredReports.length === 0) {
-                let message = 'Nenhum relatório encontrado para o período selecionado';
-                
-                if (period === 'custom') {
-                    const customDate = document.getElementById('customDate').value;
-                    const formattedDate = customDate ? formatDate(customDate) : 'data selecionada';
-                    message = `Nenhum relatório encontrado para a data ${formattedDate}`;
-                } else if (period === 'day') {
-                    message = 'Nenhum relatório encontrado para hoje';
-                } else if (period === 'week') {
-                    message = 'Nenhum relatório encontrado para esta semana';
-                } else if (period === 'month') {
-                    message = 'Nenhum relatório encontrado para este mês';
-                }
-                
-                content.innerHTML = `
-                    <div class="text-center text-gray-400 py-12">
-                        <div class="text-6xl mb-4">📊</div>
-                        <p class="text-lg">${message}</p>
-                        <p class="text-sm mt-2">Tente selecionar outro período ou data</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let totalDespesas = 0;
-            let totalReceita = 0;
-            let totalLucro = 0;
-
-            filteredReports.forEach(report => {
-                totalDespesas += report.totalDespesas;
-                totalReceita += report.receita;
-                totalLucro += report.lucroLiquido;
-            });
-
-            // Gerar título do período
-            let periodTitle = '';
-            if (period === 'custom') {
-                const customDate = document.getElementById('customDate').value;
-                periodTitle = `Relatórios de ${formatDate(customDate)}`;
-            } else if (period === 'day') {
-                periodTitle = 'Relatórios de Hoje';
-            } else if (period === 'week') {
-                periodTitle = 'Relatórios desta Semana';
-            } else if (period === 'month') {
-                periodTitle = 'Relatórios deste Mês';
-            }
-
-            content.innerHTML = `
-                <div class="space-y-6">
-                    <div class="text-center mb-6">
-                        <h4 class="text-2xl font-bold text-white">${periodTitle}</h4>
-                        <p class="text-gray-300">${filteredReports.length} relatório(s) encontrado(s)</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30 text-center">
-                            <h4 class="text-white font-semibold">Total Despesas</h4>
-                            <p class="text-2xl font-bold text-red-400">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                        <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30 text-center">
-                            <h4 class="text-white font-semibold">Total Receita</h4>
-                            <p class="text-2xl font-bold text-green-400">R$ ${totalReceita.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                        <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30 text-center">
-                            <h4 class="text-white font-semibold">Lucro Líquido</h4>
-                            <p class="text-2xl font-bold ${totalLucro >= 0 ? 'text-green-400' : 'text-red-400'}">R$ ${totalLucro.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <h4 class="text-lg font-semibold text-white">Relatórios do Período (${filteredReports.length} encontrados)</h4>
-                        ${filteredReports.map(report => `
-                            <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex-1">
-                                        <h5 class="text-white font-semibold">${formatDate(report.date)}</h5>
-                                        <p class="text-gray-300 text-sm">
-                                            ${report.nomeMotorista ? `Motorista: ${report.nomeMotorista} | ` : ''}
-                                            ${report.nomeCaminhao ? `Caminhão: ${report.nomeCaminhao}` : ''}
-                                        </p>
-                                        <p class="text-gray-300 text-sm">
-                                            ${report.localPartida ? `Partida: ${report.localPartida} | ` : ''}
-                                            ${report.localChegada ? `Chegada: ${report.localChegada}` : ''}
-                                        </p>
-                                        <p class="text-gray-300 text-sm mt-1">
-                                            Despesas: R$ ${(report.totalDespesas || 0).toFixed(2).replace('.', ',')} | 
-                                            Receita: R$ ${(report.receita || 0).toFixed(2).replace('.', ',')} | 
-                                            Lucro: R$ ${(report.lucroLiquido || 0).toFixed(2).replace('.', ',')}
-                                        </p>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <button onclick="viewReportSummary(${report.id})" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
-                                            Ver Detalhes
-                                        </button>
-                                        <button onclick="deleteReport(${report.id})" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
-                                            Excluir
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="flex space-x-4">
-                        <button onclick="exportToPDF()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                            Exportar PDF
-                        </button>
-                        <button onclick="exportToExcel()" class="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300">
-                            Exportar Excel
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Funções de configurações
-        function saveSettings() {
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (newPassword && newPassword !== confirmPassword) {
-                showNotification('As senhas não coincidem!', 'error');
-                return;
-            }
-            
-            if (newPassword) {
-                showNotification('Senha alterada com sucesso!', 'success');
-            }
-            
-            showNotification('Configurações salvas!', 'success');
-            closeSettingsModal();
-        }
-
-        function exportData() {
-            const dataStr = JSON.stringify(reports, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `truckplan-backup-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            URL.revokeObjectURL(url);
-            showNotification('Dados exportados com sucesso!', 'success');
-        }
-
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const importedData = JSON.parse(e.target.result);
-                            reports = importedData;
-                            localStorage.setItem('truckReports', JSON.stringify(reports));
-                            updateWeekSummary();
-                            showNotification('Dados importados com sucesso!', 'success');
-                        } catch (error) {
-                            showNotification('Erro ao importar dados!', 'error');
-                        }
-                    };
-                    reader.readAsText(file);
-                }
-            };
-            input.click();
-        }
-
-        function exportToPDF() {
-            showNotification('Funcionalidade de PDF em desenvolvimento!', 'info');
-        }
-
-        function exportToExcel() {
-            showNotification('Funcionalidade de Excel em desenvolvimento!', 'info');
-        }
-
-        // Funções auxiliares
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR');
-        }
-
-        function getCurrentWeek() {
-            const now = new Date();
-            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-            return startOfWeek;
-        }
-
-        function isSameWeek(date1, date2) {
-            const week1 = getWeekNumber(date1);
-            const week2 = getWeekNumber(date2);
-            return week1 === week2 && date1.getFullYear() === date2.getFullYear();
-        }
-
-        function getWeekNumber(date) {
-            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-slide-up ${
-                type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' : 
-                type === 'success' ? 'bg-green-100 text-green-700 border border-green-200' :
-                'bg-blue-100 text-blue-700 border border-blue-200'
-            }`;
-            
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <span class="text-xl mr-2">${type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️'}</span>
-                    ${message}
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Gerar gráfico de pizza
-        function generatePieChart(report) {
-            const canvas = document.getElementById('pieChartCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const data = [
-                { label: 'Combustível', value: report.combustivel, color: '#3B82F6' },
-                { label: 'Comida', value: report.comida, color: '#10B981' },
-                { label: 'Aluguel', value: report.aluguel, color: '#F59E0B' },
-                { label: 'Pedágios', value: report.pedagios, color: '#EF4444' },
-                { label: 'Manutenção', value: report.manutencao || 0, color: '#8B5CF6' },
-                { label: 'Pneus', value: report.pneus || 0, color: '#F97316' },
-                { label: 'Seguro', value: report.seguro || 0, color: '#06B6D4' },
-                { label: 'IPVA', value: report.ipva || 0, color: '#84CC16' },
-                { label: 'Outras', value: report.outrasDespesas, color: '#EC4899' }
-            ].filter(item => item.value > 0);
-
-            if (data.length === 0) {
-                ctx.fillStyle = '#6B7280';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Sem dados', 100, 100);
-                return;
-            }
-
-            const total = data.reduce((sum, item) => sum + item.value, 0);
-            let currentAngle = 0;
-
-            data.forEach(item => {
-                const sliceAngle = (item.value / total) * 2 * Math.PI;
-                
-                ctx.beginPath();
-                ctx.moveTo(100, 100);
-                ctx.arc(100, 100, 80, currentAngle, currentAngle + sliceAngle);
-                ctx.closePath();
-                ctx.fillStyle = item.color;
-                ctx.fill();
-                
-                currentAngle += sliceAngle;
-            });
-        }
-
-        // Gerar gráfico de barra
-        function generateBarChart(report) {
-            const canvas = document.getElementById('barChartCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const maxValue = Math.max(report.totalDespesas, report.receita);
-            const barWidth = 100;
-            const barHeight1 = (report.totalDespesas / maxValue) * 150;
-            const barHeight2 = (report.receita / maxValue) * 150;
-            
-            // Despesas (vermelho)
-            ctx.fillStyle = '#EF4444';
-            ctx.fillRect(50, 180 - barHeight1, barWidth, barHeight1);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Despesas', 100, 200);
-            
-            // Receita (verde)
-            ctx.fillStyle = '#10B981';
-            ctx.fillRect(200, 180 - barHeight2, barWidth, barHeight2);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillText('Receita', 250, 200);
-        }
-
-        // Formatação da placa do caminhão
-        function formatPlaca(input) {
-            let value = input.value.replace(/\D/g, '').toUpperCase();
-            
-            if (value.length <= 3) {
-                input.value = value;
-            } else if (value.length <= 7) {
-                input.value = value.substring(0, 3) + '-' + value.substring(3);
-            } else {
-                input.value = value.substring(0, 3) + '-' + value.substring(3, 7);
-            }
-        }
-
-        // Validação do formulário
-        function validateReportForm() {
-            const dataViagem = document.getElementById('dataViagem').value;
-            const localPartida = document.getElementById('localPartida').value.trim();
-            const localChegada = document.getElementById('localChegada').value.trim();
-            const quantidadeDiarias = parseInt(document.getElementById('quantidadeDiarias').value) || 0;
-            const litrosGasolina = parseFloat(document.getElementById('litrosGasolina').value) || 0;
-            const valorGasolina = parseFloat(document.getElementById('valorGasolina').value) || 0;
-            const nomeMotorista = document.getElementById('nomeMotorista').value.trim();
-            const nomeCaminhao = document.getElementById('nomeCaminhao').value.trim();
-            
-            console.log('Validando formulário:', {
-                dataViagem, localPartida, localChegada, quantidadeDiarias, 
-                litrosGasolina, valorGasolina, nomeMotorista, nomeCaminhao
-            });
-            
-            if (!dataViagem) {
-                showNotification('Por favor, informe a data da viagem!', 'error');
-                document.getElementById('dataViagem').focus();
-                return false;
-            }
-            
-            if (!localPartida) {
-                showNotification('Por favor, informe o local de partida!', 'error');
-                document.getElementById('localPartida').focus();
-                return false;
-            }
-            
-            if (!localChegada) {
-                showNotification('Por favor, informe o local de chegada!', 'error');
-                document.getElementById('localChegada').focus();
-                return false;
-            }
-            
-            if (quantidadeDiarias < 1) {
-                showNotification('Por favor, informe a quantidade de diárias (mínimo 1)!', 'error');
-                document.getElementById('quantidadeDiarias').focus();
-                return false;
-            }
-            
-            if (litrosGasolina < 0) {
-                showNotification('Por favor, informe a quantidade de litros de gasolina!', 'error');
-                document.getElementById('litrosGasolina').focus();
-                return false;
-            }
-            
-            if (valorGasolina < 0) {
-                showNotification('Por favor, informe o valor gasto com gasolina!', 'error');
-                document.getElementById('valorGasolina').focus();
-                return false;
-            }
-            
-            if (!nomeMotorista) {
-                showNotification('Por favor, informe o nome do motorista!', 'error');
-                document.getElementById('nomeMotorista').focus();
-                return false;
-            }
-            
-            if (!nomeCaminhao) {
-                showNotification('Por favor, informe o nome do caminhão!', 'error');
-                document.getElementById('nomeCaminhao').focus();
-                return false;
-            }
-            
-            console.log('Formulário válido!');
-            return true;
-        }
-
-        // Efeito de hover nos botões
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-            button.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-4px)';
-            });
-            
-            button.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-
-        // ========== FUNÇÕES PARA CUSTOS GERAIS ==========
-        
-        // Array para armazenar custos gerais do relatório atual
-        let custosGeraisRelatorio = [];
-
-        // Buscar custos por placa
-        function buscarCustosPorPlaca() {
-            const placa = document.getElementById('buscarPlaca').value.trim().toUpperCase();
-            if (placa.length < 3) {
-                document.getElementById('custosEncontrados').innerHTML = '';
-                return;
-            }
-
-            // Simular busca (em produção, isso seria uma chamada AJAX)
-            const custosEncontrados = buscarCustosNoBanco(placa);
-            exibirCustosEncontrados(custosEncontrados);
-        }
-
-        // Filtrar custos por tipo
-        function filtrarCustosPorTipo() {
-            const tipo = document.getElementById('filtrarTipo').value;
-            const placa = document.getElementById('buscarPlaca').value.trim().toUpperCase();
-            
-            let custosEncontrados = [];
-            if (placa.length >= 3) {
-                custosEncontrados = buscarCustosNoBanco(placa, tipo);
-            } else if (tipo) {
-                custosEncontrados = buscarCustosPorTipoNoBanco(tipo);
-            }
-            
-            exibirCustosEncontrados(custosEncontrados);
-        }
-
-        // Buscar custos no banco de dados (sem dados simulados)
-        function buscarCustosNoBanco(placa, tipo = null) {
-            // Retornar array vazio - sem dados simulados
-            return [];
-        }
-
-        function buscarCustosPorTipoNoBanco(tipo) {
-            // Buscar por tipo (sem dados simulados)
-            return [];
-        }
-
-        // Exibir custos encontrados
-        function exibirCustosEncontrados(custos) {
-            const container = document.getElementById('custosEncontrados');
-            
-            if (custos.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm">Nenhum custo encontrado</p>';
-                return;
-            }
-
-            const html = custos.map(custo => `
-                <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-600/30 cursor-pointer hover:bg-gray-700/70 transition-colors" 
-                     onclick="adicionarCustoExistente(${custo.id})">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2 mb-1">
-                                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">${getTipoDisplay(custo.tipo)}</span>
-                                <span class="text-xs text-gray-400">${formatDate(custo.data)}</span>
-                            </div>
-                            <p class="text-sm text-white font-medium">${custo.oficina}</p>
-                            <p class="text-xs text-gray-300">${custo.descricao}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-bold text-white">R$ ${custo.valor.toFixed(2).replace('.', ',')}</p>
-                            <p class="text-xs ${custo.statusPagamento === 'pago' ? 'text-green-400' : 'text-red-400'}">
-                                ${getStatusDisplay(custo.statusPagamento)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            container.innerHTML = html;
-        }
-
-        // Adicionar custo existente à lista
-        function adicionarCustoExistente(custoId) {
-            // Em produção, buscar detalhes completos do custo
-            const custo = buscarCustosNoBanco('').find(c => c.id === custoId);
-            if (custo) {
-                custosGeraisRelatorio.push(custo);
-                atualizarListaCustosGerais();
-                updateReportPreview(); // Atualizar preview após adicionar custo existente
-                showNotification('Custo adicionado ao relatório!', 'success');
-            }
-        }
-
-        // Adicionar novo custo geral
-        function adicionarCustoGeral() {
-            const tipoGasto = document.getElementById('tipoGasto').value;
-            const dataCusto = document.getElementById('dataCusto').value;
-            const placaCusto = document.getElementById('placaCusto').value;
-            const oficinaFornecedor = document.getElementById('oficinaFornecedor').value;
-            const descricaoCusto = document.getElementById('descricaoCusto').value;
-            const valorCusto = document.getElementById('valorCusto').value;
-            const formaPagamento = document.getElementById('formaPagamento').value;
-            const statusPagamento = document.getElementById('statusPagamento').value;
-            const dataVencimento = document.getElementById('dataVencimento').value;
-            const comprovante = document.getElementById('comprovante').files[0];
-
-            // Validação
-            if (!tipoGasto || !dataCusto || !placaCusto || !oficinaFornecedor || !descricaoCusto || !valorCusto || !formaPagamento || !statusPagamento) {
-                showNotification('Preencha todos os campos obrigatórios!', 'error');
-                return;
-            }
-
-            const novoCusto = {
-                id: Date.now(), // ID temporário
-                tipo: tipoGasto,
-                data: dataCusto,
-                placa: placaCusto.toUpperCase(),
-                oficina: oficinaFornecedor,
-                descricao: descricaoCusto,
-                valor: parseFloat(valorCusto),
-                formaPagamento: formaPagamento,
-                statusPagamento: statusPagamento,
-                dataVencimento: dataVencimento || null,
-                comprovante: comprovante ? comprovante.name : null,
-                isNew: true // Marcar como novo custo
-            };
-
-            custosGeraisRelatorio.push(novoCusto);
-            atualizarListaCustosGerais();
-            limparFormularioCusto();
-            updateReportPreview(); // Atualizar preview após adicionar custo
-            showNotification('Custo adicionado com sucesso!', 'success');
-        }
-
-        // Atualizar lista de custos gerais
-        function atualizarListaCustosGerais() {
-            const container = document.getElementById('listaCustosGerais');
-            
-            if (custosGeraisRelatorio.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Nenhum custo adicionado</p>';
-                return;
-            }
-
-            const totalCustos = custosGeraisRelatorio.reduce((sum, custo) => sum + custo.valor, 0);
-
-            const html = `
-                <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-600/30">
-                    <div class="flex justify-between items-center mb-3">
-                        <h6 class="text-md font-semibold text-white">Custos Adicionados (${custosGeraisRelatorio.length})</h6>
-                        <span class="text-lg font-bold text-red-400">Total: R$ ${totalCustos.toFixed(2).replace('.', ',')}</span>
-                    </div>
-                    <div class="space-y-2 max-h-60 overflow-y-auto">
-                        ${custosGeraisRelatorio.map((custo, index) => `
-                            <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-600/30">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1">
-                                        <div class="flex items-center space-x-2 mb-1">
-                                            <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">${getTipoDisplay(custo.tipo)}</span>
-                                            <span class="text-xs text-gray-400">${formatDate(custo.data)}</span>
-                                            ${custo.isNew ? '<span class="text-xs bg-green-600 text-white px-2 py-1 rounded">NOVO</span>' : ''}
-                                        </div>
-                                        <p class="text-sm text-white font-medium">${custo.oficina}</p>
-                                        <p class="text-xs text-gray-300">${custo.descricao}</p>
-                                        <p class="text-xs text-gray-400">Placa: ${custo.placa}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-sm font-bold text-white">R$ ${custo.valor.toFixed(2).replace('.', ',')}</p>
-                                        <p class="text-xs ${custo.statusPagamento === 'pago' ? 'text-green-400' : 'text-red-400'}">
-                                            ${getStatusDisplay(custo.statusPagamento)}
-                                        </p>
-                                        <button onclick="removerCustoGeral(${index})" class="text-red-400 hover:text-red-300 text-xs mt-1">
-                                            Remover
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-
-            container.innerHTML = html;
-        }
-
-        // Remover custo da lista
-        function removerCustoGeral(index) {
-            custosGeraisRelatorio.splice(index, 1);
-            atualizarListaCustosGerais();
-            updateReportPreview(); // Atualizar preview após remover custo
-            showNotification('Custo removido!', 'info');
-        }
-
-        // Limpar formulário de custo
-        function limparFormularioCusto() {
-            document.getElementById('tipoGasto').value = '';
-            document.getElementById('dataCusto').value = '';
-            document.getElementById('placaCusto').value = '';
-            document.getElementById('oficinaFornecedor').value = '';
-            document.getElementById('descricaoCusto').value = '';
-            document.getElementById('valorCusto').value = '';
-            document.getElementById('formaPagamento').value = '';
-            document.getElementById('statusPagamento').value = '';
-            document.getElementById('dataVencimento').value = '';
-            document.getElementById('comprovante').value = '';
-        }
-
-        // Funções auxiliares
-        function getTipoDisplay(tipo) {
-            const tipos = {
-                'manutencao': 'Manutenção',
-                'ipva': 'IPVA',
-                'seguro': 'Seguro',
-                'batida': 'Batida',
-                'pecas': 'Peças',
-                'acessorios': 'Acessórios',
-                'combustivel': 'Combustível',
-                'documentacao': 'Documentação',
-                'multas': 'Multas',
-                'estacionamento': 'Estacionamento',
-                'pedagio': 'Pedágio',
-                'outros': 'Outros'
-            };
-            return tipos[tipo] || tipo;
-        }
-
-        function getStatusDisplay(status) {
-            const statusMap = {
-                'pago': 'Pago',
-                'nao_pago': 'Não Pago',
-                'parcial': 'Parcial'
-            };
-            return statusMap[status] || status;
-        }
-
     </script>
 </body>
 </html>

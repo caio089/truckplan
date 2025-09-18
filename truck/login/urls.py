@@ -31,4 +31,11 @@ urlpatterns = [
     # APIs para relatórios
     path('buscar-relatorios-periodo/', views.buscar_relatorios_periodo, name='buscar_relatorios_periodo'),
     path('buscar-relatorios-mes/', views.buscar_relatorios_mes, name='buscar_relatorios_mes'),
+    path('listar-relatorios/', views.listar_relatorios, name='listar_relatorios'),
+    path('excluir-relatorio/<int:relatorio_id>/', views.excluir_relatorio, name='excluir_relatorio'),
+    path('atualizar-relatorio/<int:relatorio_id>/', views.atualizar_relatorio, name='atualizar_relatorio'),
+    
+    # Rotas para custos fixos mensais
+    path('custos-fixos/', views.custos_fixos, name='custos_fixos'),
+    path('excluir-custo-fixo/<int:custo_id>/', views.excluir_custo_fixo, name='excluir_custo_fixo'),
 ]

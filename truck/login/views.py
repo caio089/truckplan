@@ -12,9 +12,9 @@ import json
 from django.core.paginator import Paginator
 from django.db.models import Sum, Count, Q
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import logging
-from .models import DailyReport, MonthlyCost, MotoristaSalario, CustosGerais
+from .models import DailyReport, MonthlyCost, MotoristaSalario, CustosGerais, CustoFixoMensal, ParcelaCusto
 
 logger = logging.getLogger(__name__)
 
@@ -165,11 +165,17 @@ def cadastrar_viagem(request):
                     salario.save()
             
             # Processar custos gerais
+            print(f"🔍 Processando custos gerais para relatório {relatorio.id}")
+            print(f"📋 Dados POST recebidos: {dict(request.POST)}")
+            
             custos_salvos = 0
             index = 0
             while True:
                 tipo_gasto = request.POST.get(f'custo_{index}_tipo_gasto')
+                print(f"🔍 Verificando custo {index}: tipo_gasto = {tipo_gasto}")
+                
                 if not tipo_gasto:
+                    print(f"❌ Nenhum tipo_gasto encontrado para índice {index}, parando loop")
                     break
                 
                 oficina_fornecedor = request.POST.get(f'custo_{index}_oficina_fornecedor', '').strip()
@@ -178,86 +184,287 @@ def cadastrar_viagem(request):
                 forma_pagamento = request.POST.get(f'custo_{index}_forma_pagamento', 'vista')
                 status_pagamento = request.POST.get(f'custo_{index}_status_pagamento', 'pago')
                 
+                print(f"📋 Custo {index}: {oficina_fornecedor} - {descricao} - R$ {valor}")
+                
                 if oficina_fornecedor and descricao and valor:
-                    CustosGerais.objects.create(
-                        tipo_gasto=tipo_gasto,
-                        data=data_viagem,
-                        veiculo_placa=caminhao,  # Usar o nome do caminhão como placa
-                        oficina_fornecedor=oficina_fornecedor,
-                        descricao=descricao,
-                        valor=Decimal(valor),
-                        forma_pagamento=forma_pagamento,
-                        status_pagamento=status_pagamento
-                    )
-                    custos_salvos += 1
+                    try:
+                        custo = CustosGerais.objects.create(
+                            relatorio=relatorio,
+                            tipo_gasto=tipo_gasto,
+                            data=data_viagem,
+                            veiculo_placa=caminhao,  # Usar o nome do caminhão como placa
+                            oficina_fornecedor=oficina_fornecedor,
+                            descricao=descricao,
+                            valor=Decimal(valor),
+                            forma_pagamento=forma_pagamento,
+                            status_pagamento=status_pagamento
+                        )
+                        custos_salvos += 1
+                        print(f"✅ Custo {index} salvo com ID: {custo.id}")
+                    except Exception as e:
+                        print(f"❌ Erro ao salvar custo {index}: {e}")
+                else:
+                    print(f"❌ Custo {index} não atende critérios: oficina='{oficina_fornecedor}', descricao='{descricao}', valor='{valor}'")
                 
                 index += 1
+            
+            print(f"📊 Total de custos salvos: {custos_salvos}")
             
             mensagem = f'Viagem cadastrada com sucesso! Valor das diárias: R$ {relatorio.valor_diarias:.2f}'
             if custos_salvos > 0:
                 mensagem += f' | {custos_salvos} custo(s) geral(is) adicionado(s)'
-            messages.success(request, mensagem)
-            return redirect('cadastrar_viagem')
+            
+            # Verificar se é uma requisição AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': mensagem})
+            else:
+                messages.success(request, mensagem)
+                return redirect('cadastrar_viagem')
             
         except Exception as e:
             logger.error(f'Erro ao cadastrar viagem: {e}')
-            messages.error(request, 'Erro ao cadastrar viagem. Tente novamente.')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': f'Erro ao cadastrar viagem: {str(e)}'})
+            else:
+                messages.error(request, 'Erro ao cadastrar viagem. Tente novamente.')
     
     return render(request, 'login/cadastrar_viagem.html')
 
 @login_required
+def listar_relatorios(request):
+    """View para listar todos os relatórios"""
+    print("🔍 Listando relatórios...")
+    
+    # Usar raw SQL para evitar problemas de conversão Decimal
+    from django.db import connection
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, data_viagem, partida, chegada, diarias, 
+                   litros_gasolina, gasto_gasolina, receita_frete, 
+                   motorista, caminhao, valor_diarias
+            FROM login_dailyreport 
+            ORDER BY data_viagem DESC, created_at DESC
+        """)
+        
+        columns = [col[0] for col in cursor.description]
+        relatorios_raw = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
+    print(f"📊 Total de relatórios encontrados: {len(relatorios_raw)}")
+    
+    # Converter para formato JSON
+    relatorios_data = []
+    for relatorio in relatorios_raw:
+        # Buscar salário do motorista para o mês da viagem
+        from datetime import datetime
+        data_obj = datetime.strptime(str(relatorio['data_viagem']), '%Y-%m-%d')
+        ano_mes = data_obj.strftime('%Y-%m')
+        
+        try:
+            salario = MotoristaSalario.objects.get(
+                motorista=relatorio['motorista'],
+                ano_mes=ano_mes
+            )
+            salario_liquido = salario.get_salario_liquido()
+        except MotoristaSalario.DoesNotExist:
+            salario = None
+            salario_liquido = 0
+        
+        # Buscar custos gerais da viagem usando o relacionamento
+        custos_gerais = CustosGerais.objects.filter(relatorio_id=relatorio['id'])
+        total_custos_gerais = custos_gerais.aggregate(Sum('valor'))['valor__sum'] or Decimal('0')
+        
+        # Preparar lista de custos gerais para o frontend
+        custos_gerais_list = []
+        for custo in custos_gerais:
+            custos_gerais_list.append({
+                'id': custo.id,
+                'tipo_gasto': custo.get_tipo_gasto_display(),
+                'oficina_fornecedor': custo.oficina_fornecedor,
+                'descricao': custo.descricao,
+                'valor': float(custo.valor),
+                'forma_pagamento': custo.get_forma_pagamento_display(),
+                'status_pagamento': custo.get_status_pagamento_display(),
+                'veiculo_placa': custo.veiculo_placa
+            })
+        
+        # Calcular totais com conversões seguras
+        try:
+            total_diarias = float(relatorio['valor_diarias']) if relatorio['valor_diarias'] else 0.0
+        except (TypeError, ValueError, InvalidOperation):
+            total_diarias = 0.0
+            
+        try:
+            gasto_gasolina = float(relatorio['gasto_gasolina']) if relatorio['gasto_gasolina'] else 0.0
+        except (TypeError, ValueError, InvalidOperation):
+            gasto_gasolina = 0.0
+            
+        try:
+            receita_frete = float(relatorio['receita_frete']) if relatorio['receita_frete'] else 0.0
+        except (TypeError, ValueError, InvalidOperation):
+            receita_frete = 0.0
+            
+        try:
+            custos_gerais_float = float(total_custos_gerais) if total_custos_gerais else 0.0
+        except (TypeError, ValueError, InvalidOperation):
+            custos_gerais_float = 0.0
+            
+        total_despesas = gasto_gasolina + total_diarias + float(salario_liquido) + custos_gerais_float
+        lucro_liquido = receita_frete - total_despesas
+        
+        relatorios_data.append({
+            'id': relatorio['id'],
+            'date': str(relatorio['data_viagem']),
+            'localPartida': relatorio['partida'],
+            'localChegada': relatorio['chegada'],
+            'quantidadeDiarias': relatorio['diarias'],
+            'totalDiarias': total_diarias,
+            'litrosGasolina': float(relatorio['litros_gasolina']) if relatorio['litros_gasolina'] else 0.0,
+            'valorGasolina': gasto_gasolina,
+            'nomeMotorista': relatorio['motorista'],
+            'nomeCaminhao': relatorio['caminhao'],
+            'receita': receita_frete,
+            'totalGastosViagem': gasto_gasolina + total_diarias,
+            'totalCustosGerais': custos_gerais_float,
+            'totalDespesas': total_despesas,
+            'lucroLiquido': lucro_liquido,
+            'salarioBase': float(salario.salario_base) if salario and salario.salario_base else 0,
+            'bonusViagens': float(salario.bonus_viagens) if salario and salario.bonus_viagens else 0,
+            'descontoFaltas': float(salario.desconto_faltas) if salario and salario.desconto_faltas else 0,
+            'salarioLiquido': float(salario_liquido),
+            'custosGerais': custos_gerais_list
+        })
+    
+    print(f"✅ Relatórios processados: {len(relatorios_data)}")
+    print(f"📋 Primeiro relatório: {relatorios_data[0] if relatorios_data else 'Nenhum'}")
+    
+    return JsonResponse({'relatorios': relatorios_data})
+
+@login_required
+def excluir_relatorio(request, relatorio_id):
+    """View para excluir um relatório"""
+    try:
+        relatorio = DailyReport.objects.get(id=relatorio_id)
+        relatorio.delete()
+        return JsonResponse({'success': True, 'message': 'Relatório excluído com sucesso!'})
+    except DailyReport.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Relatório não encontrado!'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Erro ao excluir relatório: {str(e)}'})
+
+@login_required
 def relatorio_semanal(request):
     """View para relatórios semanais"""
+    # Aceitar tanto POST quanto GET
     if request.method == 'POST':
         data_inicio = request.POST.get('data_inicio')
         data_fim = request.POST.get('data_fim')
+    else:
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
         
         if data_inicio and data_fim:
             try:
                 data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
                 data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
                 
-                # Buscar relatórios do período
-                relatorios = DailyReport.objects.filter(
-                    data_viagem__range=[data_inicio, data_fim]
-                ).order_by('data_viagem')
+                # Buscar relatórios do período usando SQL raw para evitar problemas de conversão Decimal
+                from django.db import connection
                 
-                # Calcular totais
-                total_litros = relatorios.aggregate(Sum('litros_gasolina'))['litros_gasolina__sum'] or Decimal('0')
-                total_gasto_gasolina = relatorios.aggregate(Sum('gasto_gasolina'))['gasto_gasolina__sum'] or Decimal('0')
-                total_diarias = relatorios.aggregate(Sum('diarias'))['diarias__sum'] or 0
-                total_valor_diarias = relatorios.aggregate(Sum('valor_diarias'))['valor_diarias__sum'] or Decimal('0')
-                total_receita_frete = relatorios.aggregate(Sum('receita_frete'))['receita_frete__sum'] or Decimal('0')
-                total_gastos = total_gasto_gasolina + total_valor_diarias
-                lucro = total_receita_frete - total_gasto_gasolina - total_valor_diarias
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT id, data_viagem, partida, chegada, diarias, 
+                               litros_gasolina, gasto_gasolina, receita_frete, 
+                               motorista, caminhao, valor_diarias
+                        FROM login_dailyreport 
+                        WHERE data_viagem BETWEEN %s AND %s 
+                        ORDER BY data_viagem
+                    """, [data_inicio, data_fim])
+                    
+                    columns = [col[0] for col in cursor.description]
+                    relatorios = [dict(zip(columns, row)) for row in cursor.fetchall()]
                 
-                # Resumo por motorista
-                resumo_motorista = relatorios.values('motorista').annotate(
-                    total_viagens=Count('id'),
-                    total_diarias=Sum('diarias'),
-                    total_valor_diarias=Sum('valor_diarias'),
-                    total_gasto_gasolina=Sum('gasto_gasolina'),
-                    total_receita_frete=Sum('receita_frete')
-                ).order_by('motorista')
+                # Calcular totais usando agregação direta no banco
+                try:
+                    total_litros = DailyReport.objects.filter(
+                        data_viagem__range=[data_inicio, data_fim]
+                    ).aggregate(Sum('litros_gasolina'))['litros_gasolina__sum'] or Decimal('0')
+                except Exception:
+                    total_litros = Decimal('0')
                 
-                # Resumo por caminhão
-                resumo_caminhao = relatorios.values('caminhao').annotate(
-                    total_viagens=Count('id'),
-                    total_diarias=Sum('diarias'),
-                    total_valor_diarias=Sum('valor_diarias'),
-                    total_gasto_gasolina=Sum('gasto_gasolina'),
-                    total_receita_frete=Sum('receita_frete')
-                ).order_by('caminhao')
+                try:
+                    total_gasto_gasolina = DailyReport.objects.filter(
+                        data_viagem__range=[data_inicio, data_fim]
+                    ).aggregate(Sum('gasto_gasolina'))['gasto_gasolina__sum'] or Decimal('0')
+                except Exception:
+                    total_gasto_gasolina = Decimal('0')
+                
+                try:
+                    total_diarias = DailyReport.objects.filter(
+                        data_viagem__range=[data_inicio, data_fim]
+                    ).aggregate(Sum('diarias'))['diarias__sum'] or 0
+                except Exception:
+                    total_diarias = 0
+                
+                try:
+                    total_valor_diarias = DailyReport.objects.filter(
+                        data_viagem__range=[data_inicio, data_fim]
+                    ).aggregate(Sum('valor_diarias'))['valor_diarias__sum'] or Decimal('0')
+                except Exception:
+                    total_valor_diarias = Decimal('0')
+                
+                try:
+                    total_receita_frete = DailyReport.objects.filter(
+                        data_viagem__range=[data_inicio, data_fim]
+                    ).aggregate(Sum('receita_frete'))['receita_frete__sum'] or Decimal('0')
+                except Exception:
+                    total_receita_frete = Decimal('0')
+                
+                # Converter para float para evitar problemas com Decimal
+                total_gasto_gasolina_float = float(total_gasto_gasolina)
+                total_valor_diarias_float = float(total_valor_diarias)
+                total_receita_frete_float = float(total_receita_frete)
+                
+                total_gastos = total_gasto_gasolina_float + total_valor_diarias_float
+                lucro = total_receita_frete_float - total_gasto_gasolina_float - total_valor_diarias_float
+                
+                # Resumo por motorista usando agregação direta
+                try:
+                    resumo_motorista = DailyReport.objects.filter(
+                        data_viagem__range=[data_inicio, data_fim]
+                    ).values('motorista').annotate(
+                        total_viagens=Count('id'),
+                        total_diarias=Sum('diarias'),
+                        total_valor_diarias=Sum('valor_diarias'),
+                        total_gasto_gasolina=Sum('gasto_gasolina'),
+                        total_receita_frete=Sum('receita_frete')
+                    ).order_by('motorista')
+                except Exception:
+                    resumo_motorista = []
+                
+                # Resumo por caminhão usando agregação direta
+                try:
+                    resumo_caminhao = DailyReport.objects.filter(
+                        data_viagem__range=[data_inicio, data_fim]
+                    ).values('caminhao').annotate(
+                        total_viagens=Count('id'),
+                        total_diarias=Sum('diarias'),
+                        total_valor_diarias=Sum('valor_diarias'),
+                        total_gasto_gasolina=Sum('gasto_gasolina'),
+                        total_receita_frete=Sum('receita_frete')
+                    ).order_by('caminhao')
+                except Exception:
+                    resumo_caminhao = []
                 
                 context = {
                     'relatorios': relatorios,
                     'data_inicio': data_inicio,
                     'data_fim': data_fim,
-                    'total_litros': total_litros,
-                    'total_gasto_gasolina': total_gasto_gasolina,
+                    'total_litros': float(total_litros),
+                    'total_gasto_gasolina': total_gasto_gasolina_float,
                     'total_diarias': total_diarias,
-                    'total_valor_diarias': total_valor_diarias,
-                    'total_receita_frete': total_receita_frete,
+                    'total_valor_diarias': total_valor_diarias_float,
+                    'total_receita_frete': total_receita_frete_float,
                     'total_gastos': total_gastos,
                     'lucro': lucro,
                     'resumo_motorista': resumo_motorista,
@@ -274,23 +481,71 @@ def relatorio_semanal(request):
 @login_required
 def relatorio_mensal(request):
     """View para relatórios mensais"""
+    # Aceitar tanto POST quanto GET
     if request.method == 'POST':
         ano_mes = request.POST.get('ano_mes')
+    else:
+        ano_mes = request.GET.get('ano_mes')
         
         if ano_mes:
             try:
-                # Buscar relatórios do mês
-                relatorios = DailyReport.objects.filter(
-                    data_viagem__year=ano_mes[:4],
-                    data_viagem__month=ano_mes[5:7]
-                ).order_by('data_viagem')
+                # Buscar relatórios do mês usando SQL raw para evitar problemas de conversão Decimal
+                from django.db import connection
                 
-                # Calcular totais
-                total_diarias = relatorios.aggregate(Sum('diarias'))['diarias__sum'] or 0
-                total_valor_diarias = relatorios.aggregate(Sum('valor_diarias'))['valor_diarias__sum'] or Decimal('0')
-                total_litros = relatorios.aggregate(Sum('litros_gasolina'))['litros_gasolina__sum'] or Decimal('0')
-                total_gasto_gasolina = relatorios.aggregate(Sum('gasto_gasolina'))['gasto_gasolina__sum'] or Decimal('0')
-                total_receita_frete = relatorios.aggregate(Sum('receita_frete'))['receita_frete__sum'] or Decimal('0')
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT id, data_viagem, partida, chegada, diarias, 
+                               litros_gasolina, gasto_gasolina, receita_frete, 
+                               motorista, caminhao, valor_diarias
+                        FROM login_dailyreport 
+                        WHERE strftime('%%Y', data_viagem) = %s 
+                        AND strftime('%%m', data_viagem) = %s 
+                        ORDER BY data_viagem
+                    """, [ano_mes[:4], ano_mes[5:7]])
+                    
+                    columns = [col[0] for col in cursor.description]
+                    relatorios = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                
+                # Calcular totais usando agregação direta no banco
+                try:
+                    total_diarias = DailyReport.objects.filter(
+                        data_viagem__year=ano_mes[:4],
+                        data_viagem__month=ano_mes[5:7]
+                    ).aggregate(Sum('diarias'))['diarias__sum'] or 0
+                except Exception:
+                    total_diarias = 0
+                
+                try:
+                    total_valor_diarias = DailyReport.objects.filter(
+                        data_viagem__year=ano_mes[:4],
+                        data_viagem__month=ano_mes[5:7]
+                    ).aggregate(Sum('valor_diarias'))['valor_diarias__sum'] or Decimal('0')
+                except Exception:
+                    total_valor_diarias = Decimal('0')
+                
+                try:
+                    total_litros = DailyReport.objects.filter(
+                        data_viagem__year=ano_mes[:4],
+                        data_viagem__month=ano_mes[5:7]
+                    ).aggregate(Sum('litros_gasolina'))['litros_gasolina__sum'] or Decimal('0')
+                except Exception:
+                    total_litros = Decimal('0')
+                
+                try:
+                    total_gasto_gasolina = DailyReport.objects.filter(
+                        data_viagem__year=ano_mes[:4],
+                        data_viagem__month=ano_mes[5:7]
+                    ).aggregate(Sum('gasto_gasolina'))['gasto_gasolina__sum'] or Decimal('0')
+                except Exception:
+                    total_gasto_gasolina = Decimal('0')
+                
+                try:
+                    total_receita_frete = DailyReport.objects.filter(
+                        data_viagem__year=ano_mes[:4],
+                        data_viagem__month=ano_mes[5:7]
+                    ).aggregate(Sum('receita_frete'))['receita_frete__sum'] or Decimal('0')
+                except Exception:
+                    total_receita_frete = Decimal('0')
                 
                 # Buscar ou criar custos fixos do mês
                 custos_fixos, created = MonthlyCost.objects.get_or_create(
@@ -327,20 +582,28 @@ def relatorio_mensal(request):
                 
                 # Calcular lucro líquido
                 total_custos_fixos = custos_fixos.get_total_custos_fixos()
-                total_despesas = total_gasto_gasolina + total_valor_diarias + total_custos_fixos + total_custos_gerais
-                lucro_liquido = total_receita_frete - total_despesas
+                
+                # Converter para float para evitar problemas com Decimal
+                total_gasto_gasolina_float = float(total_gasto_gasolina)
+                total_valor_diarias_float = float(total_valor_diarias)
+                total_custos_gerais_float = float(total_custos_gerais)
+                total_receita_frete_float = float(total_receita_frete)
+                total_custos_fixos_float = float(total_custos_fixos)
+                
+                total_despesas = total_gasto_gasolina_float + total_valor_diarias_float + total_custos_fixos_float + total_custos_gerais_float
+                lucro_liquido = total_receita_frete_float - total_despesas
                 
                 context = {
                     'ano_mes': ano_mes,
                     'custos_fixos': custos_fixos,
                     'custos_gerais_mes': custos_gerais_mes,
-                    'total_custos_gerais': total_custos_gerais,
+                    'total_custos_gerais': total_custos_gerais_float,
                     'relatorios': relatorios,
                     'total_diarias': total_diarias,
-                    'total_valor_diarias': total_valor_diarias,
-                    'total_litros': total_litros,
-                    'total_gasto_gasolina': total_gasto_gasolina,
-                    'total_receita_frete': total_receita_frete,
+                    'total_valor_diarias': total_valor_diarias_float,
+                    'total_litros': float(total_litros),
+                    'total_gasto_gasolina': total_gasto_gasolina_float,
+                    'total_receita_frete': total_receita_frete_float,
                     'total_custos_fixos': total_custos_fixos,
                     'total_despesas': total_despesas,
                     'lucro_liquido': lucro_liquido,
@@ -936,7 +1199,206 @@ def buscar_relatorios_mes(request):
         'error': 'Método não permitido'
     })
 
+@login_required
+def atualizar_relatorio(request, relatorio_id):
+    """View para atualizar um relatório existente"""
+    if request.method == 'POST':
+        try:
+            # Buscar o relatório existente
+            relatorio = get_object_or_404(DailyReport, id=relatorio_id)
+            
+            # Obter dados do POST
+            data_viagem = request.POST.get('data_viagem')
+            partida = request.POST.get('partida', '').strip()
+            chegada = request.POST.get('chegada', '').strip()
+            diarias = request.POST.get('diarias', '0')
+            litros_gasolina = request.POST.get('litros_gasolina', '0')
+            gasto_gasolina = request.POST.get('gasto_gasolina', '0')
+            receita_frete = request.POST.get('receita_frete', '0')
+            motorista = request.POST.get('motorista', '').strip()
+            caminhao = request.POST.get('caminhao', '').strip()
+            salario_base = request.POST.get('salario_base', '0')
+            bonus_viagens = request.POST.get('bonus_viagens', '0')
+            desconto_faltas = request.POST.get('desconto_faltas', '0')
+            
+            # Atualizar dados do relatório
+            relatorio.data_viagem = data_viagem
+            relatorio.partida = partida
+            relatorio.chegada = chegada
+            relatorio.diarias = int(diarias)
+            relatorio.litros_gasolina = Decimal(litros_gasolina)
+            relatorio.gasto_gasolina = Decimal(gasto_gasolina)
+            relatorio.receita_frete = Decimal(receita_frete)
+            relatorio.motorista = motorista
+            relatorio.caminhao = caminhao
+            relatorio.save()
+            
+            # Atualizar ou criar salário do motorista
+            if motorista and salario_base:
+                ano_mes = datetime.strptime(data_viagem, '%Y-%m-%d').strftime('%Y-%m')
+                salario, created = MotoristaSalario.objects.get_or_create(
+                    motorista=motorista,
+                    ano_mes=ano_mes,
+                    defaults={
+                        'salario_base': Decimal(salario_base),
+                        'bonus_viagens': Decimal(bonus_viagens),
+                        'desconto_faltas': Decimal(desconto_faltas)
+                    }
+                )
+                if not created:
+                    salario.salario_base = Decimal(salario_base)
+                    salario.bonus_viagens = Decimal(bonus_viagens)
+                    salario.desconto_faltas = Decimal(desconto_faltas)
+                    salario.save()
+            
+            # Remover custos gerais existentes
+            CustosGerais.objects.filter(relatorio=relatorio).delete()
+            
+            # Processar novos custos gerais
+            custos_salvos = 0
+            index = 0
+            while True:
+                tipo_gasto = request.POST.get(f'custo_{index}_tipo_gasto')
+                if not tipo_gasto:
+                    break
+                
+                oficina_fornecedor = request.POST.get(f'custo_{index}_oficina_fornecedor', '').strip()
+                descricao = request.POST.get(f'custo_{index}_descricao', '').strip()
+                valor = request.POST.get(f'custo_{index}_valor', '0')
+                forma_pagamento = request.POST.get(f'custo_{index}_forma_pagamento', 'vista')
+                status_pagamento = request.POST.get(f'custo_{index}_status_pagamento', 'pago')
+                
+                if oficina_fornecedor and descricao and valor:
+                    CustosGerais.objects.create(
+                        relatorio=relatorio,
+                        tipo_gasto=tipo_gasto,
+                        data=data_viagem,
+                        veiculo_placa=caminhao,
+                        oficina_fornecedor=oficina_fornecedor,
+                        descricao=descricao,
+                        valor=Decimal(valor),
+                        forma_pagamento=forma_pagamento,
+                        status_pagamento=status_pagamento
+                    )
+                    custos_salvos += 1
+                
+                index += 1
+            
+            mensagem = f'Relatório atualizado com sucesso! {custos_salvos} custo(s) geral(is) atualizado(s)'
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': mensagem})
+            else:
+                messages.success(request, mensagem)
+                return redirect('dashboard')
+                
+        except Exception as e:
+            logger.error(f'Erro ao atualizar relatório: {e}')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': f'Erro ao atualizar relatório: {str(e)}'})
+            else:
+                messages.error(request, f'Erro ao atualizar relatório: {str(e)}')
+                return redirect('dashboard')
+    
+    return JsonResponse({'success': False, 'message': 'Método não permitido'})
+
 def teste_abas(request):
     """View para testar as abas"""
     return render(request, 'login/teste_abas.html')
+
+@login_required
+def custos_fixos(request):
+    """View para gerenciar custos fixos mensais"""
+    if request.method == 'POST':
+        try:
+            descricao = request.POST.get('descricao', '').strip()
+            tipo_custo = request.POST.get('tipo_custo', '')
+            valor_mensal = request.POST.get('valor_mensal', '0')
+            data_inicio = request.POST.get('data_inicio')
+            data_fim = request.POST.get('data_fim') or None
+            status = request.POST.get('status', 'ativo')
+            observacoes = request.POST.get('observacoes', '').strip()
+            
+            if not descricao or not tipo_custo or not valor_mensal or not data_inicio:
+                return JsonResponse({'success': False, 'message': 'Preencha todos os campos obrigatórios!'})
+            
+            custo_fixo = CustoFixoMensal.objects.create(
+                descricao=descricao,
+                tipo_custo=tipo_custo,
+                valor_mensal=Decimal(valor_mensal),
+                data_inicio=data_inicio,
+                data_fim=data_fim,
+                status=status,
+                observacoes=observacoes
+            )
+            
+            mensagem = f'Custo fixo "{descricao}" cadastrado com sucesso!'
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': mensagem})
+            else:
+                messages.success(request, mensagem)
+                return redirect('dashboard')
+                
+        except Exception as e:
+            logger.error(f'Erro ao salvar custo fixo: {e}')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': f'Erro ao salvar custo fixo: {str(e)}'})
+            else:
+                messages.error(request, f'Erro ao salvar custo fixo: {str(e)}')
+                return redirect('dashboard')
+    
+    elif request.method == 'GET':
+        # Listar custos fixos
+        custos_fixos = CustoFixoMensal.objects.all().order_by('-data_inicio')
+        
+        custos_data = []
+        for custo in custos_fixos:
+            custos_data.append({
+                'id': custo.id,
+                'descricao': custo.descricao,
+                'tipo_custo': custo.tipo_custo,
+                'tipo_custo_display': custo.get_tipo_custo_display(),
+                'valor_mensal': float(custo.valor_mensal),
+                'data_inicio': custo.data_inicio.strftime('%Y-%m-%d'),
+                'data_fim': custo.data_fim.strftime('%Y-%m-%d') if custo.data_fim else None,
+                'status': custo.status,
+                'status_display': custo.get_status_display(),
+                'observacoes': custo.observacoes,
+                'created_at': custo.created_at.strftime('%Y-%m-%d %H:%M')
+            })
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'custos_fixos': custos_data})
+        else:
+            return render(request, 'login/custos_fixos.html', {'custos_fixos': custos_fixos})
+    
+    return JsonResponse({'success': False, 'message': 'Método não permitido'})
+
+@login_required
+def excluir_custo_fixo(request, custo_id):
+    """View para excluir custo fixo"""
+    if request.method == 'POST':
+        try:
+            custo = get_object_or_404(CustoFixoMensal, id=custo_id)
+            descricao = custo.descricao
+            custo.delete()
+            
+            mensagem = f'Custo fixo "{descricao}" excluído com sucesso!'
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': mensagem})
+            else:
+                messages.success(request, mensagem)
+                return redirect('dashboard')
+                
+        except Exception as e:
+            logger.error(f'Erro ao excluir custo fixo: {e}')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': f'Erro ao excluir custo fixo: {str(e)}'})
+            else:
+                messages.error(request, f'Erro ao excluir custo fixo: {str(e)}')
+                return redirect('dashboard')
+    
+    return JsonResponse({'success': False, 'message': 'Método não permitido'})
 
