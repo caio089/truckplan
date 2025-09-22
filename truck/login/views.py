@@ -597,10 +597,10 @@ def relatorio_mensal(request):
                                litros_gasolina, gasto_gasolina, receita_frete, 
                                motorista, caminhao, valor_diarias
                         FROM login_dailyreport 
-                        WHERE strftime('%%Y', data_viagem) = %s 
-                        AND strftime('%%m', data_viagem) = %s 
+                        WHERE EXTRACT(YEAR FROM data_viagem) = %s 
+                        AND EXTRACT(MONTH FROM data_viagem) = %s 
                         ORDER BY data_viagem
-                    """, [ano_mes[:4], ano_mes[5:7]])
+                    """, [int(ano_mes[:4]), int(ano_mes[5:7])])
                     
                     columns = [col[0] for col in cursor.description]
                     relatorios = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -1143,16 +1143,21 @@ def buscar_relatorios_periodo(request):
             for relatorio in relatorios:
                 relatorios_data.append({
                     'id': relatorio.id,
-                    'data_viagem': relatorio.data_viagem.isoformat(),
-                    'motorista': relatorio.motorista,
-                    'caminhao': relatorio.caminhao,
-                    'partida': relatorio.partida,
-                    'chegada': relatorio.chegada,
-                    'diarias': relatorio.diarias,
-                    'valor_diarias': float(relatorio.valor_diarias),
-                    'litros_gasolina': float(relatorio.litros_gasolina),
-                    'gasto_gasolina': float(relatorio.gasto_gasolina),
-                    'receita_frete': float(relatorio.receita_frete)
+                    'date': relatorio.data_viagem.isoformat(),
+                    'localPartida': relatorio.partida,
+                    'localChegada': relatorio.chegada,
+                    'nomeMotorista': relatorio.motorista,
+                    'nomeCaminhao': relatorio.caminhao,
+                    'quantidadeDiarias': relatorio.diarias,
+                    'totalDiarias': float(relatorio.valor_diarias),
+                    'litrosGasolina': float(relatorio.litros_gasolina),
+                    'valorGasolina': float(relatorio.gasto_gasolina),
+                    'receita': float(relatorio.receita_frete),
+                    'totalGastosViagem': float(relatorio.valor_diarias) + float(relatorio.gasto_gasolina),
+                    'totalCustosGerais': 0.0,
+                    'totalDespesas': float(relatorio.valor_diarias) + float(relatorio.gasto_gasolina),
+                    'lucroLiquido': float(relatorio.receita_frete) - float(relatorio.valor_diarias) - float(relatorio.gasto_gasolina),
+                    'salarioLiquido': 0.0
                 })
             
             return JsonResponse({

@@ -1,0 +1,45 @@
+# =====================================================
+# DEPENDÊNCIAS PARA SISTEMA TRUCK PLAN COM SUPABASE
+# =====================================================
+
+# Django e dependências básicas
+Django==5.2.6
+django-environ==0.11.2
+python-dotenv==1.0.0
+
+# PostgreSQL para conectar com Supabase
+psycopg2-binary==2.9.9
+
+# Cliente Supabase (opcional, para usar APIs do Supabase)
+supabase==2.3.4
+
+# Para upload de arquivos e processamento
+Pillow==10.2.0
+
+# Para formatação de datas e números
+python-dateutil==2.9.0
+
+# Para validação de dados
+django-extensions==3.2.3
+
+# Para desenvolvimento (opcional)
+django-debug-toolbar==4.2.0
+
+# Para produção (opcional)
+gunicorn==21.2.0
+whitenoise==6.6.0
+
+# =====================================================
+# DEPENDÊNCIAS ADICIONAIS RECOMENDADAS
+# =====================================================
+
+# Para cache (Redis - opcional)
+# redis==5.0.1
+# django-redis==5.4.0
+
+# Para monitoramento (opcional)
+# sentry-sdk==1.39.2
+
+# Para testes (opcional)
+# pytest==7.4.3
+# pytest-django==4.7.0

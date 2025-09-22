@@ -310,27 +310,27 @@
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Partida *</label>
-                                <input type="text" id="localPartida" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: São Paulo - SP" required>
+                                <input type="text" id="localPartida" name="localPartida" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: São Paulo - SP" required>
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Chegada *</label>
-                                <input type="text" id="localChegada" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Rio de Janeiro - RJ" required>
+                                <input type="text" id="localChegada" name="localChegada" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Rio de Janeiro - RJ" required>
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Quantidade de Diárias *</label>
-                                <input type="number" id="quantidadeDiarias" min="1" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="1" required>
+                                <input type="number" id="quantidadeDiarias" name="quantidadeDiarias" min="1" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="1" required>
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Motorista *</label>
-                                <input type="text" id="nomeMotorista" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Nome completo do motorista" required>
+                                <input type="text" id="nomeMotorista" name="nomeMotorista" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Nome completo do motorista" required>
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Nome do Caminhão *</label>
-                                <input type="text" id="nomeCaminhao" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Volvo FH 540" required>
+                                <input type="text" id="nomeCaminhao" name="nomeCaminhao" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Ex: Volvo FH 540" required>
                             </div>
                         </div>
                     </div>
@@ -342,12 +342,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de Gasolina Gastos *</label>
-                                <input type="number" id="litrosGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
+                                <input type="number" id="litrosGasolina" name="litrosGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Valor Gasto com Gasolina (R$) *</label>
-                                <input type="number" id="valorGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
+                                <input type="number" id="valorGasolina" name="valorGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
                             </div>
                         </div>
                     </div>
@@ -357,7 +357,7 @@
                         <h4 class="text-lg font-semibold text-white mb-4">Receita</h4>
                         <div>
                             <label class="block text-gray-200 text-sm font-semibold mb-2">Receita/Frete (R$)</label>
-                            <input type="number" id="receita" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                            <input type="number" id="receita" name="receita" step="0.01" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
                         </div>
                     </div>
 
@@ -367,15 +367,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Salário Base (R$)</label>
-                                <input type="number" id="salario_base" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                                <input type="number" id="salario_base" name="salario_base" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
                             </div>
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Bônus por Viagens (R$)</label>
-                                <input type="number" id="bonus_viagens" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                                <input type="number" id="bonus_viagens" name="bonus_viagens" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
                             </div>
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Desconto por Faltas (R$)</label>
-                                <input type="number" id="desconto_faltas" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
+                                <input type="number" id="desconto_faltas" name="desconto_faltas" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
                             </div>
                         </div>
                     </div>
@@ -620,6 +620,11 @@
         // Limpar dados de teste
         localStorage.removeItem('truckReports');
         localStorage.removeItem('truckCosts');
+        
+        // Carregar dados do servidor quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarRelatoriosDoServidor();
+        });
     </script>
 </body>
 </html>

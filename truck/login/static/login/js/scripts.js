@@ -287,8 +287,46 @@ function mostrarResultadosBusca(relatorios) {
 function mostrarRelatoriosHoje() {
     try {
         const hoje = new Date().toISOString().split('T')[0];
-        const relatoriosHoje = reports.filter(report => report.date === hoje);
-        mostrarResultadosBusca(relatoriosHoje);
+        
+        // Obter CSRF token de forma mais robusta
+        const csrfToken = getCSRFToken();
+        if (!csrfToken) {
+            console.error('CSRF token não encontrado');
+            showNotification('Erro: Token CSRF não encontrado', 'error');
+            return;
+        }
+        console.log('CSRF token encontrado:', csrfToken.substring(0, 10) + '...');
+        
+        // Buscar dados do servidor
+        fetch('/login/buscar-relatorios-periodo/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                data_inicio: hoje,
+                data_fim: hoje
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                mostrarResultadosBusca(data.relatorios);
+            } else {
+                console.error('Erro do servidor:', data.error);
+                showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            showNotification(`Erro ao carregar relatórios: ${error.message}`, 'error');
+        });
     } catch (error) {
         console.error('Erro em mostrarRelatoriosHoje:', error);
         showNotification('Erro ao carregar relatórios de hoje', 'error');
@@ -301,12 +339,48 @@ function mostrarRelatoriosSemana() {
         const inicioSemana = new Date(hoje);
         inicioSemana.setDate(hoje.getDate() - hoje.getDay());
         
-        const relatoriosSemana = reports.filter(report => {
-            const reportDate = new Date(report.date);
-            return reportDate >= inicioSemana && reportDate <= hoje;
-        });
+        const dataInicio = inicioSemana.toISOString().split('T')[0];
+        const dataFim = hoje.toISOString().split('T')[0];
         
-        mostrarResultadosBusca(relatoriosSemana);
+        // Obter CSRF token de forma mais robusta
+        const csrfToken = getCSRFToken();
+        if (!csrfToken) {
+            console.error('CSRF token não encontrado');
+            showNotification('Erro: Token CSRF não encontrado', 'error');
+            return;
+        }
+        console.log('CSRF token encontrado:', csrfToken.substring(0, 10) + '...');
+        
+        // Buscar dados do servidor
+        fetch('/login/buscar-relatorios-periodo/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                data_inicio: dataInicio,
+                data_fim: dataFim
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                mostrarResultadosBusca(data.relatorios);
+            } else {
+                console.error('Erro do servidor:', data.error);
+                showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            showNotification(`Erro ao carregar relatórios: ${error.message}`, 'error');
+        });
     } catch (error) {
         console.error('Erro em mostrarRelatoriosSemana:', error);
         showNotification('Erro ao carregar relatórios da semana', 'error');
@@ -318,12 +392,48 @@ function mostrarRelatoriosMes() {
         const hoje = new Date();
         const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
         
-        const relatoriosMes = reports.filter(report => {
-            const reportDate = new Date(report.date);
-            return reportDate >= inicioMes && reportDate <= hoje;
-        });
+        const dataInicio = inicioMes.toISOString().split('T')[0];
+        const dataFim = hoje.toISOString().split('T')[0];
         
-        mostrarResultadosBusca(relatoriosMes);
+        // Obter CSRF token de forma mais robusta
+        const csrfToken = getCSRFToken();
+        if (!csrfToken) {
+            console.error('CSRF token não encontrado');
+            showNotification('Erro: Token CSRF não encontrado', 'error');
+            return;
+        }
+        console.log('CSRF token encontrado:', csrfToken.substring(0, 10) + '...');
+        
+        // Buscar dados do servidor
+        fetch('/login/buscar-relatorios-periodo/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                data_inicio: dataInicio,
+                data_fim: dataFim
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                mostrarResultadosBusca(data.relatorios);
+            } else {
+                console.error('Erro do servidor:', data.error);
+                showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            showNotification(`Erro ao carregar relatórios: ${error.message}`, 'error');
+        });
     } catch (error) {
         console.error('Erro em mostrarRelatoriosMes:', error);
         showNotification('Erro ao carregar relatórios do mês', 'error');
@@ -369,13 +479,6 @@ function salvarRelatorio() {
     const form = document.getElementById('reportForm');
     const formData = new FormData(form);
     
-    // Debug: Log do FormData
-    console.log('=== DEBUG FORMDATA ===');
-    console.log('FormData entries:');
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-    }
-    console.log('=====================');
     
     // Validar campos obrigatórios
     const camposObrigatorios = ['dataViagem', 'localPartida', 'localChegada', 'quantidadeDiarias', 'litrosGasolina', 'valorGasolina', 'nomeMotorista', 'nomeCaminhao'];
@@ -404,14 +507,6 @@ function salvarRelatorio() {
     // Usar o valor do elemento se o FormData estiver vazio
     const dataFinal = dataViagem || dataValue;
     
-    // Debug temporário
-    console.log('=== DEBUG DATA ===');
-    console.log('dataViagem (FormData):', dataViagem);
-    console.log('dataValue (Element):', dataValue);
-    console.log('dataFinal (Final):', dataFinal);
-    console.log('Tipo da dataFinal:', typeof dataFinal);
-    console.log('Comprimento:', dataFinal ? dataFinal.length : 'undefined');
-    console.log('==================');
     
     if (!dataFinal || dataFinal.trim() === '') {
         console.log('ERRO: Data vazia');
@@ -423,8 +518,6 @@ function salvarRelatorio() {
     // Verificar se a data está no formato correto
     const dataRegex = /^\d{4}-\d{2}-\d{2}$/;
     const isValidFormat = dataRegex.test(dataFinal);
-    console.log('Regex test result:', isValidFormat);
-    console.log('Data matches regex:', dataFinal.match(dataRegex));
     
     if (!isValidFormat) {
         console.log('ERRO: Formato inválido');
@@ -1007,7 +1100,6 @@ let processandoCusto = false;
 function adicionarCustoGeral() {
     // Evitar múltiplas execuções simultâneas
     if (processandoCusto) {
-        console.log('Já está processando um custo, aguarde...');
         return;
     }
     
@@ -1031,10 +1123,17 @@ function adicionarCustoGeral() {
         const statusPagamento = document.getElementById('statusPagamento').value;
         const dataVencimento = document.getElementById('dataVencimento').value;
         const comprovante = document.getElementById('comprovante').files[0];
+        
 
         // Validação mínima - apenas campos essenciais
         if (!tipoGasto || !descricaoCusto || !valorCusto) {
             showNotification('Preencha pelo menos: Tipo, Descrição e Valor!', 'error');
+            processandoCusto = false;
+            const btnAdicionarCusto = document.getElementById('btnAdicionarCusto');
+            if (btnAdicionarCusto) {
+                btnAdicionarCusto.disabled = false;
+                btnAdicionarCusto.textContent = '➕ Adicionar Custo';
+            }
             return;
         }
 
@@ -1364,9 +1463,6 @@ async function excluirCustoFixo(custoId) {
 
 async function salvarRelatorioNoServidor(reportData, isEdit) {
     try {
-        console.log('=== DEBUG SALVAR RELATÓRIO ===');
-        console.log('reportData recebido:', reportData);
-        console.log('isEdit:', isEdit);
         
         const formData = new FormData();
         
@@ -1374,8 +1470,6 @@ async function salvarRelatorioNoServidor(reportData, isEdit) {
         formData.append('data_viagem', reportData.date);
         formData.append('dataViagem', reportData.date);
         
-        console.log('Data sendo enviada:', reportData.date);
-        console.log('Tipo da data:', typeof reportData.date);
         formData.append('partida', reportData.localPartida);
         formData.append('localPartida', reportData.localPartida);
         formData.append('chegada', reportData.localChegada);
@@ -1414,12 +1508,6 @@ async function salvarRelatorioNoServidor(reportData, isEdit) {
         const editReportId = document.getElementById('editReportId').value;
         const url = isEdit ? `/login/atualizar-relatorio/${editReportId}/` : '/login/cadastrar-viagem/';
         
-        console.log('URL da requisição:', url);
-        console.log('FormData entries:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
-        console.log('========================');
         
         const response = await fetch(url, {
             method: 'POST',
