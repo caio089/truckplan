@@ -773,34 +773,15 @@ function closeReportDetailsModal() {
 }
 
 function editReport(reportId) {
-    const report = reports.find(r => r.id === reportId);
-    if (!report) return;
+    console.log('=== EDITAR RELATÓRIO ===');
+    console.log('ID do relatório:', reportId);
+    console.log('Redirecionando para:', `/login/atualizar-relatorio/${reportId}/`);
     
-    // Preencher formulário com dados do relatório
-    document.getElementById('editReportId').value = report.id;
-    document.getElementById('dataViagem').value = report.date;
-    document.getElementById('localPartida').value = report.localPartida || '';
-    document.getElementById('localChegada').value = report.localChegada || '';
-    document.getElementById('quantidadeDiarias').value = report.quantidadeDiarias || '';
-    document.getElementById('litrosGasolina').value = report.litrosGasolina || '';
-    document.getElementById('valorGasolina').value = report.valorGasolina || '';
-    document.getElementById('nomeMotorista').value = report.nomeMotorista || '';
-    document.getElementById('nomeCaminhao').value = report.nomeCaminhao || '';
-    document.getElementById('receita').value = report.receita || '';
-    document.getElementById('salario_base').value = report.salario_base || '';
-    document.getElementById('bonus_viagens').value = report.bonus_viagens || '';
-    document.getElementById('desconto_faltas').value = report.desconto_faltas || '';
+    // Alert temporário para debug
+    alert(`Editando relatório ${reportId} - Redirecionando para página de edição`);
     
-    // Carregar custos gerais se existirem
-    if (report.custosGerais && Array.isArray(report.custosGerais)) {
-        custosGeraisRelatorio = [...report.custosGerais];
-    } else {
-        custosGeraisRelatorio = [];
-    }
-    atualizarListaCustosGerais();
-    
-    // Abrir modal
-    openReportModal();
+    // Redirecionar para a página de edição com dados preenchidos
+    window.location.href = `/login/atualizar-relatorio/${reportId}/`;
 }
 
 async function deleteReport(reportId) {
@@ -1670,6 +1651,11 @@ window.alternarResumo = alternarResumo;
 window.viewReportSummary = viewReportSummary;
 window.editReport = editReport;
 window.deleteReport = deleteReport;
+
+// Debug: verificar se a função editReport está correta
+console.log('=== DEBUG FUNÇÃO EDITREPORT ===');
+console.log('Tipo da função editReport:', typeof window.editReport);
+console.log('Função editReport:', window.editReport.toString());
 
 document.addEventListener('DOMContentLoaded', function() {
     carregarRelatoriosDoServidor();

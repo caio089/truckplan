@@ -188,6 +188,10 @@
             
             <!-- Botões de Navegação para Relatórios -->
             <div class="flex flex-wrap gap-4 mb-6">
+                <button onclick="irParaRelatorioDiario()" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
+                    <span class="mr-2">📅</span>
+                    Relatório Diário
+                </button>
                 <button onclick="irParaRelatorioSemanal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
                     <span class="mr-2">📊</span>
                     Relatório Semanal
@@ -250,6 +254,13 @@
                         <span class="text-sm">Este Mês</span>
                     </div>
                 </button>
+
+                <a href="{% url 'parcelas_custos' %}" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-orange-500">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <span class="text-3xl">📅</span>
+                        <span class="text-sm">Parcelas</span>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -275,14 +286,97 @@
                 </button>
             </div>
             
-            <div id="custosFixosList" class="space-y-4">
-                <!-- Custos fixos serão carregados aqui via JavaScript -->
-                <div class="text-center text-gray-400 py-8">
-                    <span class="text-4xl">💳</span>
-                    <p class="mt-2">Nenhum custo fixo cadastrado</p>
-                    <p class="text-sm">Adicione parcelas do caminhão, seguro, IPVA, etc.</p>
+            {% if custos_fixos_mensais or parcelas_semana %}
+            <div class="mb-6">
+                <!-- Parcelas Vencidas na Semana -->
+                {% if parcelas_semana %}
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-orange-300 mb-4">📅 Parcelas Vencidas Esta Semana (R$ {{ total_parcelas_semana|floatformat:2 }})</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for parcela in parcelas_semana %}
+                        <div class="bg-gradient-to-r from-orange-600/20 to-orange-700/20 rounded-xl p-4 border border-orange-500/30">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-orange-200 text-sm font-medium">Parcela {{ parcela.numero_parcela }}</p>
+                                    <p class="text-lg font-bold text-white">{{ parcela.custo_geral.descricao }}</p>
+                                    <p class="text-sm text-orange-300">R$ {{ parcela.valor_parcela|floatformat:2 }}</p>
+                                    <p class="text-xs text-gray-400">Vence: {{ parcela.data_vencimento|date:"d/m/Y" }}</p>
+                                </div>
+                                <div class="text-2xl opacity-80">📅</div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="px-2 py-1 rounded text-xs {% if parcela.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-yellow-600 text-white{% endif %}">
+                                    {{ parcela.get_status_pagamento_display }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Custos Fixos Mensais -->
+                {% if custos_fixos_mensais %}
+                <div>
+                    <h4 class="text-lg font-semibold text-blue-300 mb-4">📅 Custos Fixos Mensais (R$ {{ total_custos_fixos_mensais|floatformat:2 }})</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for custo in custos_fixos_mensais %}
+                        <div class="bg-gradient-to-r from-blue-600/20 to-blue-700/20 rounded-xl p-4 border border-blue-500/30">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <p class="text-blue-200 text-sm font-medium">{{ custo.get_tipo_custo_display }}</p>
+                                    <p class="text-lg font-bold text-white">{{ custo.descricao }}</p>
+                                    <p class="text-sm text-blue-300">R$ {{ custo.valor_mensal|floatformat:2 }}/mês</p>
+                                    {% if custo.data_fim %}
+                                    <p class="text-xs text-gray-400">Até {{ custo.data_fim|date:"d/m/Y" }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="text-2xl opacity-80">
+                                        {% if custo.tipo_custo == 'parcela_caminhao' %}🚛
+                                        {% elif custo.tipo_custo == 'seguro' %}🛡️
+                                        {% elif custo.tipo_custo == 'ipva' %}📋
+                                        {% elif custo.tipo_custo == 'licenciamento' %}📄
+                                        {% elif custo.tipo_custo == 'manutencao_preventiva' %}🔧
+                                        {% else %}💰{% endif %}
+                                    </div>
+                                    <div class="flex flex-col space-y-1">
+                                        <a href="{% url 'editar_custo_fixo' custo.id %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded text-xs transition-colors text-center" title="Editar">
+                                            ✏️
+                                        </a>
+                                        <form method="post" action="{% url 'apagar_custo_fixo' custo.id %}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja apagar este custo fixo? Esta ação não pode ser desfeita.');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors w-full" title="Apagar">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if custo.observacoes %}
+                            <p class="text-xs text-gray-400 mt-2">{{ custo.observacoes|truncatechars:50 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mt-4 p-4 bg-gradient-to-r from-gray-700/50 to-gray-800/50 rounded-xl">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-semibold text-white">Total de Custos Fixos</span>
+                        <span class="text-2xl font-bold text-blue-400">R$ {{ total_custos_fixos_mensais|add:total_parcelas_semana|floatformat:2 }}</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">Mensais + Parcelas (proporcional para esta semana)</p>
                 </div>
             </div>
+            {% else %}
+            <div class="text-center text-gray-400 py-8">
+                <span class="text-4xl">💳</span>
+                <p class="mt-2">Nenhum custo fixo cadastrado</p>
+                <p class="text-sm">Adicione parcelas do caminhão, seguro, IPVA, etc.</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -615,7 +709,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{% static 'login/js/scripts.js' %}"></script>
+    <script src="{% static 'login/js/scripts.js' %}?v=20250122194500"></script>
     <script>
         // Limpar dados de teste
         localStorage.removeItem('truckReports');
@@ -625,6 +719,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             carregarRelatoriosDoServidor();
         });
+        
+        // Função para ir para relatório diário
+        function irParaRelatorioDiario() {
+            window.location.href = "{% url 'relatorio_diario' %}";
+        }
+        
     </script>
 </body>
 </html>

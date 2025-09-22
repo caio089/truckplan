@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Custo Fixo - TruckPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 25%, #1d4ed8 50%, #2563eb 75%, #3b82f6 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <h2 class="mt-6 text-3xl font-extrabold text-white">
+                    <i class="fas fa-edit mr-2"></i>
+                    Editar Custo Fixo
+                </h2>
+                <p class="mt-2 text-sm text-blue-200">
+                    Atualize as informações do custo fixo mensal
+                </p>
+            </div>
+
+            <!-- Form -->
+            <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Tipo de Custo -->
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">
+                            <i class="fas fa-tag mr-1"></i>
+                            Tipo de Custo
+                        </label>
+                        <select name="tipo_custo" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" required>
+                            {% for value, label in tipos_custo %}
+                            <option value="{{ value }}" {% if custo.tipo_custo == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Descrição -->
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">
+                            <i class="fas fa-file-text mr-1"></i>
+                            Descrição
+                        </label>
+                        <input type="text" name="descricao" value="{{ custo.descricao }}" 
+                               class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" 
+                               placeholder="Ex: Parcela do caminhão" required>
+                    </div>
+
+                    <!-- Valor Mensal -->
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">
+                            <i class="fas fa-dollar-sign mr-1"></i>
+                            Valor Mensal (R$)
+                        </label>
+                        <input type="number" name="valor_mensal" value="{{ custo.valor_mensal }}" 
+                               step="0.01" min="0"
+                               class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" 
+                               placeholder="0.00" required>
+                    </div>
+
+                    <!-- Data de Início -->
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Data de Início
+                        </label>
+                        <input type="date" name="data_inicio" value="{{ custo.data_inicio|date:'Y-m-d' }}" 
+                               class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" 
+                               required>
+                    </div>
+
+                    <!-- Data de Fim -->
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">
+                            <i class="fas fa-calendar-times mr-1"></i>
+                            Data de Fim (Opcional)
+                        </label>
+                        <input type="date" name="data_fim" 
+                               value="{% if custo.data_fim %}{{ custo.data_fim|date:'Y-m-d' }}{% endif %}"
+                               class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                        <p class="text-xs text-gray-400 mt-1">Deixe em branco para custo permanente</p>
+                    </div>
+
+                    <!-- Observações -->
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">
+                            <i class="fas fa-sticky-note mr-1"></i>
+                            Observações
+                        </label>
+                        <textarea name="observacoes" rows="3"
+                                  class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20"
+                                  placeholder="Observações adicionais...">{{ custo.observacoes }}</textarea>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="flex space-x-4">
+                        <button type="submit" 
+                                class="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-save mr-2"></i>
+                            Salvar Alterações
+                        </button>
+                        <a href="{% url 'dashboard' %}" 
+                           class="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 text-center">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Informações do Custo -->
+            <div class="bg-blue-900/30 border border-blue-500/50 rounded-xl p-4">
+                <h3 class="text-blue-200 font-semibold mb-2">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Informações do Custo
+                </h3>
+                <div class="text-sm text-blue-100 space-y-1">
+                    <p><strong>ID:</strong> {{ custo.id }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="px-2 py-1 rounded text-xs {% if custo.status == 'ativo' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
+                            {{ custo.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Criado em:</strong> {{ custo.created_at|date:"d/m/Y H:i" }}</p>
+                    {% if custo.updated_at %}
+                    <p><strong>Atualizado em:</strong> {{ custo.updated_at|date:"d/m/Y H:i" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Validação do formulário
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const valorMensal = parseFloat(document.querySelector('input[name="valor_mensal"]').value);
+            const dataInicio = new Date(document.querySelector('input[name="data_inicio"]').value);
+            const dataFim = document.querySelector('input[name="data_fim"]').value;
+            
+            if (valorMensal <= 0) {
+                e.preventDefault();
+                alert('O valor mensal deve ser maior que zero!');
+                return;
+            }
+            
+            if (dataFim) {
+                const dataFimDate = new Date(dataFim);
+                if (dataFimDate <= dataInicio) {
+                    e.preventDefault();
+                    alert('A data de fim deve ser posterior à data de início!');
+                    return;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

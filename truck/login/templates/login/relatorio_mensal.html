@@ -52,8 +52,24 @@
         <!-- Filtros -->
         <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
             <h2 class="text-xl font-semibold text-white mb-4">Selecionar Mês</h2>
-            <form method="post" class="space-y-4">
-                {% csrf_token %}
+            
+            <!-- Debug Info -->
+            {% if ano_mes %}
+            <div class="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 mb-4">
+                <p class="text-blue-200 text-sm">
+                    <strong>Debug:</strong> Processando relatório para: <span class="text-blue-100">{{ ano_mes }}</span>
+                </p>
+                <p class="text-blue-200 text-sm">
+                    <strong>Relatórios encontrados:</strong> <span class="text-blue-100">{{ relatorios|length }}</span>
+                </p>
+                {% if total_diarias %}
+                <p class="text-blue-200 text-sm">
+                    <strong>Total diárias:</strong> <span class="text-blue-100">{{ total_diarias }}</span>
+                </p>
+                {% endif %}
+            </div>
+            {% endif %}
+            <form method="get" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Ano e Mês</label>
@@ -100,8 +116,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-yellow-100 text-sm font-medium">Custos Fixos</p>
-                        <p class="text-3xl font-bold">R$ {{ total_custos_fixos|floatformat:2 }}</p>
-                        <p class="text-sm opacity-80">Peças + Seguro + Manutenção</p>
+                        <p class="text-3xl font-bold">R$ {{ total_custos_fixos|add:total_custos_fixos_mensais|add:total_parcelas_mes|floatformat:2 }}</p>
+                        <p class="text-sm opacity-80">Tradicionais + Mensais + Parcelas</p>
                     </div>
                     <div class="text-4xl opacity-80">🔧</div>
                 </div>
@@ -121,38 +137,89 @@
         </div>
 
         <!-- Detalhamento de Custos Fixos -->
-        {% if custos_fixos %}
+        {% if custos_fixos_mensais or parcelas_mes %}
         <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
-            <h3 class="text-xl font-semibold text-white mb-6">Custos Fixos do Mês</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gray-700/50 rounded-xl p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-300 text-sm">Peças</p>
-                            <p class="text-2xl font-bold text-white">R$ {{ custos_fixos.pecas|floatformat:2 }}</p>
-                        </div>
-                        <div class="text-3xl opacity-80">🔩</div>
-                    </div>
-                </div>
-                <div class="bg-gray-700/50 rounded-xl p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-300 text-sm">Seguro</p>
-                            <p class="text-2xl font-bold text-white">R$ {{ custos_fixos.seguro|floatformat:2 }}</p>
-                        </div>
-                        <div class="text-3xl opacity-80">🛡️</div>
-                    </div>
-                </div>
-                <div class="bg-gray-700/50 rounded-xl p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-300 text-sm">Manutenção</p>
-                            <p class="text-2xl font-bold text-white">R$ {{ custos_fixos.manutencao|floatformat:2 }}</p>
-                        </div>
-                        <div class="text-3xl opacity-80">🔧</div>
-                    </div>
+            <h3 class="text-xl font-semibold text-white mb-6">💰 Custos Fixos do Mês</h3>
+            
+            <!-- Parcelas Vencidas no Mês -->
+            {% if parcelas_mes %}
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-orange-300 mb-4">📅 Parcelas Vencidas no Mês (R$ {{ total_parcelas_mes|floatformat:2 }})</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-white">
+                        <thead>
+                            <tr class="border-b border-gray-600">
+                                <th class="text-left py-3 px-4">Custo</th>
+                                <th class="text-center py-3 px-4">Parcela</th>
+                                <th class="text-right py-3 px-4">Valor</th>
+                                <th class="text-center py-3 px-4">Vencimento</th>
+                                <th class="text-center py-3 px-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for parcela in parcelas_mes %}
+                            <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
+                                <td class="py-3 px-4">
+                                    <div>
+                                        <p class="font-medium">{{ parcela.custo_geral.descricao }}</p>
+                                        <p class="text-sm text-gray-400">{{ parcela.custo_geral.get_tipo_gasto_display }}</p>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <span class="bg-orange-600 text-white px-2 py-1 rounded text-xs">
+                                        {{ parcela.numero_parcela }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-right font-semibold">
+                                    R$ {{ parcela.valor_parcela|floatformat:2 }}
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    {{ parcela.data_vencimento|date:"d/m/Y" }}
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <span class="px-2 py-1 rounded text-xs {% if parcela.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-yellow-600 text-white{% endif %}">
+                                        {{ parcela.get_status_pagamento_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            {% endif %}
+            
+            <!-- Custos Fixos Mensais (Parcelas, Seguro, IPVA, etc.) -->
+            {% if custos_fixos_mensais %}
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-blue-300 mb-4">📅 Custos Fixos Mensais (R$ {{ total_custos_fixos_mensais|floatformat:2 }})</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for custo in custos_fixos_mensais %}
+                    <div class="bg-gradient-to-r from-blue-600/20 to-blue-700/20 rounded-xl p-4 border border-blue-500/30">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-200 text-sm font-medium">{{ custo.get_tipo_custo_display }}</p>
+                                <p class="text-xl font-bold text-white">{{ custo.descricao }}</p>
+                                <p class="text-sm text-blue-300">R$ {{ custo.valor_mensal|floatformat:2 }}/mês</p>
+                            </div>
+                            <div class="text-2xl opacity-80">
+                                {% if custo.tipo_custo == 'parcela_caminhao' %}🚛
+                                {% elif custo.tipo_custo == 'seguro' %}🛡️
+                                {% elif custo.tipo_custo == 'ipva' %}📋
+                                {% elif custo.tipo_custo == 'licenciamento' %}📄
+                                {% elif custo.tipo_custo == 'manutencao_preventiva' %}🔧
+                                {% else %}💰{% endif %}
+                            </div>
+                        </div>
+                        {% if custo.observacoes %}
+                        <p class="text-xs text-gray-400 mt-2">{{ custo.observacoes|truncatechars:50 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
         </div>
         {% endif %}
 
@@ -169,6 +236,8 @@
                             <th class="text-left py-3 px-4">Veículo</th>
                             <th class="text-left py-3 px-4">Descrição</th>
                             <th class="text-right py-3 px-4">Valor</th>
+                            <th class="text-center py-3 px-4">Parcelas</th>
+                            <th class="text-right py-3 px-4">Valor Parcela</th>
                             <th class="text-center py-3 px-4">Status</th>
                         </tr>
                     </thead>
@@ -184,6 +253,22 @@
                             <td class="py-3 px-4">{{ custo.veiculo_placa }}</td>
                             <td class="py-3 px-4">{{ custo.descricao|truncatechars:30 }}</td>
                             <td class="py-3 px-4 text-right font-semibold">R$ {{ custo.valor|floatformat:2 }}</td>
+                            <td class="py-3 px-4 text-center">
+                                {% if custo.is_parcela %}
+                                    <span class="bg-orange-600 text-white px-2 py-1 rounded text-xs">
+                                        {{ custo.parcela_numero }}/{{ custo.total_parcelas }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                {% if custo.is_parcela %}
+                                    <span class="text-orange-300 font-semibold">R$ {{ custo.valor_parcela|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">-</span>
+                                {% endif %}
+                            </td>
                             <td class="py-3 px-4 text-center">
                                 <span class="px-2 py-1 rounded text-xs {% if custo.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
                                     {{ custo.get_status_pagamento_display }}
@@ -229,8 +314,12 @@
                             <span class="text-white font-semibold">R$ {{ total_gasto_gasolina|floatformat:2 }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-700/50">
-                            <span class="text-gray-300">Custos Fixos</span>
-                            <span class="text-white font-semibold">R$ {{ total_custos_fixos|floatformat:2 }}</span>
+                            <span class="text-gray-300">Custos Fixos Mensais</span>
+                            <span class="text-white font-semibold">R$ {{ total_custos_fixos_mensais|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-700/50">
+                            <span class="text-gray-300">Parcelas Vencidas</span>
+                            <span class="text-white font-semibold">R$ {{ total_parcelas_mes|floatformat:2 }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-700/50">
                             <span class="text-gray-300">Custos Gerais</span>
@@ -272,6 +361,7 @@
                             <th class="text-left py-3 px-4">Rota</th>
                             <th class="text-right py-3 px-4">Diárias</th>
                             <th class="text-right py-3 px-4">Gasolina</th>
+                            <th class="text-center py-3 px-4">Custos Gerais</th>
                             <th class="text-right py-3 px-4">Receita</th>
                             <th class="text-right py-3 px-4">Lucro</th>
                         </tr>
@@ -285,9 +375,73 @@
                             <td class="py-3 px-4">{{ relatorio.partida }} → {{ relatorio.chegada }}</td>
                             <td class="py-3 px-4 text-right">{{ relatorio.diarias }} (R$ {{ relatorio.valor_diarias|floatformat:2 }})</td>
                             <td class="py-3 px-4 text-right">{{ relatorio.litros_gasolina|floatformat:2 }}L (R$ {{ relatorio.gasto_gasolina|floatformat:2 }})</td>
+                            <td class="py-3 px-4 text-center">
+                                <button onclick="toggleCustosGerais({{ relatorio.id }})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors">
+                                    Ver Custos
+                                </button>
+                            </td>
                             <td class="py-3 px-4 text-right">R$ {{ relatorio.receita_frete|floatformat:2 }}</td>
                             <td class="py-3 px-4 text-right {% if relatorio.get_lucro >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
                                 R$ {{ relatorio.get_lucro|floatformat:2 }}
+                            </td>
+                        </tr>
+                        <!-- Linha expandível com custos gerais -->
+                        <tr id="custos-{{ relatorio.id }}" class="hidden bg-gray-700/20">
+                            <td colspan="9" class="py-4 px-4">
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-white mb-3">💰 Custos Gerais da Viagem</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {% for custo in relatorio.custos_gerais.all %}
+                                        <div class="bg-gradient-to-r from-gray-700/30 to-gray-800/30 rounded-lg p-3 border border-gray-600/50">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="text-sm font-medium text-blue-300">{{ custo.get_tipo_gasto_display }}</span>
+                                                <span class="text-xs px-2 py-1 rounded {% if custo.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
+                                                    {{ custo.get_status_pagamento_display }}
+                                                </span>
+                                            </div>
+                                            <p class="text-white font-semibold text-lg">R$ {{ custo.valor|floatformat:2 }}</p>
+                                            <p class="text-gray-300 text-sm">{{ custo.descricao|truncatechars:40 }}</p>
+                                            <p class="text-gray-400 text-xs mt-1">
+                                                <span class="font-medium">Onde:</span> {{ custo.oficina_fornecedor }}
+                                            </p>
+                                            <p class="text-gray-400 text-xs">
+                                                <span class="font-medium">Placa:</span> {{ custo.veiculo_placa }}
+                                            </p>
+                                            <p class="text-gray-400 text-xs">
+                                                <span class="font-medium">Pagamento:</span> {{ custo.get_forma_pagamento_display }}
+                                            </p>
+                                            
+                                            <!-- Informações de Parcelas -->
+                                            {% if custo.is_parcela %}
+                                            <div class="mt-3 pt-3 border-t border-gray-600/50">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <span class="text-xs font-medium text-orange-300">📅 Parcela</span>
+                                                    <span class="text-xs px-2 py-1 bg-orange-600 text-white rounded">
+                                                        {{ custo.parcela_numero }}/{{ custo.total_parcelas }}
+                                                    </span>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <p class="text-gray-300 text-xs">
+                                                        <span class="font-medium">Valor desta parcela:</span> R$ {{ custo.valor_parcela|floatformat:2 }}
+                                                    </p>
+                                                    <p class="text-gray-300 text-xs">
+                                                        <span class="font-medium">Status geral:</span> 
+                                                        <span class="text-green-400 font-semibold">{{ custo.parcelas_pagas }}</span>
+                                                        <span class="text-gray-400">/</span>
+                                                        <span class="text-white">{{ custo.total_parcelas }}</span>
+                                                        <span class="text-gray-400">pagas</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% empty %}
+                                        <div class="col-span-full text-center text-gray-400 py-4">
+                                            <p>Nenhum custo geral registrado para esta viagem</p>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -311,29 +465,48 @@
     <script>
         // Definir mês atual como padrão
         document.addEventListener('DOMContentLoaded', function() {
-            const hoje = new Date();
-            const mesAtual = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
-            document.querySelector('input[name="ano_mes"]').value = mesAtual;
+            const inputAnoMes = document.querySelector('input[name="ano_mes"]');
+            if (inputAnoMes) {
+                const hoje = new Date();
+                const mesAtual = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
+                inputAnoMes.value = mesAtual;
+            }
         });
+
+        // Função para expandir/contrair custos gerais
+        function toggleCustosGerais(relatorioId) {
+            const custosRow = document.getElementById('custos-' + relatorioId);
+            const button = event.target;
+            
+            if (custosRow.classList.contains('hidden')) {
+                custosRow.classList.remove('hidden');
+                button.textContent = 'Ocultar Custos';
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                button.classList.add('bg-red-600', 'hover:bg-red-700');
+            } else {
+                custosRow.classList.add('hidden');
+                button.textContent = 'Ver Custos';
+                button.classList.remove('bg-red-600', 'hover:bg-red-700');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }
+        }
         
         // Função para gerar relatório mensal
         function gerarRelatorioMensal() {
-            const anoMes = document.querySelector('input[name="ano_mes"]').value;
-            if (!anoMes) {
-                alert('Por favor, selecione um mês!');
-                return;
+            const form = document.querySelector('form');
+            if (form) {
+                form.submit();
+            } else {
+                alert('Erro: Formulário não encontrado!');
             }
-            
-            // Redirecionar para a mesma página com o parâmetro do mês
-            const url = new URL(window.location);
-            url.searchParams.set('ano_mes', anoMes);
-            window.location.href = url.toString();
         }
         
         // Função para limpar relatório mensal
         function limparRelatorioMensal() {
-            // Limpar o campo de mês
-            document.querySelector('input[name="ano_mes"]').value = '';
+            const inputAnoMes = document.querySelector('input[name="ano_mes"]');
+            if (inputAnoMes) {
+                inputAnoMes.value = '';
+            }
             
             // Recarregar a página sem parâmetros
             window.location.href = window.location.pathname;

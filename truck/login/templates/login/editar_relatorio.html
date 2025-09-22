@@ -1,0 +1,328 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Relatório - TruckPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+        }
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-white">✏️ Editar Relatório</h1>
+                <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                    ← Voltar ao Dashboard
+                </a>
+            </div>
+            
+            <div class="bg-blue-600/20 border border-blue-500/30 rounded-xl p-4">
+                <p class="text-blue-200 text-sm">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Todos os campos estão preenchidos com os dados atuais. Modifique apenas o que deseja alterar.
+                </p>
+            </div>
+        </div>
+
+        <!-- Formulário de Edição -->
+        <form method="post" id="editarRelatorioForm" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Informações Básicas da Viagem -->
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
+                <h2 class="text-2xl font-bold text-white mb-6">🚛 Informações da Viagem</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem *</label>
+                        <input type="date" name="data_viagem" id="dataViagem" value="{{ relatorio.data_viagem|date:'Y-m-d' }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Partida *</label>
+                        <input type="text" name="partida" id="localPartida" value="{{ relatorio.partida }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Chegada *</label>
+                        <input type="text" name="chegada" id="localChegada" value="{{ relatorio.chegada }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Motorista *</label>
+                        <input type="text" name="motorista" id="nomeMotorista" value="{{ relatorio.motorista }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Caminhão *</label>
+                        <input type="text" name="caminhao" id="nomeCaminhao" value="{{ relatorio.caminhao }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Quantidade de Diárias *</label>
+                        <input type="number" name="diarias" id="quantidadeDiarias" value="{{ relatorio.diarias }}" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações Financeiras -->
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
+                <h2 class="text-2xl font-bold text-white mb-6">💰 Informações Financeiras</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de Gasolina</label>
+                        <input type="number" name="litros_gasolina" id="litrosGasolina" value="{{ relatorio.litros_gasolina }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Gasto com Gasolina (R$)</label>
+                        <input type="number" name="gasto_gasolina" id="valorGasolina" value="{{ relatorio.gasto_gasolina }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Receita do Frete (R$)</label>
+                        <input type="number" name="receita_frete" id="receita" value="{{ relatorio.receita_frete }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Salário do Motorista -->
+            {% if salario_motorista %}
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
+                <h2 class="text-2xl font-bold text-white mb-6">👨‍💼 Salário do Motorista</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Salário Base (R$)</label>
+                        <input type="number" name="salario_base" id="salarioBase" value="{{ salario_motorista.salario_base }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Bônus por Viagens (R$)</label>
+                        <input type="number" name="bonus_viagens" id="bonusViagens" value="{{ salario_motorista.bonus_viagens }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Desconto por Faltas (R$)</label>
+                        <input type="number" name="desconto_faltas" id="descontoFaltas" value="{{ salario_motorista.desconto_faltas }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Custos Gerais -->
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">💳 Custos Gerais</h2>
+                    <button type="button" onclick="adicionarCustoGeral()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                        ➕ Adicionar Custo
+                    </button>
+                </div>
+                
+                <div id="custosGeraisContainer">
+                    {% for custo in custos_gerais %}
+                    <div class="custo-item bg-gray-800/30 rounded-xl p-6 mb-4 border border-gray-600/30">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-white">Custo {{ forloop.counter }}</h3>
+                            <button type="button" onclick="removerCustoGeral(this)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-all duration-300">
+                                🗑️ Remover
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Tipo de Gasto</label>
+                                <select name="custo_{{ forloop.counter0 }}_tipo_gasto" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                    <option value="combustivel" {% if custo.tipo_gasto == 'combustivel' %}selected{% endif %}>Combustível</option>
+                                    <option value="manutencao" {% if custo.tipo_gasto == 'manutencao' %}selected{% endif %}>Manutenção</option>
+                                    <option value="pecas" {% if custo.tipo_gasto == 'pecas' %}selected{% endif %}>Peças</option>
+                                    <option value="seguro" {% if custo.tipo_gasto == 'seguro' %}selected{% endif %}>Seguro</option>
+                                    <option value="documentacao" {% if custo.tipo_gasto == 'documentacao' %}selected{% endif %}>Documentação</option>
+                                    <option value="multas" {% if custo.tipo_gasto == 'multas' %}selected{% endif %}>Multas</option>
+                                    <option value="estacionamento" {% if custo.tipo_gasto == 'estacionamento' %}selected{% endif %}>Estacionamento</option>
+                                    <option value="pedagio" {% if custo.tipo_gasto == 'pedagio' %}selected{% endif %}>Pedágio</option>
+                                    <option value="outros" {% if custo.tipo_gasto == 'outros' %}selected{% endif %}>Outros</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Oficina/Fornecedor</label>
+                                <input type="text" name="custo_{{ forloop.counter0 }}_oficina_fornecedor" value="{{ custo.oficina_fornecedor }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Descrição</label>
+                                <input type="text" name="custo_{{ forloop.counter0 }}_descricao" value="{{ custo.descricao }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Valor (R$)</label>
+                                <input type="number" name="custo_{{ forloop.counter0 }}_valor" value="{{ custo.valor }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Forma de Pagamento</label>
+                                <select name="custo_{{ forloop.counter0 }}_forma_pagamento" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                    <option value="vista" {% if custo.forma_pagamento == 'vista' %}selected{% endif %}>À Vista</option>
+                                    <option value="credito" {% if custo.forma_pagamento == 'credito' %}selected{% endif %}>Cartão de Crédito</option>
+                                    <option value="debito" {% if custo.forma_pagamento == 'debito' %}selected{% endif %}>Cartão de Débito</option>
+                                    <option value="pix" {% if custo.forma_pagamento == 'pix' %}selected{% endif %}>PIX</option>
+                                    <option value="transferencia" {% if custo.forma_pagamento == 'transferencia' %}selected{% endif %}>Transferência</option>
+                                    <option value="cheque" {% if custo.forma_pagamento == 'cheque' %}selected{% endif %}>Cheque</option>
+                                    <option value="parcelado" {% if custo.forma_pagamento == 'parcelado' %}selected{% endif %}>Parcelado</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Status do Pagamento</label>
+                                <select name="custo_{{ forloop.counter0 }}_status_pagamento" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                    <option value="pago" {% if custo.status_pagamento == 'pago' %}selected{% endif %}>Pago</option>
+                                    <option value="nao_pago" {% if custo.status_pagamento == 'nao_pago' %}selected{% endif %}>Não Pago</option>
+                                    <option value="parcial" {% if custo.status_pagamento == 'parcial' %}selected{% endif %}>Parcialmente Pago</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
+                <div class="flex justify-center space-x-4">
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300">
+                        💾 Salvar Alterações
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300">
+                        ❌ Cancelar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let custoIndex = {{ custos_gerais|length }};
+
+        function adicionarCustoGeral() {
+            const container = document.getElementById('custosGeraisContainer');
+            const custoItem = document.createElement('div');
+            custoItem.className = 'custo-item bg-gray-800/30 rounded-xl p-6 mb-4 border border-gray-600/30';
+            custoItem.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-white">Custo ${custoIndex + 1}</h3>
+                    <button type="button" onclick="removerCustoGeral(this)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-all duration-300">
+                        🗑️ Remover
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Tipo de Gasto</label>
+                        <select name="custo_${custoIndex}_tipo_gasto" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                            <option value="combustivel">Combustível</option>
+                            <option value="manutencao">Manutenção</option>
+                            <option value="pecas">Peças</option>
+                            <option value="seguro">Seguro</option>
+                            <option value="documentacao">Documentação</option>
+                            <option value="multas">Multas</option>
+                            <option value="estacionamento">Estacionamento</option>
+                            <option value="pedagio">Pedágio</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Oficina/Fornecedor</label>
+                        <input type="text" name="custo_${custoIndex}_oficina_fornecedor" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Descrição</label>
+                        <input type="text" name="custo_${custoIndex}_descricao" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Valor (R$)</label>
+                        <input type="number" name="custo_${custoIndex}_valor" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Forma de Pagamento</label>
+                        <select name="custo_${custoIndex}_forma_pagamento" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                            <option value="vista">À Vista</option>
+                            <option value="credito">Cartão de Crédito</option>
+                            <option value="debito">Cartão de Débito</option>
+                            <option value="pix">PIX</option>
+                            <option value="transferencia">Transferência</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="parcelado">Parcelado</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Status do Pagamento</label>
+                        <select name="custo_${custoIndex}_status_pagamento" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                            <option value="pago">Pago</option>
+                            <option value="nao_pago">Não Pago</option>
+                            <option value="parcial">Parcialmente Pago</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(custoItem);
+            custoIndex++;
+        }
+
+        function removerCustoGeral(button) {
+            button.closest('.custo-item').remove();
+        }
+
+        // Validação do formulário
+        document.getElementById('editarRelatorioForm').addEventListener('submit', function(e) {
+            const camposObrigatorios = ['dataViagem', 'localPartida', 'localChegada', 'nomeMotorista', 'nomeCaminhao', 'quantidadeDiarias'];
+            let valido = true;
+            
+            camposObrigatorios.forEach(campo => {
+                const input = document.getElementById(campo);
+                if (!input.value.trim()) {
+                    input.classList.add('border-red-500');
+                    valido = false;
+                } else {
+                    input.classList.remove('border-red-500');
+                }
+            });
+            
+            if (!valido) {
+                e.preventDefault();
+                alert('Por favor, preencha todos os campos obrigatórios.');
+            }
+        });
+    </script>
+</body>
+</html>

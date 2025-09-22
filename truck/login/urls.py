@@ -13,6 +13,7 @@ urlpatterns = [
     path('buscar-detalhes-viagem/<int:viagem_id>/', views.buscar_detalhes_viagem, name='buscar_detalhes_viagem'),
     
     # Rotas para relatórios
+    path('relatorio-diario/', views.relatorio_diario, name='relatorio_diario'),
     path('relatorio-semanal/', views.relatorio_semanal, name='relatorio_semanal'),
     path('relatorio-mensal/', views.relatorio_mensal, name='relatorio_mensal'),
     path('salvar-custos-mensais/', views.salvar_custos_mensais, name='salvar_custos_mensais'),
@@ -37,5 +38,11 @@ urlpatterns = [
     
     # Rotas para custos fixos mensais
     path('custos-fixos/', views.custos_fixos, name='custos_fixos'),
-    path('excluir-custo-fixo/<int:custo_id>/', views.excluir_custo_fixo, name='excluir_custo_fixo'),
+    path('editar-custo-fixo/<int:custo_id>/', views.editar_custo_fixo, name='editar_custo_fixo'),
+    path('apagar-custo-fixo/<int:custo_id>/', views.apagar_custo_fixo, name='apagar_custo_fixo'),
+    
+    # Rotas para parcelas de custos
+    path('parcelas-custos/', views.parcelas_custos, name='parcelas_custos'),
+    path('marcar-parcela-paga/<int:parcela_id>/', views.marcar_parcela_paga, name='marcar_parcela_paga'),
+    path('excluir-parcela/<int:parcela_id>/', views.excluir_parcela, name='excluir_parcela'),
 ]

@@ -1,0 +1,296 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Diário - TruckPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+        }
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-white">📊 Relatório Diário</h1>
+                <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                    ← Voltar ao Dashboard
+                </a>
+            </div>
+            
+            <!-- Formulário de Busca -->
+            <form method="get" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem</label>
+                        <input type="date" name="data_viagem" id="dataViagem" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" value="{{ data_viagem|date:'Y-m-d' }}">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                            🔍 Buscar Relatório
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if relatorio %}
+        <!-- Resumo da Viagem -->
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-2xl font-bold text-white mb-6">🚛 Resumo da Viagem</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">Data da Viagem</p>
+                            <p class="text-2xl font-bold">{{ relatorio.data_viagem|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">📅</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">Rota</p>
+                            <p class="text-lg font-bold">{{ relatorio.partida }} → {{ relatorio.chegada }}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">🗺️</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-sm font-medium">Motorista</p>
+                            <p class="text-lg font-bold">{{ relatorio.motorista }}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">👨‍💼</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-orange-100 text-sm font-medium">Caminhão</p>
+                            <p class="text-lg font-bold">{{ relatorio.caminhao }}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">🚛</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-2xl font-bold text-white mb-6">💰 Resumo Financeiro</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">Receita do Frete</p>
+                            <p class="text-3xl font-bold">R$ {{ relatorio.receita_frete|floatformat:2 }}</p>
+                        </div>
+                        <div class="text-4xl opacity-80">💰</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100 text-sm font-medium">Gasto com Gasolina</p>
+                            <p class="text-3xl font-bold">R$ {{ relatorio.gasto_gasolina|floatformat:2 }}</p>
+                        </div>
+                        <div class="text-4xl opacity-80">⛽</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-yellow-100 text-sm font-medium">Valor das Diárias</p>
+                            <p class="text-3xl font-bold">R$ {{ relatorio.valor_diarias|floatformat:2 }}</p>
+                        </div>
+                        <div class="text-4xl opacity-80">📅</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">Custos Gerais</p>
+                            <p class="text-3xl font-bold">R$ {{ total_custos_gerais|floatformat:2 }}</p>
+                        </div>
+                        <div class="text-4xl opacity-80">💳</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-3xl font-bold {% if lucro_liquido >= 0 %}text-green-300{% else %}text-red-300{% endif %}">R$ {{ lucro_liquido|floatformat:2 }}</p>
+                        </div>
+                        <div class="text-4xl opacity-80">📈</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custos Gerais Detalhados -->
+        {% if custos_gerais_detalhados %}
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-2xl font-bold text-white mb-6">💳 Custos Gerais do Dia (R$ {{ total_custos_gerais|floatformat:2 }})</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-white">
+                    <thead>
+                        <tr class="border-b border-gray-600">
+                            <th class="text-left py-3 px-4">Tipo</th>
+                            <th class="text-left py-3 px-4">Veículo</th>
+                            <th class="text-left py-3 px-4">Descrição</th>
+                            <th class="text-right py-3 px-4">Valor</th>
+                            <th class="text-center py-3 px-4">Parcelas</th>
+                            <th class="text-right py-3 px-4">Valor Parcela</th>
+                            <th class="text-center py-3 px-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for custo in custos_gerais_detalhados %}
+                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-1 bg-blue-600 text-white rounded text-xs">
+                                    {{ custo.get_tipo_gasto_display }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">{{ custo.veiculo_placa }}</td>
+                            <td class="py-3 px-4">{{ custo.descricao|truncatechars:40 }}</td>
+                            <td class="py-3 px-4 text-right font-semibold">R$ {{ custo.valor|floatformat:2 }}</td>
+                            <td class="py-3 px-4 text-center">
+                                {% if custo.is_parcela %}
+                                    <span class="bg-orange-600 text-white px-2 py-1 rounded text-xs">
+                                        {{ custo.parcela_numero }}/{{ custo.total_parcelas }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                {% if custo.is_parcela %}
+                                    <span class="text-orange-300 font-semibold">R$ {{ custo.valor_parcela|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-2 py-1 rounded text-xs {% if custo.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
+                                    {{ custo.get_status_pagamento_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <div class="text-center text-gray-400 py-8">
+                <span class="text-4xl">💳</span>
+                <p class="mt-2 text-xl">Nenhum custo geral registrado para este dia</p>
+                <p class="text-sm">Os custos gerais aparecerão aqui quando forem cadastrados</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Detalhes da Viagem -->
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-2xl font-bold text-white mb-6">📋 Detalhes da Viagem</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold text-blue-300 mb-4">Informações Básicas</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Diárias:</span>
+                            <span class="text-white font-semibold">{{ relatorio.diarias }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Litros de Gasolina:</span>
+                            <span class="text-white font-semibold">{{ relatorio.litros_gasolina|floatformat:2 }}L</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Total de Gastos:</span>
+                            <span class="text-white font-semibold">R$ {{ total_gastos|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold text-green-300 mb-4">Resultado Financeiro</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Receita Total:</span>
+                            <span class="text-green-400 font-semibold">R$ {{ relatorio.receita_frete|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Gastos Totais:</span>
+                            <span class="text-red-400 font-semibold">R$ {{ total_gastos|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between border-t border-gray-600 pt-3">
+                            <span class="text-gray-300 font-semibold">Lucro Líquido:</span>
+                            <span class="{% if lucro_liquido >= 0 %}text-green-400{% else %}text-red-400{% endif %} font-bold text-lg">R$ {{ lucro_liquido|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% elif data_viagem %}
+        <!-- Nenhum relatório encontrado -->
+        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
+            <div class="text-center text-gray-400 py-12">
+                <span class="text-6xl">📊</span>
+                <p class="mt-4 text-2xl">Nenhum relatório encontrado</p>
+                <p class="text-lg">Não há relatório cadastrado para {{ data_viagem|date:"d/m/Y" }}</p>
+                <p class="text-sm mt-2">Verifique se a data está correta ou cadastre um novo relatório</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Definir data atual como padrão se não houver data selecionada
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataInput = document.getElementById('dataViagem');
+            if (!dataInput.value) {
+                const hoje = new Date();
+                const dataFormatada = hoje.toISOString().split('T')[0];
+                dataInput.value = dataFormatada;
+            }
+        });
+    </script>
+</body>
+</html>
