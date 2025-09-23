@@ -26,28 +26,102 @@
                 transform: translateY(0);
             }
         }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .mobile-p-2 { padding: 0.5rem; }
+            .mobile-p-4 { padding: 1rem; }
+            .mobile-p-6 { padding: 1.5rem; }
+            .mobile-mb-4 { margin-bottom: 1rem; }
+            .mobile-mb-6 { margin-bottom: 1.5rem; }
+            .mobile-mb-8 { margin-bottom: 2rem; }
+            .mobile-text-sm { font-size: 0.875rem; }
+            .mobile-text-base { font-size: 1rem; }
+            .mobile-text-lg { font-size: 1.125rem; }
+            .mobile-text-xl { font-size: 1.25rem; }
+            .mobile-text-2xl { font-size: 1.5rem; }
+            .mobile-text-3xl { font-size: 1.875rem; }
+            .mobile-grid-1 { grid-template-columns: 1fr; }
+            .mobile-grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .mobile-flex-col { flex-direction: column; }
+            .mobile-items-center { align-items: center; }
+            .mobile-justify-center { justify-content: center; }
+            .mobile-text-center { text-align: center; }
+            .mobile-space-y-2 > * + * { margin-top: 0.5rem; }
+            .mobile-space-y-4 > * + * { margin-top: 1rem; }
+            .mobile-gap-2 { gap: 0.5rem; }
+            .mobile-gap-4 { gap: 1rem; }
+            .mobile-gap-6 { gap: 1.5rem; }
+            .mobile-rounded-lg { border-radius: 0.5rem; }
+            .mobile-rounded-xl { border-radius: 0.75rem; }
+            .mobile-rounded-2xl { border-radius: 1rem; }
+            .mobile-hidden { display: none; }
+            .mobile-block { display: block; }
+            .mobile-w-full { width: 100%; }
+            .mobile-touch-target { min-height: 44px; min-width: 44px; }
+            .mobile-button { padding: 0.75rem 1rem; font-size: 0.875rem; }
+            .mobile-input { font-size: 16px; padding: 0.75rem; }
+            .mobile-overflow-x-auto { overflow-x: auto; }
+            .mobile-table { min-width: 100%; }
+            .mobile-table th, .mobile-table td { padding: 0.5rem; font-size: 0.875rem; }
+            .mobile-card-grid { grid-template-columns: 1fr; }
+            .mobile-card-padding { padding: 1rem; }
+            .mobile-card-text-sm { font-size: 0.75rem; }
+            .mobile-card-text-base { font-size: 0.875rem; }
+            .mobile-card-text-lg { font-size: 1rem; }
+            .mobile-card-text-xl { font-size: 1.125rem; }
+            .mobile-card-text-2xl { font-size: 1.25rem; }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .tablet-grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .tablet-grid-3 { grid-template-columns: repeat(3, 1fr); }
+            .tablet-p-4 { padding: 1rem; }
+            .tablet-p-6 { padding: 1.5rem; }
+            .tablet-text-lg { font-size: 1.125rem; }
+            .tablet-text-xl { font-size: 1.25rem; }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 375px) {
+            .xs-mobile-p-1 { padding: 0.25rem; }
+            .xs-mobile-p-2 { padding: 0.5rem; }
+            .xs-mobile-text-xs { font-size: 0.75rem; }
+            .xs-mobile-text-sm { font-size: 0.875rem; }
+            .xs-mobile-text-base { font-size: 1rem; }
+            .xs-mobile-gap-2 { gap: 0.5rem; }
+            .xs-mobile-gap-4 { gap: 1rem; }
+        }
+        
+        /* Landscape mobile */
+        @media (max-width: 896px) and (orientation: landscape) {
+            .landscape-mobile-p-2 { padding: 0.5rem; }
+            .landscape-mobile-mb-2 { margin-bottom: 0.5rem; }
+            .landscape-mobile-text-sm { font-size: 0.875rem; }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-6 lg:py-8">
         <!-- Header -->
-        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-white">📊 Relatório Diário</h1>
-                <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+                <h1 class="text-2xl sm:text-3xl font-bold text-white">📊 Relatório Diário</h1>
+                <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base w-full sm:w-auto">
                     ← Voltar ao Dashboard
                 </a>
             </div>
             
             <!-- Formulário de Busca -->
             <form method="get" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem</label>
-                        <input type="date" name="data_viagem" id="dataViagem" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" value="{{ data_viagem|date:'Y-m-d' }}">
+                        <input type="date" name="data_viagem" id="dataViagem" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20 mobile-input" value="{{ data_viagem|date:'Y-m-d' }}">
                     </div>
                     <div class="flex items-end">
-                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
                             🔍 Buscar Relatório
                         </button>
                     </div>
@@ -57,104 +131,104 @@
 
         {% if relatorio %}
         <!-- Resumo da Viagem -->
-        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
-            <h2 class="text-2xl font-bold text-white mb-6">🚛 Resumo da Viagem</h2>
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">🚛 Resumo da Viagem</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-blue-100 text-sm font-medium">Data da Viagem</p>
-                            <p class="text-2xl font-bold">{{ relatorio.data_viagem|date:"d/m/Y" }}</p>
+                            <p class="text-blue-100 text-xs sm:text-sm font-medium">Data da Viagem</p>
+                            <p class="text-lg sm:text-xl lg:text-2xl font-bold">{{ relatorio.data_viagem|date:"d/m/Y" }}</p>
                         </div>
-                        <div class="text-3xl opacity-80">📅</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">📅</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-green-100 text-sm font-medium">Rota</p>
-                            <p class="text-lg font-bold">{{ relatorio.partida }} → {{ relatorio.chegada }}</p>
+                            <p class="text-green-100 text-xs sm:text-sm font-medium">Rota</p>
+                            <p class="text-sm sm:text-base lg:text-lg font-bold">{{ relatorio.partida }} → {{ relatorio.chegada }}</p>
                         </div>
-                        <div class="text-3xl opacity-80">🗺️</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">🗺️</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-purple-100 text-sm font-medium">Motorista</p>
-                            <p class="text-lg font-bold">{{ relatorio.motorista }}</p>
+                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Motorista</p>
+                            <p class="text-sm sm:text-base lg:text-lg font-bold">{{ relatorio.motorista }}</p>
                         </div>
-                        <div class="text-3xl opacity-80">👨‍💼</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">👨‍💼</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-orange-100 text-sm font-medium">Caminhão</p>
-                            <p class="text-lg font-bold">{{ relatorio.caminhao }}</p>
+                            <p class="text-orange-100 text-xs sm:text-sm font-medium">Caminhão</p>
+                            <p class="text-sm sm:text-base lg:text-lg font-bold">{{ relatorio.caminhao }}</p>
                         </div>
-                        <div class="text-3xl opacity-80">🚛</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">🚛</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Resumo Financeiro -->
-        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
-            <h2 class="text-2xl font-bold text-white mb-6">💰 Resumo Financeiro</h2>
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">💰 Resumo Financeiro</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-blue-100 text-sm font-medium">Receita do Frete</p>
-                            <p class="text-3xl font-bold">R$ {{ relatorio.receita_frete|floatformat:2 }}</p>
+                            <p class="text-blue-100 text-xs sm:text-sm font-medium">Receita do Frete</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ relatorio.receita_frete|floatformat:2 }}</p>
                         </div>
-                        <div class="text-4xl opacity-80">💰</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💰</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-red-100 text-sm font-medium">Gasto com Gasolina</p>
-                            <p class="text-3xl font-bold">R$ {{ relatorio.gasto_gasolina|floatformat:2 }}</p>
+                            <p class="text-red-100 text-xs sm:text-sm font-medium">Gasto com Gasolina</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ relatorio.gasto_gasolina|floatformat:2 }}</p>
                         </div>
-                        <div class="text-4xl opacity-80">⛽</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">⛽</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-yellow-100 text-sm font-medium">Valor das Diárias</p>
-                            <p class="text-3xl font-bold">R$ {{ relatorio.valor_diarias|floatformat:2 }}</p>
+                            <p class="text-yellow-100 text-xs sm:text-sm font-medium">Valor das Diárias</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ relatorio.valor_diarias|floatformat:2 }}</p>
                         </div>
-                        <div class="text-4xl opacity-80">📅</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📅</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-green-100 text-sm font-medium">Custos Gerais</p>
-                            <p class="text-3xl font-bold">R$ {{ total_custos_gerais|floatformat:2 }}</p>
+                            <p class="text-green-100 text-xs sm:text-sm font-medium">Custos Gerais</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ total_custos_gerais|floatformat:2 }}</p>
                         </div>
-                        <div class="text-4xl opacity-80">💳</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💳</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
-                            <p class="text-3xl font-bold {% if lucro_liquido >= 0 %}text-green-300{% else %}text-red-300{% endif %}">R$ {{ lucro_liquido|floatformat:2 }}</p>
+                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold {% if lucro_liquido >= 0 %}text-green-300{% else %}text-red-300{% endif %}">R$ {{ lucro_liquido|floatformat:2 }}</p>
                         </div>
-                        <div class="text-4xl opacity-80">📈</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📈</div>
                     </div>
                 </div>
             </div>
@@ -162,50 +236,50 @@
 
         <!-- Custos Gerais Detalhados -->
         {% if custos_gerais_detalhados %}
-        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
-            <h2 class="text-2xl font-bold text-white mb-6">💳 Custos Gerais do Dia (R$ {{ total_custos_gerais|floatformat:2 }})</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-white">
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">💳 Custos Gerais do Dia (R$ {{ total_custos_gerais|floatformat:2 }})</h2>
+            <div class="overflow-x-auto mobile-overflow-x-auto">
+                <table class="w-full text-white mobile-table">
                     <thead>
                         <tr class="border-b border-gray-600">
-                            <th class="text-left py-3 px-4">Tipo</th>
-                            <th class="text-left py-3 px-4">Veículo</th>
-                            <th class="text-left py-3 px-4">Descrição</th>
-                            <th class="text-right py-3 px-4">Valor</th>
-                            <th class="text-center py-3 px-4">Parcelas</th>
-                            <th class="text-right py-3 px-4">Valor Parcela</th>
-                            <th class="text-center py-3 px-4">Status</th>
+                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Tipo</th>
+                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Veículo</th>
+                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Descrição</th>
+                            <th class="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Valor</th>
+                            <th class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Parcelas</th>
+                            <th class="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Valor Parcela</th>
+                            <th class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for custo in custos_gerais_detalhados %}
                         <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
-                            <td class="py-3 px-4">
-                                <span class="px-2 py-1 bg-blue-600 text-white rounded text-xs">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4">
+                                <span class="px-1 sm:px-2 py-1 bg-blue-600 text-white rounded text-xs">
                                     {{ custo.get_tipo_gasto_display }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4">{{ custo.veiculo_placa }}</td>
-                            <td class="py-3 px-4">{{ custo.descricao|truncatechars:40 }}</td>
-                            <td class="py-3 px-4 text-right font-semibold">R$ {{ custo.valor|floatformat:2 }}</td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{{ custo.veiculo_placa }}</td>
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{{ custo.descricao|truncatechars:20 }}</td>
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-right font-semibold text-xs sm:text-sm">R$ {{ custo.valor|floatformat:2 }}</td>
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-center">
                                 {% if custo.is_parcela %}
-                                    <span class="bg-orange-600 text-white px-2 py-1 rounded text-xs">
+                                    <span class="bg-orange-600 text-white px-1 sm:px-2 py-1 rounded text-xs">
                                         {{ custo.parcela_numero }}/{{ custo.total_parcelas }}
                                     </span>
                                 {% else %}
                                     <span class="text-gray-400 text-xs">-</span>
                                 {% endif %}
                             </td>
-                            <td class="py-3 px-4 text-right">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-right">
                                 {% if custo.is_parcela %}
-                                    <span class="text-orange-300 font-semibold">R$ {{ custo.valor_parcela|floatformat:2 }}</span>
+                                    <span class="text-orange-300 font-semibold text-xs sm:text-sm">R$ {{ custo.valor_parcela|floatformat:2 }}</span>
                                 {% else %}
                                     <span class="text-gray-400 text-xs">-</span>
                                 {% endif %}
                             </td>
-                            <td class="py-3 px-4 text-center">
-                                <span class="px-2 py-1 rounded text-xs {% if custo.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-center">
+                                <span class="px-1 sm:px-2 py-1 rounded text-xs {% if custo.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
                                     {{ custo.get_status_pagamento_display }}
                                 </span>
                             </td>
@@ -226,42 +300,42 @@
         {% endif %}
 
         <!-- Detalhes da Viagem -->
-        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
-            <h2 class="text-2xl font-bold text-white mb-6">📋 Detalhes da Viagem</h2>
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">📋 Detalhes da Viagem</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                    <h3 class="text-lg font-semibold text-blue-300 mb-4">Informações Básicas</h3>
-                    <div class="space-y-3">
+                    <h3 class="text-base sm:text-lg font-semibold text-blue-300 mb-3 sm:mb-4">Informações Básicas</h3>
+                    <div class="space-y-2 sm:space-y-3">
                         <div class="flex justify-between">
-                            <span class="text-gray-300">Diárias:</span>
-                            <span class="text-white font-semibold">{{ relatorio.diarias }}</span>
+                            <span class="text-gray-300 text-sm sm:text-base">Diárias:</span>
+                            <span class="text-white font-semibold text-sm sm:text-base">{{ relatorio.diarias }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-300">Litros de Gasolina:</span>
-                            <span class="text-white font-semibold">{{ relatorio.litros_gasolina|floatformat:2 }}L</span>
+                            <span class="text-gray-300 text-sm sm:text-base">Litros de Gasolina:</span>
+                            <span class="text-white font-semibold text-sm sm:text-base">{{ relatorio.litros_gasolina|floatformat:2 }}L</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-300">Total de Gastos:</span>
-                            <span class="text-white font-semibold">R$ {{ total_gastos|floatformat:2 }}</span>
+                            <span class="text-gray-300 text-sm sm:text-base">Total de Gastos:</span>
+                            <span class="text-white font-semibold text-sm sm:text-base">R$ {{ total_gastos|floatformat:2 }}</span>
                         </div>
                     </div>
                 </div>
                 
                 <div>
-                    <h3 class="text-lg font-semibold text-green-300 mb-4">Resultado Financeiro</h3>
-                    <div class="space-y-3">
+                    <h3 class="text-base sm:text-lg font-semibold text-green-300 mb-3 sm:mb-4">Resultado Financeiro</h3>
+                    <div class="space-y-2 sm:space-y-3">
                         <div class="flex justify-between">
-                            <span class="text-gray-300">Receita Total:</span>
-                            <span class="text-green-400 font-semibold">R$ {{ relatorio.receita_frete|floatformat:2 }}</span>
+                            <span class="text-gray-300 text-sm sm:text-base">Receita Total:</span>
+                            <span class="text-green-400 font-semibold text-sm sm:text-base">R$ {{ relatorio.receita_frete|floatformat:2 }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-300">Gastos Totais:</span>
-                            <span class="text-red-400 font-semibold">R$ {{ total_gastos|floatformat:2 }}</span>
+                            <span class="text-gray-300 text-sm sm:text-base">Gastos Totais:</span>
+                            <span class="text-red-400 font-semibold text-sm sm:text-base">R$ {{ total_gastos|floatformat:2 }}</span>
                         </div>
-                        <div class="flex justify-between border-t border-gray-600 pt-3">
-                            <span class="text-gray-300 font-semibold">Lucro Líquido:</span>
-                            <span class="{% if lucro_liquido >= 0 %}text-green-400{% else %}text-red-400{% endif %} font-bold text-lg">R$ {{ lucro_liquido|floatformat:2 }}</span>
+                        <div class="flex justify-between border-t border-gray-600 pt-2 sm:pt-3">
+                            <span class="text-gray-300 font-semibold text-sm sm:text-base">Lucro Líquido:</span>
+                            <span class="{% if lucro_liquido >= 0 %}text-green-400{% else %}text-red-400{% endif %} font-bold text-base sm:text-lg">R$ {{ lucro_liquido|floatformat:2 }}</span>
                         </div>
                     </div>
                 </div>
@@ -270,12 +344,12 @@
 
         {% elif data_viagem %}
         <!-- Nenhum relatório encontrado -->
-        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
-            <div class="text-center text-gray-400 py-12">
-                <span class="text-6xl">📊</span>
-                <p class="mt-4 text-2xl">Nenhum relatório encontrado</p>
-                <p class="text-lg">Não há relatório cadastrado para {{ data_viagem|date:"d/m/Y" }}</p>
-                <p class="text-sm mt-2">Verifique se a data está correta ou cadastre um novo relatório</p>
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
+            <div class="text-center text-gray-400 py-8 sm:py-12">
+                <span class="text-4xl sm:text-6xl">📊</span>
+                <p class="mt-4 text-xl sm:text-2xl">Nenhum relatório encontrado</p>
+                <p class="text-base sm:text-lg">Não há relatório cadastrado para {{ data_viagem|date:"d/m/Y" }}</p>
+                <p class="text-xs sm:text-sm mt-2">Verifique se a data está correta ou cadastre um novo relatório</p>
             </div>
         </div>
         {% endif %}

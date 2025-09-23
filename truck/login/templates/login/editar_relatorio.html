@@ -26,21 +26,92 @@
                 transform: translateY(0);
             }
         }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .mobile-p-2 { padding: 0.5rem; }
+            .mobile-p-4 { padding: 1rem; }
+            .mobile-p-6 { padding: 1.5rem; }
+            .mobile-mb-4 { margin-bottom: 1rem; }
+            .mobile-mb-6 { margin-bottom: 1.5rem; }
+            .mobile-mb-8 { margin-bottom: 2rem; }
+            .mobile-text-sm { font-size: 0.875rem; }
+            .mobile-text-base { font-size: 1rem; }
+            .mobile-text-lg { font-size: 1.125rem; }
+            .mobile-text-xl { font-size: 1.25rem; }
+            .mobile-text-2xl { font-size: 1.5rem; }
+            .mobile-text-3xl { font-size: 1.875rem; }
+            .mobile-grid-1 { grid-template-columns: 1fr; }
+            .mobile-grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .mobile-flex-col { flex-direction: column; }
+            .mobile-items-center { align-items: center; }
+            .mobile-justify-center { justify-content: center; }
+            .mobile-text-center { text-align: center; }
+            .mobile-space-y-2 > * + * { margin-top: 0.5rem; }
+            .mobile-space-y-4 > * + * { margin-top: 1rem; }
+            .mobile-gap-2 { gap: 0.5rem; }
+            .mobile-gap-4 { gap: 1rem; }
+            .mobile-gap-6 { gap: 1.5rem; }
+            .mobile-rounded-lg { border-radius: 0.5rem; }
+            .mobile-rounded-xl { border-radius: 0.75rem; }
+            .mobile-rounded-2xl { border-radius: 1rem; }
+            .mobile-hidden { display: none; }
+            .mobile-block { display: block; }
+            .mobile-w-full { width: 100%; }
+            .mobile-touch-target { min-height: 44px; min-width: 44px; }
+            .mobile-button { padding: 0.75rem 1rem; font-size: 0.875rem; }
+            .mobile-input { font-size: 16px; padding: 0.75rem; }
+            .mobile-overflow-x-auto { overflow-x: auto; }
+            .mobile-table { min-width: 100%; }
+            .mobile-table th, .mobile-table td { padding: 0.5rem; font-size: 0.875rem; }
+            .mobile-form-grid { grid-template-columns: 1fr; }
+            .mobile-form-input { padding: 0.75rem; font-size: 16px; }
+            .mobile-form-select { padding: 0.75rem; font-size: 16px; }
+            .mobile-form-button { padding: 0.75rem 1rem; font-size: 0.875rem; min-height: 44px; }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .tablet-grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .tablet-grid-3 { grid-template-columns: repeat(3, 1fr); }
+            .tablet-p-4 { padding: 1rem; }
+            .tablet-p-6 { padding: 1.5rem; }
+            .tablet-text-lg { font-size: 1.125rem; }
+            .tablet-text-xl { font-size: 1.25rem; }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 375px) {
+            .xs-mobile-p-1 { padding: 0.25rem; }
+            .xs-mobile-p-2 { padding: 0.5rem; }
+            .xs-mobile-text-xs { font-size: 0.75rem; }
+            .xs-mobile-text-sm { font-size: 0.875rem; }
+            .xs-mobile-text-base { font-size: 1rem; }
+            .xs-mobile-gap-2 { gap: 0.5rem; }
+            .xs-mobile-gap-4 { gap: 1rem; }
+        }
+        
+        /* Landscape mobile */
+        @media (max-width: 896px) and (orientation: landscape) {
+            .landscape-mobile-p-2 { padding: 0.5rem; }
+            .landscape-mobile-mb-2 { margin-bottom: 0.5rem; }
+            .landscape-mobile-text-sm { font-size: 0.875rem; }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-6 lg:py-8">
         <!-- Header -->
-        <div class="glass-effect rounded-2xl p-8 mb-8 animate-slide-up border border-gray-600/30">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-white">✏️ Editar Relatório</h1>
-                <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+                <h1 class="text-2xl sm:text-3xl font-bold text-white">✏️ Editar Relatório</h1>
+                <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base w-full sm:w-auto">
                     ← Voltar ao Dashboard
                 </a>
             </div>
             
-            <div class="bg-blue-600/20 border border-blue-500/30 rounded-xl p-4">
-                <p class="text-blue-200 text-sm">
+            <div class="bg-blue-600/20 border border-blue-500/30 rounded-xl p-3 sm:p-4">
+                <p class="text-blue-200 text-xs sm:text-sm">
                     <i class="fas fa-info-circle mr-2"></i>
                     Todos os campos estão preenchidos com os dados atuais. Modifique apenas o que deseja alterar.
                 </p>
@@ -48,115 +119,115 @@
         </div>
 
         <!-- Formulário de Edição -->
-        <form method="post" id="editarRelatorioForm" class="space-y-8">
+        <form method="post" id="editarRelatorioForm" class="space-y-6 sm:space-y-8">
             {% csrf_token %}
             
             <!-- Informações Básicas da Viagem -->
-            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
-                <h2 class="text-2xl font-bold text-white mb-6">🚛 Informações da Viagem</h2>
+            <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30">
+                <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">🚛 Informações da Viagem</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem *</label>
-                        <input type="date" name="data_viagem" id="dataViagem" value="{{ relatorio.data_viagem|date:'Y-m-d' }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                        <input type="date" name="data_viagem" id="dataViagem" value="{{ relatorio.data_viagem|date:'Y-m-d' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input" required>
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Partida *</label>
-                        <input type="text" name="partida" id="localPartida" value="{{ relatorio.partida }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                        <input type="text" name="partida" id="localPartida" value="{{ relatorio.partida }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input" required>
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Local de Chegada *</label>
-                        <input type="text" name="chegada" id="localChegada" value="{{ relatorio.chegada }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                        <input type="text" name="chegada" id="localChegada" value="{{ relatorio.chegada }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input" required>
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Motorista *</label>
-                        <input type="text" name="motorista" id="nomeMotorista" value="{{ relatorio.motorista }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                        <input type="text" name="motorista" id="nomeMotorista" value="{{ relatorio.motorista }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input" required>
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Caminhão *</label>
-                        <input type="text" name="caminhao" id="nomeCaminhao" value="{{ relatorio.caminhao }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                        <input type="text" name="caminhao" id="nomeCaminhao" value="{{ relatorio.caminhao }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input" required>
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Quantidade de Diárias *</label>
-                        <input type="number" name="diarias" id="quantidadeDiarias" value="{{ relatorio.diarias }}" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20" required>
+                        <input type="number" name="diarias" id="quantidadeDiarias" value="{{ relatorio.diarias }}" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input" required>
                     </div>
                 </div>
             </div>
 
             <!-- Informações Financeiras -->
-            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
-                <h2 class="text-2xl font-bold text-white mb-6">💰 Informações Financeiras</h2>
+            <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30">
+                <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">💰 Informações Financeiras</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de Gasolina</label>
-                        <input type="number" name="litros_gasolina" id="litrosGasolina" value="{{ relatorio.litros_gasolina }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                        <input type="number" name="litros_gasolina" id="litrosGasolina" value="{{ relatorio.litros_gasolina }}" step="0.01" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Gasto com Gasolina (R$)</label>
-                        <input type="number" name="gasto_gasolina" id="valorGasolina" value="{{ relatorio.gasto_gasolina }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                        <input type="number" name="gasto_gasolina" id="valorGasolina" value="{{ relatorio.gasto_gasolina }}" step="0.01" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Receita do Frete (R$)</label>
-                        <input type="number" name="receita_frete" id="receita" value="{{ relatorio.receita_frete }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                        <input type="number" name="receita_frete" id="receita" value="{{ relatorio.receita_frete }}" step="0.01" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                     </div>
                 </div>
             </div>
 
             <!-- Salário do Motorista -->
             {% if salario_motorista %}
-            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
-                <h2 class="text-2xl font-bold text-white mb-6">👨‍💼 Salário do Motorista</h2>
+            <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30">
+                <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">👨‍💼 Salário do Motorista</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Salário Base (R$)</label>
-                        <input type="number" name="salario_base" id="salarioBase" value="{{ salario_motorista.salario_base }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                        <input type="number" name="salario_base" id="salarioBase" value="{{ salario_motorista.salario_base }}" step="0.01" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Bônus por Viagens (R$)</label>
-                        <input type="number" name="bonus_viagens" id="bonusViagens" value="{{ salario_motorista.bonus_viagens }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                        <input type="number" name="bonus_viagens" id="bonusViagens" value="{{ salario_motorista.bonus_viagens }}" step="0.01" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                     </div>
                     
                     <div>
                         <label class="block text-gray-200 text-sm font-semibold mb-2">Desconto por Faltas (R$)</label>
-                        <input type="number" name="desconto_faltas" id="descontoFaltas" value="{{ salario_motorista.desconto_faltas }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                        <input type="number" name="desconto_faltas" id="descontoFaltas" value="{{ salario_motorista.desconto_faltas }}" step="0.01" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                     </div>
                 </div>
             </div>
             {% endif %}
 
             <!-- Custos Gerais -->
-            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">💳 Custos Gerais</h2>
-                    <button type="button" onclick="adicionarCustoGeral()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+            <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+                    <h2 class="text-xl sm:text-2xl font-bold text-white">💳 Custos Gerais</h2>
+                    <button type="button" onclick="adicionarCustoGeral()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base w-full sm:w-auto">
                         ➕ Adicionar Custo
                     </button>
                 </div>
                 
                 <div id="custosGeraisContainer">
                     {% for custo in custos_gerais %}
-                    <div class="custo-item bg-gray-800/30 rounded-xl p-6 mb-4 border border-gray-600/30">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-white">Custo {{ forloop.counter }}</h3>
-                            <button type="button" onclick="removerCustoGeral(this)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-all duration-300">
+                    <div class="custo-item bg-gray-800/30 rounded-xl p-4 sm:p-6 mb-3 sm:mb-4 border border-gray-600/30">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4 gap-2">
+                            <h3 class="text-base sm:text-lg font-semibold text-white">Custo {{ forloop.counter }}</h3>
+                            <button type="button" onclick="removerCustoGeral(this)" class="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-all duration-300 mobile-touch-target w-full sm:w-auto">
                                 🗑️ Remover
                             </button>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Tipo de Gasto</label>
-                                <select name="custo_{{ forloop.counter0 }}_tipo_gasto" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                <select name="custo_{{ forloop.counter0 }}_tipo_gasto" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-select">
                                     <option value="combustivel" {% if custo.tipo_gasto == 'combustivel' %}selected{% endif %}>Combustível</option>
                                     <option value="manutencao" {% if custo.tipo_gasto == 'manutencao' %}selected{% endif %}>Manutenção</option>
                                     <option value="pecas" {% if custo.tipo_gasto == 'pecas' %}selected{% endif %}>Peças</option>
@@ -171,22 +242,22 @@
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Oficina/Fornecedor</label>
-                                <input type="text" name="custo_{{ forloop.counter0 }}_oficina_fornecedor" value="{{ custo.oficina_fornecedor }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                <input type="text" name="custo_{{ forloop.counter0 }}_oficina_fornecedor" value="{{ custo.oficina_fornecedor }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Descrição</label>
-                                <input type="text" name="custo_{{ forloop.counter0 }}_descricao" value="{{ custo.descricao }}" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                <input type="text" name="custo_{{ forloop.counter0 }}_descricao" value="{{ custo.descricao }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Valor (R$)</label>
-                                <input type="number" name="custo_{{ forloop.counter0 }}_valor" value="{{ custo.valor }}" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                <input type="number" name="custo_{{ forloop.counter0 }}_valor" value="{{ custo.valor }}" step="0.01" min="0" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-input">
                             </div>
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Forma de Pagamento</label>
-                                <select name="custo_{{ forloop.counter0 }}_forma_pagamento" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                <select name="custo_{{ forloop.counter0 }}_forma_pagamento" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-select">
                                     <option value="vista" {% if custo.forma_pagamento == 'vista' %}selected{% endif %}>À Vista</option>
                                     <option value="credito" {% if custo.forma_pagamento == 'credito' %}selected{% endif %}>Cartão de Crédito</option>
                                     <option value="debito" {% if custo.forma_pagamento == 'debito' %}selected{% endif %}>Cartão de Débito</option>
@@ -199,7 +270,7 @@
                             
                             <div>
                                 <label class="block text-gray-200 text-sm font-semibold mb-2">Status do Pagamento</label>
-                                <select name="custo_{{ forloop.counter0 }}_status_pagamento" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20">
+                                <select name="custo_{{ forloop.counter0 }}_status_pagamento" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-400 focus:ring-4 focus:ring-blue-200/20 mobile-form-select">
                                     <option value="pago" {% if custo.status_pagamento == 'pago' %}selected{% endif %}>Pago</option>
                                     <option value="nao_pago" {% if custo.status_pagamento == 'nao_pago' %}selected{% endif %}>Não Pago</option>
                                     <option value="parcial" {% if custo.status_pagamento == 'parcial' %}selected{% endif %}>Parcialmente Pago</option>
@@ -212,12 +283,12 @@
             </div>
 
             <!-- Botões de Ação -->
-            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30">
-                <div class="flex justify-center space-x-4">
-                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300">
+            <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30">
+                <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 mobile-touch-target">
                         💾 Salvar Alterações
                     </button>
-                    <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300">
+                    <a href="{% url 'dashboard' %}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 mobile-touch-target text-center">
                         ❌ Cancelar
                     </a>
                 </div>

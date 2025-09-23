@@ -1,0 +1,49 @@
+# VARIÁVEIS DE AMBIENTE PARA O RENDER
+# Copie e cole estas variáveis no painel do Render
+
+# ===========================================
+# CONFIGURAÇÕES BÁSICAS DO DJANGO
+# ===========================================
+
+DEBUG=False
+
+SECRET_KEY=django-insecure-%!e8du$3hdcb47yr*ko()muqp%i_ts5@hzzmxhjybw21uywl%z
+
+ALLOWED_HOSTS=truckplan.onrender.com
+
+# ===========================================
+# CONFIGURAÇÃO DO BANCO SUPABASE
+# ===========================================
+# IMPORTANTE: Substitua os valores abaixo pelos seus dados reais do Supabase
+
+# Opção 1: DATABASE_URL (RECOMENDADO - mais simples)
+# Cole aqui a URL completa do seu banco Supabase
+DATABASE_URL=postgresql://postgres:[SUA_SENHA]@[SEU_HOST]:5432/postgres
+
+# Opção 2: Variáveis individuais (se preferir usar variáveis separadas)
+# Descomente e preencha com seus dados do Supabase:
+# SUPABASE_DB_NAME=postgres
+# SUPABASE_DB_USER=postgres
+# SUPABASE_DB_PASSWORD=[SUA_SENHA_DO_SUPABASE]
+# SUPABASE_DB_HOST=[SEU_HOST_DO_SUPABASE]
+# SUPABASE_DB_PORT=5432
+
+# ===========================================
+# INSTRUÇÕES PARA PREENCHER
+# ===========================================
+
+# 1. Acesse seu projeto no Supabase
+# 2. Vá em Settings > Database
+# 3. Copie a "Connection string" (URI)
+# 4. Substitua [password] pela sua senha real
+# 5. Cole no campo DATABASE_URL no Render
+
+# Exemplo de DATABASE_URL do Supabase:
+# postgresql://postgres.abcdefghijklmnop:minhasenha123@aws-0-us-east-1.pooler.supabase.com:5432/postgres
+
+# ===========================================
+# VARIÁVEIS OPCIONAIS (não obrigatórias)
+# ===========================================
+
+# TIME_ZONE=America/Sao_Paulo
+# LANGUAGE_CODE=pt-br

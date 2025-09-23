@@ -39,6 +39,84 @@
             }
         }
     </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+        }
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .mobile-p-2 { padding: 0.5rem; }
+            .mobile-p-4 { padding: 1rem; }
+            .mobile-p-6 { padding: 1.5rem; }
+            .mobile-mb-4 { margin-bottom: 1rem; }
+            .mobile-mb-6 { margin-bottom: 1.5rem; }
+            .mobile-mb-8 { margin-bottom: 2rem; }
+            .mobile-text-sm { font-size: 0.875rem; }
+            .mobile-text-base { font-size: 1rem; }
+            .mobile-text-lg { font-size: 1.125rem; }
+            .mobile-text-xl { font-size: 1.25rem; }
+            .mobile-text-2xl { font-size: 1.5rem; }
+            .mobile-text-3xl { font-size: 1.875rem; }
+            .mobile-text-4xl { font-size: 2.25rem; }
+            .mobile-grid-1 { grid-template-columns: 1fr; }
+            .mobile-grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .mobile-flex-col { flex-direction: column; }
+            .mobile-items-center { align-items: center; }
+            .mobile-justify-center { justify-content: center; }
+            .mobile-text-center { text-align: center; }
+            .mobile-space-y-2 > * + * { margin-top: 0.5rem; }
+            .mobile-space-y-4 > * + * { margin-top: 1rem; }
+            .mobile-gap-2 { gap: 0.5rem; }
+            .mobile-gap-4 { gap: 1rem; }
+            .mobile-gap-6 { gap: 1.5rem; }
+            .mobile-rounded-lg { border-radius: 0.5rem; }
+            .mobile-rounded-xl { border-radius: 0.75rem; }
+            .mobile-rounded-2xl { border-radius: 1rem; }
+            .mobile-hidden { display: none; }
+            .mobile-block { display: block; }
+            .mobile-w-full { width: 100%; }
+            .mobile-touch-target { min-height: 44px; min-width: 44px; }
+            .mobile-button { padding: 0.75rem 1rem; font-size: 0.875rem; }
+            .mobile-input { font-size: 16px; padding: 0.75rem; }
+            .mobile-overflow-x-auto { overflow-x: auto; }
+            .mobile-table { min-width: 100%; }
+            .mobile-table th, .mobile-table td { padding: 0.5rem; font-size: 0.875rem; }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .tablet-grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .tablet-grid-3 { grid-template-columns: repeat(3, 1fr); }
+            .tablet-p-4 { padding: 1rem; }
+            .tablet-p-6 { padding: 1.5rem; }
+            .tablet-text-lg { font-size: 1.125rem; }
+            .tablet-text-xl { font-size: 1.25rem; }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 375px) {
+            .xs-mobile-p-1 { padding: 0.25rem; }
+            .xs-mobile-p-2 { padding: 0.5rem; }
+            .xs-mobile-text-xs { font-size: 0.75rem; }
+            .xs-mobile-text-sm { font-size: 0.875rem; }
+            .xs-mobile-text-base { font-size: 1rem; }
+            .xs-mobile-gap-2 { gap: 0.5rem; }
+            .xs-mobile-gap-4 { gap: 1rem; }
+        }
+        
+        /* Landscape mobile */
+        @media (max-width: 896px) and (orientation: landscape) {
+            .landscape-mobile-p-2 { padding: 0.5rem; }
+            .landscape-mobile-mb-2 { margin-bottom: 0.5rem; }
+            .landscape-mobile-text-sm { font-size: 0.875rem; }
+        }
+    </style>
 </head>
 <body class="gradient-bg min-h-screen">
     <!-- CSRF Token -->
@@ -52,15 +130,15 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="relative z-10 p-6">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <span class="text-3xl">🚛</span>
-                <h1 class="text-2xl font-bold text-white">TruckPlan</h1>
+    <nav class="relative z-10 p-2 sm:p-4 lg:p-6">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <span class="text-2xl sm:text-3xl">🚛</span>
+                <h1 class="text-xl sm:text-2xl font-bold text-white">TruckPlan</h1>
             </div>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-300">Bem-vindo, {{ user.username }}!</span>
-                <a href="{% url 'logout' %}" class="bg-gray-800/50 hover:bg-gray-700/50 text-white px-4 py-2 rounded-lg transition-all duration-300 backdrop-blur-sm border border-gray-600">
+            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <span class="text-gray-300 text-sm sm:text-base">Bem-vindo, {{ user.username }}!</span>
+                <a href="{% url 'logout' %}" class="bg-gray-800/50 hover:bg-gray-700/50 text-white px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 backdrop-blur-sm border border-gray-600 mobile-touch-target text-sm sm:text-base">
                     Sair
                 </a>
             </div>
@@ -68,151 +146,155 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="relative z-10 max-w-7xl mx-auto px-6 pb-12">
+    <div class="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pb-8 sm:pb-12">
         <!-- Welcome Section -->
-        <div class="text-center mb-12 animate-slide-up">
-            <h2 class="text-4xl font-bold text-white mb-4">Dashboard</h2>
-            <p class="text-gray-300 text-lg">Sistema de Controle de Despesas de Caminhão</p>
+        <div class="text-center mb-8 sm:mb-12 animate-slide-up">
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-4">Dashboard</h2>
+            <p class="text-gray-300 text-sm sm:text-base lg:text-lg">Sistema de Controle de Despesas de Caminhão</p>
         </div>
 
         <!-- Resumo Financeiro -->
-        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white">Resumo Financeiro</h3>
-                <div class="flex space-x-2">
-                    <button id="btnSemanal" onclick="alternarResumo('semanal')" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold transition-all duration-300">
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+                <h3 class="text-xl sm:text-2xl font-bold text-white">Resumo Financeiro</h3>
+                <div class="flex space-x-2 w-full sm:w-auto">
+                    <button id="btnSemanal" onclick="alternarResumo('semanal')" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
                         Semanal
                     </button>
-                    <button id="btnMensal" onclick="alternarResumo('mensal')" class="px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold transition-all duration-300">
+                    <button id="btnMensal" onclick="alternarResumo('mensal')" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
                         Mensal
                     </button>
                 </div>
             </div>
             
-            <div id="resumoSemanal" class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white">
+            <div id="resumoSemanal" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-red-100 text-sm font-medium">Total de Gastos</p>
-                            <p class="text-3xl font-bold" id="totalGastosSemanal">R$ 0,00</p>
+                            <p class="text-red-100 text-xs sm:text-sm font-medium">Total de Gastos</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalGastosSemanal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Esta semana</p>
                         </div>
-                        <div class="text-4xl opacity-80">💰</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💰</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 text-white">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
-                            <p class="text-3xl font-bold" id="totalLucrosSemanal">R$ 0,00</p>
+                            <p class="text-green-100 text-xs sm:text-sm font-medium">Total de Receitas</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalLucrosSemanal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Esta semana</p>
                         </div>
-                        <div class="text-4xl opacity-80">📈</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📈</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
-                            <p class="text-3xl font-bold" id="lucroLiquidoSemanal">R$ 0,00</p>
+                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="lucroLiquidoSemanal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Esta semana</p>
                         </div>
-                        <div class="text-4xl opacity-80">💎</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💎</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-2xl p-6 text-white">
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-yellow-100 text-sm font-medium">Média Diária</p>
-                            <p class="text-3xl font-bold" id="mediaDiariaSemanal">R$ 0,00</p>
+                            <p class="text-yellow-100 text-xs sm:text-sm font-medium">Média Diária</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="mediaDiariaSemanal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Por dia</p>
                         </div>
-                        <div class="text-4xl opacity-80">📊</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📊</div>
                     </div>
                 </div>
             </div>
 
-            <div id="resumoMensal" class="grid grid-cols-1 md:grid-cols-4 gap-6 hidden">
-                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white">
+            <div id="resumoMensal" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 hidden">
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-red-100 text-sm font-medium">Total de Gastos</p>
-                            <p class="text-3xl font-bold" id="totalGastosMensal">R$ 0,00</p>
+                            <p class="text-red-100 text-xs sm:text-sm font-medium">Total de Gastos</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalGastosMensal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Este mês</p>
                         </div>
-                        <div class="text-4xl opacity-80">💰</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💰</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 text-white">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
-                            <p class="text-3xl font-bold" id="totalLucrosMensal">R$ 0,00</p>
+                            <p class="text-green-100 text-xs sm:text-sm font-medium">Total de Receitas</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalLucrosMensal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Este mês</p>
                         </div>
-                        <div class="text-4xl opacity-80">📈</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📈</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
-                            <p class="text-3xl font-bold" id="lucroLiquidoMensal">R$ 0,00</p>
+                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="lucroLiquidoMensal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Este mês</p>
                         </div>
-                        <div class="text-4xl opacity-80">💎</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💎</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-2xl p-6 text-white">
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-yellow-100 text-sm font-medium">Média Diária</p>
-                            <p class="text-3xl font-bold" id="mediaDiariaMensal">R$ 0,00</p>
+                            <p class="text-yellow-100 text-xs sm:text-sm font-medium">Média Diária</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="mediaDiariaMensal">R$ 0,00</p>
                             <p class="text-xs opacity-80">Por dia</p>
                         </div>
-                        <div class="text-4xl opacity-80">📊</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📊</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Busca por Data -->
-        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
-            <h3 class="text-2xl font-bold text-white mb-6">🔍 Buscar Relatórios por Data</h3>
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
+            <h3 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">🔍 Buscar Relatórios por Data</h3>
             
             <!-- Botões de Navegação para Relatórios -->
-            <div class="flex flex-wrap gap-4 mb-6">
-                <button onclick="irParaRelatorioDiario()" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
-                    <span class="mr-2">📅</span>
-                    Relatório Diário
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <button onclick="irParaRelatorioDiario()" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
+                    <span class="mr-2 text-sm sm:text-base">📅</span>
+                    <span class="hidden sm:inline">Relatório Diário</span>
+                    <span class="sm:hidden">Diário</span>
                 </button>
-                <button onclick="irParaRelatorioSemanal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
-                    <span class="mr-2">📊</span>
-                    Relatório Semanal
+                <button onclick="irParaRelatorioSemanal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
+                    <span class="mr-2 text-sm sm:text-base">📊</span>
+                    <span class="hidden sm:inline">Relatório Semanal</span>
+                    <span class="sm:hidden">Semanal</span>
                 </button>
-                <button onclick="irParaRelatorioMensal()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
-                    <span class="mr-2">📈</span>
-                    Relatório Mensal
+                <button onclick="irParaRelatorioMensal()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
+                    <span class="mr-2 text-sm sm:text-base">📈</span>
+                    <span class="hidden sm:inline">Relatório Mensal</span>
+                    <span class="sm:hidden">Mensal</span>
                 </button>
-                <button onclick="showPreviousReports()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center cursor-pointer">
-                    <span class="mr-2">📋</span>
-                    Relatórios Anteriores
+                <button onclick="showPreviousReports()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
+                    <span class="mr-2 text-sm sm:text-base">📋</span>
+                    <span class="hidden sm:inline">Relatórios Anteriores</span>
+                    <span class="sm:hidden">Anteriores</span>
                 </button>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                     <label class="block text-gray-200 text-sm font-semibold mb-2">📅 Data Específica</label>
-                    <input type="date" id="dataEspecifica" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Selecione a data">
+                    <input type="date" id="dataEspecifica" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20 mobile-input" placeholder="Selecione a data">
                 </div>
                 <div class="flex items-end">
-                    <button onclick="buscarRelatorioPorData()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                    <button onclick="buscarRelatorioPorData()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
                         🔍 Buscar Relatório
                     </button>
                 </div>
@@ -220,34 +302,34 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
-            <h3 class="text-2xl font-bold text-white mb-6">Ações Rápidas</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <button onclick="openReportModal()" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-600">
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <span class="text-3xl">📊</span>
-                        <span class="text-sm">Novo Relatório</span>
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
+            <h3 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Ações Rápidas</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <button onclick="openReportModal()" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-600 mobile-touch-target">
+                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
+                        <span class="text-2xl sm:text-3xl">📊</span>
+                        <span class="text-xs sm:text-sm">Novo Relatório</span>
                     </div>
                 </button>
 
-                <button onclick="mostrarRelatoriosHoje()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-green-500">
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <span class="text-3xl">📅</span>
-                        <span class="text-sm">Hoje</span>
+                <button onclick="mostrarRelatoriosHoje()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-green-500 mobile-touch-target">
+                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
+                        <span class="text-2xl sm:text-3xl">📅</span>
+                        <span class="text-xs sm:text-sm">Hoje</span>
                     </div>
                 </button>
 
-                <button onclick="mostrarRelatoriosSemana()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-blue-500">
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <span class="text-3xl">📈</span>
-                        <span class="text-sm">Esta Semana</span>
+                <button onclick="mostrarRelatoriosSemana()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-blue-500 mobile-touch-target">
+                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
+                        <span class="text-2xl sm:text-3xl">📈</span>
+                        <span class="text-xs sm:text-sm">Esta Semana</span>
                     </div>
                 </button>
 
-                <button onclick="mostrarRelatoriosMes()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-purple-500">
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <span class="text-3xl">📊</span>
-                        <span class="text-sm">Este Mês</span>
+                <button onclick="mostrarRelatoriosMes()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-purple-500 mobile-touch-target">
+                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
+                        <span class="text-2xl sm:text-3xl">📊</span>
+                        <span class="text-xs sm:text-sm">Este Mês</span>
                     </div>
                 </button>
 
@@ -268,10 +350,10 @@
         </div>
 
         <!-- Custos Fixos Mensais -->
-        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white">💰 Custos Fixos Mensais</h3>
-                <button onclick="openCustosFixosModal()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+                <h3 class="text-xl sm:text-2xl font-bold text-white">💰 Custos Fixos Mensais</h3>
+                <button onclick="openCustosFixosModal()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base w-full sm:w-auto">
                     ➕ Adicionar Custo Fixo
                 </button>
             </div>
@@ -282,21 +364,21 @@
                 <!-- Custos Fixos Mensais -->
                 {% if custos_fixos_mensais %}
                 <div>
-                    <h4 class="text-lg font-semibold text-blue-300 mb-4">📅 Custos Fixos Mensais (R$ {{ total_custos_fixos_mensais|floatformat:2 }})</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <h4 class="text-base sm:text-lg font-semibold text-blue-300 mb-3 sm:mb-4">📅 Custos Fixos Mensais (R$ {{ total_custos_fixos_mensais|floatformat:2 }})</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         {% for custo in custos_fixos_mensais %}
-                        <div class="bg-gradient-to-r from-blue-600/20 to-blue-700/20 rounded-xl p-4 border border-blue-500/30">
-                            <div class="flex items-center justify-between">
-                                <div class="flex-1">
-                                    <p class="text-blue-200 text-sm font-medium">{{ custo.get_tipo_custo_display }}</p>
-                                    <p class="text-lg font-bold text-white">{{ custo.descricao }}</p>
-                                    <p class="text-sm text-blue-300">R$ {{ custo.valor_mensal|floatformat:2 }}/mês</p>
+                        <div class="bg-gradient-to-r from-blue-600/20 to-blue-700/20 rounded-xl p-3 sm:p-4 border border-blue-500/30">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-blue-200 text-xs sm:text-sm font-medium">{{ custo.get_tipo_custo_display }}</p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-bold text-white truncate">{{ custo.descricao }}</p>
+                                    <p class="text-xs sm:text-sm text-blue-300">R$ {{ custo.valor_mensal|floatformat:2 }}/mês</p>
                                     {% if custo.data_fim %}
                                     <p class="text-xs text-gray-400">Até {{ custo.data_fim|date:"d/m/Y" }}</p>
                                     {% endif %}
                                 </div>
-                                <div class="flex items-center space-x-2">
-                                    <div class="text-2xl opacity-80">
+                                <div class="flex items-center space-x-1 sm:space-x-2 ml-2">
+                                    <div class="text-lg sm:text-xl lg:text-2xl opacity-80">
                                         {% if custo.tipo_custo == 'parcela_caminhao' %}🚛
                                         {% elif custo.tipo_custo == 'seguro' %}🛡️
                                         {% elif custo.tipo_custo == 'ipva' %}📋
@@ -305,12 +387,12 @@
                                         {% else %}💰{% endif %}
                                     </div>
                                     <div class="flex flex-col space-y-1">
-                                        <a href="{% url 'editar_custo_fixo' custo.id %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded text-xs transition-colors text-center" title="Editar">
+                                        <a href="{% url 'editar_custo_fixo' custo.id %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-1 sm:px-2 py-1 rounded text-xs transition-colors text-center mobile-touch-target" title="Editar">
                                             ✏️
                                         </a>
                                         <form method="post" action="{% url 'apagar_custo_fixo' custo.id %}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja apagar este custo fixo? Esta ação não pode ser desfeita.');">
                                             {% csrf_token %}
-                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors w-full" title="Apagar">
+                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-1 sm:px-2 py-1 rounded text-xs transition-colors w-full mobile-touch-target" title="Apagar">
                                                 🗑️
                                             </button>
                                         </form>
@@ -318,7 +400,7 @@
                                 </div>
                             </div>
                             {% if custo.observacoes %}
-                            <p class="text-xs text-gray-400 mt-2">{{ custo.observacoes|truncatechars:50 }}</p>
+                            <p class="text-xs text-gray-400 mt-2 break-words">{{ custo.observacoes|truncatechars:50 }}</p>
                             {% endif %}
                         </div>
                         {% endfor %}
@@ -326,19 +408,19 @@
                 </div>
                 {% endif %}
                 
-                <div class="mt-4 p-4 bg-gradient-to-r from-gray-700/50 to-gray-800/50 rounded-xl">
-                    <div class="flex justify-between items-center">
-                        <span class="text-lg font-semibold text-white">Total de Custos Fixos</span>
-                        <span class="text-2xl font-bold text-blue-400">R$ {{ total_custos_fixos_mensais|floatformat:2 }}</span>
+                <div class="mt-3 sm:mt-4 p-3 sm:p-4 bg-gradient-to-r from-gray-700/50 to-gray-800/50 rounded-xl">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <span class="text-base sm:text-lg font-semibold text-white">Total de Custos Fixos</span>
+                        <span class="text-xl sm:text-2xl font-bold text-blue-400">R$ {{ total_custos_fixos_mensais|floatformat:2 }}</span>
                     </div>
-                    <p class="text-sm text-gray-400 mt-1">Custos fixos mensais</p>
+                    <p class="text-xs sm:text-sm text-gray-400 mt-1">Custos fixos mensais</p>
                 </div>
             </div>
             {% else %}
-            <div class="text-center text-gray-400 py-8">
-                <span class="text-4xl">💳</span>
-                <p class="mt-2">Nenhum custo fixo cadastrado</p>
-                <p class="text-sm">Adicione parcelas do caminhão, seguro, IPVA, etc.</p>
+            <div class="text-center text-gray-400 py-6 sm:py-8">
+                <span class="text-3xl sm:text-4xl">💳</span>
+                <p class="mt-2 text-sm sm:text-base">Nenhum custo fixo cadastrado</p>
+                <p class="text-xs sm:text-sm">Adicione parcelas do caminhão, seguro, IPVA, etc.</p>
             </div>
             {% endif %}
         </div>

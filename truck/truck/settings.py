@@ -41,13 +41,13 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 # Session security
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # CSRF protection
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
 CSRF_COOKIE_HTTPONLY = True
 
 
@@ -66,6 +66,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -97,27 +98,16 @@ WSGI_APPLICATION = 'truck.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-from urllib.parse import urlparse
+import dj_database_url
 
-# Configuração para Supabase usando DATABASE_URL (recomendado)
+# Configuração do banco de dados usando dj-database-url
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
-    db_info = urlparse(DATABASE_URL)
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': db_info.path[1:],
-            'USER': db_info.username,
-            'PASSWORD': db_info.password,
-            'HOST': db_info.hostname,
-            'PORT': db_info.port,
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
-        }
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
 else:
-    # Fallback para variáveis individuais (não recomendado)
+    # Fallback para variáveis individuais
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -167,7 +157,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# WhiteNoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
