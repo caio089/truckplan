@@ -36,9 +36,12 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver'
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+
+# HSTS settings (only in production with HTTPS)
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Session security
 SESSION_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
@@ -49,6 +52,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # CSRF protection
 CSRF_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
 CSRF_COOKIE_HTTPONLY = True
+
+# CSRF trusted origins for production
+if not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://truckplan.onrender.com',
+        'https://*.onrender.com',
+    ]
 
 
 # Application definition
