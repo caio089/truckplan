@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: truckplan
+    env: python
+    plan: free
+    runtime: python-3.11
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn truck.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: truckplan-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: truckplan.onrender.com
+
+databases:
+  - name: truckplan-db
+    plan: free
