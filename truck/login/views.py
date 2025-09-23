@@ -79,11 +79,8 @@ def dashboard(request):
         data_vencimento__range=[inicio_semana, hoje]
     ).order_by('data_vencimento')
     
-    # Calcular total de custos fixos mensais (proporcional à semana)
-    total_custos_fixos_mensais = 0
-    for custo in custos_fixos_mensais:
-        # Simplificar: usar valor mensal completo se ativo
-        total_custos_fixos_mensais += float(custo.valor_mensal)
+    # Calcular total de custos fixos mensais
+    total_custos_fixos_mensais = sum(float(custo.valor_mensal) for custo in custos_fixos_mensais)
     
     # Calcular total de parcelas vencidas na semana
     total_parcelas_semana = sum(float(parcela.valor_parcela) for parcela in parcelas_semana)
@@ -132,7 +129,6 @@ def cadastrar_viagem(request):
     if request.method == 'POST':
         try:
             # Debug: Log dos dados recebidos
-            print("=== DEBUG BACKEND CADASTRAR_VIAGEM ===")
             print("Dados POST recebidos:", dict(request.POST))
             print("Headers:", dict(request.headers))
             
@@ -147,11 +143,6 @@ def cadastrar_viagem(request):
             receita_frete = request.POST.get('receita_frete', '0').strip() or request.POST.get('receita', '0').strip()
             motorista = request.POST.get('motorista', '').strip() or request.POST.get('nomeMotorista', '').strip()
             caminhao = request.POST.get('caminhao', '').strip() or request.POST.get('nomeCaminhao', '').strip()
-            
-            print(f"Data viagem extraída: '{data_viagem}' (tipo: {type(data_viagem)})")
-            print(f"Partida extraída: '{partida}'")
-            print(f"Chegada extraída: '{chegada}'")
-            print("=====================================")
             
             # Dados do salário do motorista
             salario_base = request.POST.get('salario_base', '0').strip()
@@ -168,18 +159,10 @@ def cadastrar_viagem(request):
                     return render(request, 'login/cadastrar_viagem.html')
             
             # Validar formato da data
-            print(f"=== VALIDAÇÃO DE DATA ===")
-            print(f"Data a ser validada: '{data_viagem}'")
-            print(f"Tipo da data: {type(data_viagem)}")
-            print(f"Comprimento: {len(data_viagem) if data_viagem else 'None'}")
-            print(f"Representação: {repr(data_viagem)}")
-            
             try:
                 from datetime import datetime
                 data_obj = datetime.strptime(data_viagem, '%Y-%m-%d')
-                print(f"Data convertida com sucesso: {data_obj}")
             except ValueError as e:
-                print(f"ERRO na conversão da data: {e}")
                 error_msg = f'Formato de data inválido. Use YYYY-MM-DD. Data recebida: "{data_viagem}"'
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({'success': False, 'message': error_msg})
@@ -248,17 +231,13 @@ def cadastrar_viagem(request):
                     salario.save()
             
             # Processar custos gerais
-            print(f"🔍 Processando custos gerais para relatório {relatorio.id}")
-            print(f"📋 Dados POST recebidos: {dict(request.POST)}")
             
             custos_salvos = 0
             index = 0
             while True:
                 tipo_gasto = request.POST.get(f'custo_{index}_tipo_gasto')
-                print(f"🔍 Verificando custo {index}: tipo_gasto = {tipo_gasto}")
                 
                 if not tipo_gasto:
-                    print(f"❌ Nenhum tipo_gasto encontrado para índice {index}, parando loop")
                     break
                 
                 oficina_fornecedor = request.POST.get(f'custo_{index}_oficina_fornecedor', '').strip()
@@ -267,7 +246,6 @@ def cadastrar_viagem(request):
                 forma_pagamento = request.POST.get(f'custo_{index}_forma_pagamento', 'vista')
                 status_pagamento = request.POST.get(f'custo_{index}_status_pagamento', 'pago')
                 
-                print(f"📋 Custo {index}: {oficina_fornecedor} - {descricao} - R$ {valor}")
                 
                 if oficina_fornecedor and descricao and valor:
                     try:
@@ -283,15 +261,13 @@ def cadastrar_viagem(request):
                             status_pagamento=status_pagamento
                         )
                         custos_salvos += 1
-                        print(f"✅ Custo {index} salvo com ID: {custo.id}")
                     except Exception as e:
-                        print(f"❌ Erro ao salvar custo {index}: {e}")
+                        pass
                 else:
-                    print(f"❌ Custo {index} não atende critérios: oficina='{oficina_fornecedor}', descricao='{descricao}', valor='{valor}'")
+                    pass
                 
                 index += 1
             
-            print(f"📊 Total de custos salvos: {custos_salvos}")
             
             mensagem = f'Viagem cadastrada com sucesso! Valor das diárias: R$ {relatorio.valor_diarias:.2f}'
             if custos_salvos > 0:
@@ -316,7 +292,6 @@ def cadastrar_viagem(request):
 @login_required
 def listar_relatorios(request):
     """View para listar todos os relatórios"""
-    print("🔍 Listando relatórios...")
     
     # Usar raw SQL para evitar problemas de conversão Decimal
     from django.db import connection
@@ -333,7 +308,6 @@ def listar_relatorios(request):
         columns = [col[0] for col in cursor.description]
         relatorios_raw = [dict(zip(columns, row)) for row in cursor.fetchall()]
     
-    print(f"📊 Total de relatórios encontrados: {len(relatorios_raw)}")
     
     # Converter para formato JSON
     relatorios_data = []
@@ -357,7 +331,89 @@ def listar_relatorios(request):
         custos_gerais = CustosGerais.objects.filter(relatorio_id=relatorio['id'])
         total_custos_gerais = custos_gerais.aggregate(Sum('valor'))['valor__sum'] or Decimal('0')
         
-        # Preparar lista de custos gerais para o frontend
+        # Buscar TODAS as parcelas de custos gerais da viagem
+        todas_parcelas = []
+        print(f"=== RELATÓRIO {relatorio['id']} - COLETANDO PARCELAS ===")
+        print(f"Total de custos gerais: {len(custos_gerais)}")
+        
+        for custo in custos_gerais:
+            print(f"Custo {custo.id}: {custo.descricao} - Forma: {custo.forma_pagamento}")
+            # Sempre adicionar o custo como uma "parcela"
+            todas_parcelas.append({
+                'id': f"custo_{custo.id}",
+                'custo_id': custo.id,
+                'tipo_gasto': custo.get_tipo_gasto_display(),
+                'descricao': custo.descricao,
+                'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
+                'veiculo_placa': custo.veiculo_placa or 'N/A',
+                'numero_parcela': 1,
+                'valor_parcela': float(custo.valor),
+                'data_vencimento': custo.data.strftime('%d/%m/%Y'),
+                'status_pagamento': custo.get_status_pagamento_display(),
+                'paga': custo.status_pagamento == 'pago',
+                'forma_pagamento': custo.get_forma_pagamento_display(),
+                'observacoes': custo.observacoes or ''
+            })
+            
+            # Se tem parcelas reais, adicionar também
+            parcelas = custo.parcelas.all().order_by('numero_parcela')
+            print(f"  -> Parcelas reais encontradas: {parcelas.count()}")
+            
+            for parcela in parcelas:
+                print(f"    * Parcela {parcela.numero_parcela}: R$ {parcela.valor_parcela} - {parcela.status_pagamento}")
+                todas_parcelas.append({
+                    'id': parcela.id,
+                    'custo_id': custo.id,
+                    'tipo_gasto': custo.get_tipo_gasto_display(),
+                    'descricao': custo.descricao,
+                    'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
+                    'veiculo_placa': custo.veiculo_placa or 'N/A',
+                    'numero_parcela': parcela.numero_parcela,
+                    'valor_parcela': float(parcela.valor_parcela),
+                    'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
+                    'status_pagamento': parcela.get_status_pagamento_display(),
+                    'paga': parcela.status_pagamento == 'pago',
+                    'forma_pagamento': custo.get_forma_pagamento_display(),
+                    'observacoes': custo.observacoes or ''
+                })
+        
+        # Buscar custos fixos mensais ativos no período da viagem (sem parcelas)
+        data_viagem = relatorio['data_viagem']
+        if isinstance(data_viagem, str):
+            data_viagem = datetime.strptime(data_viagem, '%Y-%m-%d').date()
+        
+        custos_fixos_mensais = CustoFixoMensal.objects.filter(
+            status='ativo',
+            data_inicio__lte=data_viagem
+        ).filter(
+            Q(data_fim__isnull=True) | Q(data_fim__gte=data_viagem)
+        )
+        
+        # Adicionar custos fixos como "parcelas" únicas (já que não têm parcelas reais)
+        for custo_fixo in custos_fixos_mensais:
+            todas_parcelas.append({
+                'id': f"fixo_{custo_fixo.id}",
+                'custo_id': custo_fixo.id,
+                'tipo_gasto': 'Custo Fixo Mensal',
+                'descricao': custo_fixo.descricao,
+                'oficina_fornecedor': custo_fixo.oficina_fornecedor or 'N/A',
+                'veiculo_placa': custo_fixo.veiculo_placa or 'N/A',
+                'numero_parcela': 1,
+                'valor_parcela': float(custo_fixo.valor_mensal),
+                'data_vencimento': data_viagem.strftime('%d/%m/%Y'),
+                'status_pagamento': 'Pago',
+                'paga': True,
+                'forma_pagamento': 'Mensal',
+                'observacoes': custo_fixo.observacoes or ''
+            })
+        
+        # Ordenar todas as parcelas por data de vencimento
+        todas_parcelas.sort(key=lambda x: datetime.strptime(x['data_vencimento'], '%d/%m/%Y'))
+        
+        print(f"Total de parcelas coletadas: {len(todas_parcelas)}")
+        print(f"Primeiras 3 parcelas: {todas_parcelas[:3] if todas_parcelas else 'Nenhuma'}")
+        
+        # Preparar lista de custos gerais para o frontend (sem parcelas individuais)
         custos_gerais_list = []
         for custo in custos_gerais:
             custos_gerais_list.append({
@@ -368,7 +424,9 @@ def listar_relatorios(request):
                 'valor': float(custo.valor),
                 'forma_pagamento': custo.get_forma_pagamento_display(),
                 'status_pagamento': custo.get_status_pagamento_display(),
-                'veiculo_placa': custo.veiculo_placa
+                'veiculo_placa': custo.veiculo_placa,
+                'data_vencimento': custo.data_vencimento.strftime('%d/%m/%Y') if custo.data_vencimento else None,
+                'observacoes': custo.observacoes
             })
         
         # Calcular totais com conversões seguras
@@ -395,7 +453,7 @@ def listar_relatorios(request):
         total_despesas = gasto_gasolina + total_diarias + float(salario_liquido) + custos_gerais_float
         lucro_liquido = receita_frete - total_despesas
         
-        relatorios_data.append({
+        relatorio_data = {
             'id': relatorio['id'],
             'date': str(relatorio['data_viagem']),
             'localPartida': relatorio['partida'],
@@ -415,18 +473,15 @@ def listar_relatorios(request):
             'bonusViagens': float(salario.bonus_viagens) if salario and salario.bonus_viagens else 0,
             'descontoFaltas': float(salario.desconto_faltas) if salario and salario.desconto_faltas else 0,
             'salarioLiquido': float(salario_liquido),
-            'custosGerais': custos_gerais_list
-        })
-    
-    print(f"✅ Relatórios processados: {len(relatorios_data)}")
-    if relatorios_data:
-        print(f"📋 Primeiro relatório: {relatorios_data[0]}")
-        print(f"📋 Estrutura do primeiro relatório: {list(relatorios_data[0].keys())}")
-        print(f"📋 Valores do primeiro relatório:")
-        for key, value in relatorios_data[0].items():
-            print(f"    {key}: {value} (tipo: {type(value)})")
-    else:
-        print("📋 Nenhum relatório encontrado")
+            'custosGerais': custos_gerais_list,
+            'todasParcelas': todas_parcelas,
+            'totalParcelas': len(todas_parcelas),
+            'parcelasPagas': len([p for p in todas_parcelas if p['paga']]),
+            'parcelasPendentes': len([p for p in todas_parcelas if not p['paga']])
+        }
+        
+        
+        relatorios_data.append(relatorio_data)
     
     return JsonResponse({'relatorios': relatorios_data})
 
@@ -810,10 +865,59 @@ def relatorio_mensal(request):
                 from datetime import datetime
                 from dateutil.relativedelta import relativedelta
                 
+                # Buscar custos fixos mensais do modelo CustoFixoMensal
+                ano = int(ano_mes[:4])
+                mes = int(ano_mes[5:7])
+                
+                # Buscar custos fixos que estão ativos no mês específico
+                from django.db import models
+                from datetime import datetime
+                import calendar
+                
+                # Obter o último dia do mês
+                ultimo_dia_mes = calendar.monthrange(ano, mes)[1]
+                
+                custos_fixos_mensais = CustoFixoMensal.objects.filter(
+                    status='ativo',
+                    data_inicio__lte=f'{ano}-{mes:02d}-{ultimo_dia_mes}',  # Início antes ou no mês
+                ).filter(
+                    models.Q(data_fim__isnull=True) | models.Q(data_fim__gte=f'{ano}-{mes:02d}-01')  # Fim nulo ou depois do mês
+                )
+                
+                total_custos_fixos_mensais = custos_fixos_mensais.aggregate(Sum('valor_mensal'))['valor_mensal__sum'] or Decimal('0')
+                
+                # Calcular período para parcelas
                 data_inicio_mes = datetime.strptime(f"{ano_mes}-01", '%Y-%m-%d').date()
-                # Calcular o último dia do mês de forma mais simples
                 data_fim_mes = (data_inicio_mes + relativedelta(months=1) - timedelta(days=1))
                 logger.info(f'Período: {data_inicio_mes} a {data_fim_mes}')
+                
+                # Buscar parcelas de custos do mês
+                parcelas_mes = ParcelaCusto.objects.filter(
+                    data_vencimento__gte=data_inicio_mes,
+                    data_vencimento__lte=data_fim_mes,
+                    paga=False
+                )
+                total_parcelas_mes = parcelas_mes.aggregate(Sum('valor'))['valor__sum'] or Decimal('0')
+                
+                # Se é um novo registro, pedir para preencher os custos
+                if created:
+                    messages.info(request, f'Preencha os custos fixos para {ano_mes}')
+                    return render(request, 'login/relatorio_mensal.html', {
+                        'ano_mes': ano_mes,
+                        'custos_fixos': custos_fixos,
+                        'relatorios': relatorios,
+                        'total_diarias': total_diarias,
+                        'total_valor_diarias': total_valor_diarias,
+                        'total_litros': total_litros,
+                        'total_gasto_gasolina': total_gasto_gasolina,
+                        'total_receita_frete': total_receita_frete,
+                        'preencher_custos': True
+                    })
+                
+                # Calcular lucro líquido
+                total_custos_fixos = custos_fixos.get_total_custos_fixos()
+                
+                # Converter para float para evitar problemas com Decimal
             except Exception as e:
                 logger.error(f'Erro ao calcular datas: {e}')
                 data_inicio_mes = datetime.now().date().replace(day=1)
@@ -882,11 +986,37 @@ def relatorio_mensal(request):
                 total_custos_gerais_float = float(total_custos_gerais)
                 total_receita_frete_float = float(total_receita_frete)
                 total_custos_fixos_float = float(total_custos_fixos)
+                total_custos_fixos_mensais_float = float(total_custos_fixos_mensais)
+                total_parcelas_mes_float = float(total_parcelas_mes)
                 
                 # Incluir custos fixos mensais e parcelas no cálculo
-                total_despesas = total_gasto_gasolina_float + total_valor_diarias_float + total_custos_fixos_float + total_custos_gerais_float + total_custos_fixos_mensais + total_parcelas_mes
+                total_despesas = total_gasto_gasolina_float + total_valor_diarias_float + total_custos_fixos_float + total_custos_gerais_float + total_custos_fixos_mensais_float + total_parcelas_mes_float
                 lucro_liquido = total_receita_frete_float - total_despesas
                 logger.info(f'Total despesas: {total_despesas}, Lucro: {lucro_liquido}')
+                
+                context = {
+                    'ano_mes': ano_mes,
+                    'custos_fixos': custos_fixos,
+                    'custos_fixos_mensais': custos_fixos_mensais,
+                    'total_custos_fixos_mensais': total_custos_fixos_mensais_float,
+                    'custos_gerais_mes': custos_gerais_mes,
+                    'total_custos_gerais': total_custos_gerais_float,
+                    'relatorios': relatorios,
+                    'total_diarias': total_diarias,
+                    'total_valor_diarias': total_valor_diarias_float,
+                    'total_litros': float(total_litros),
+                    'total_gasto_gasolina': total_gasto_gasolina_float,
+                    'total_receita_frete': total_receita_frete_float,
+                    'total_custos_fixos': total_custos_fixos,
+                    'total_despesas': total_despesas,
+                    'lucro_liquido': lucro_liquido,
+                    'preencher_custos': False
+                }
+                
+                return render(request, 'login/relatorio_mensal.html', context)
+                
+            except ValueError:
+                messages.error(request, 'Formato de data inválido.')
             except Exception as e:
                 logger.error(f'Erro ao calcular lucro: {e}')
                 total_despesas = 0
@@ -1541,7 +1671,52 @@ def buscar_relatorios_periodo(request):
             # Converter QuerySet para lista de dicionários
             relatorios_data = []
             for relatorio in relatorios:
-                relatorios_data.append({
+                # Buscar custos gerais da viagem
+                custos_gerais = CustosGerais.objects.filter(relatorio_id=relatorio.id)
+                total_custos_gerais = custos_gerais.aggregate(Sum('valor'))['valor__sum'] or Decimal('0')
+                
+                # Buscar parcelas de custos gerais
+                todas_parcelas = []
+                
+                for custo in custos_gerais:
+                    
+                    # Sempre adicionar o custo como uma "parcela"
+                    todas_parcelas.append({
+                        'id': f"custo_{custo.id}",
+                        'custo_id': custo.id,
+                        'tipo_gasto': custo.get_tipo_gasto_display(),
+                        'descricao': custo.descricao,
+                        'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
+                        'veiculo_placa': custo.veiculo_placa or 'N/A',
+                        'numero_parcela': 1,
+                        'valor_parcela': float(custo.valor),
+                        'data_vencimento': custo.data.strftime('%d/%m/%Y'),
+                        'status_pagamento': custo.get_status_pagamento_display(),
+                        'paga': custo.status_pagamento == 'pago',
+                        'forma_pagamento': custo.get_forma_pagamento_display(),
+                        'observacoes': custo.observacoes or ''
+                    })
+                    
+                    # Se tem parcelas reais, adicionar também
+                    parcelas = custo.parcelas.all().order_by('numero_parcela')
+                    for parcela in parcelas:
+                        todas_parcelas.append({
+                            'id': parcela.id,
+                            'custo_id': custo.id,
+                            'tipo_gasto': custo.get_tipo_gasto_display(),
+                            'descricao': custo.descricao,
+                            'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
+                            'veiculo_placa': custo.veiculo_placa or 'N/A',
+                            'numero_parcela': parcela.numero_parcela,
+                            'valor_parcela': float(parcela.valor_parcela),
+                            'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
+                            'status_pagamento': parcela.get_status_pagamento_display(),
+                            'paga': parcela.status_pagamento == 'pago',
+                            'forma_pagamento': custo.get_forma_pagamento_display(),
+                            'observacoes': custo.observacoes or ''
+                        })
+                
+                relatorio_data = {
                     'id': relatorio.id,
                     'date': relatorio.data_viagem.isoformat(),
                     'localPartida': relatorio.partida,
@@ -1554,11 +1729,18 @@ def buscar_relatorios_periodo(request):
                     'valorGasolina': float(relatorio.gasto_gasolina),
                     'receita': float(relatorio.receita_frete),
                     'totalGastosViagem': float(relatorio.valor_diarias) + float(relatorio.gasto_gasolina),
-                    'totalCustosGerais': 0.0,
-                    'totalDespesas': float(relatorio.valor_diarias) + float(relatorio.gasto_gasolina),
-                    'lucroLiquido': float(relatorio.receita_frete) - float(relatorio.valor_diarias) - float(relatorio.gasto_gasolina),
-                    'salarioLiquido': 0.0
-                })
+                    'totalCustosGerais': float(total_custos_gerais),
+                    'totalDespesas': float(relatorio.valor_diarias) + float(relatorio.gasto_gasolina) + float(total_custos_gerais),
+                    'lucroLiquido': float(relatorio.receita_frete) - float(relatorio.valor_diarias) - float(relatorio.gasto_gasolina) - float(total_custos_gerais),
+                    'salarioLiquido': 0.0,
+                    'todasParcelas': todas_parcelas,
+                    'totalParcelas': len(todas_parcelas),
+                    'parcelasPagas': len([p for p in todas_parcelas if p['paga']]),
+                    'parcelasPendentes': len([p for p in todas_parcelas if not p['paga']])
+                }
+                
+                
+                relatorios_data.append(relatorio_data)
             
             return JsonResponse({
                 'success': True,
@@ -1666,6 +1848,8 @@ def buscar_relatorios_mes(request):
             
             # Converter custos gerais para lista de dicionários
             custos_gerais_data = []
+            todas_parcelas_mes = []
+            
             for custo in custos_gerais_mes:
                 custos_gerais_data.append({
                     'id': custo.id,
@@ -1677,6 +1861,42 @@ def buscar_relatorios_mes(request):
                     'valor': float(custo.valor),
                     'status_pagamento': custo.status_pagamento,
                     'status_pagamento_display': custo.get_status_pagamento_display()
+                })
+                
+                # Adicionar custo como parcela
+                todas_parcelas_mes.append({
+                    'id': f"custo_{custo.id}",
+                    'custo_id': custo.id,
+                    'tipo_gasto': custo.get_tipo_gasto_display(),
+                    'descricao': custo.descricao,
+                    'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
+                    'veiculo_placa': custo.veiculo_placa or 'N/A',
+                    'numero_parcela': 1,
+                    'valor_parcela': float(custo.valor),
+                    'data_vencimento': custo.data.strftime('%d/%m/%Y'),
+                    'status_pagamento': custo.get_status_pagamento_display(),
+                    'paga': custo.status_pagamento == 'pago',
+                    'forma_pagamento': custo.get_forma_pagamento_display(),
+                    'observacoes': custo.observacoes or ''
+                })
+                
+                # Adicionar parcelas reais se existirem
+                parcelas = custo.parcelas.all().order_by('numero_parcela')
+                for parcela in parcelas:
+                    todas_parcelas_mes.append({
+                        'id': parcela.id,
+                        'custo_id': custo.id,
+                        'tipo_gasto': custo.get_tipo_gasto_display(),
+                        'descricao': custo.descricao,
+                        'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
+                        'veiculo_placa': custo.veiculo_placa or 'N/A',
+                        'numero_parcela': parcela.numero_parcela,
+                        'valor_parcela': float(parcela.valor_parcela),
+                        'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
+                        'status_pagamento': parcela.get_status_pagamento_display(),
+                        'paga': parcela.status_pagamento == 'pago',
+                        'forma_pagamento': custo.get_forma_pagamento_display(),
+                        'observacoes': custo.observacoes or ''
                 })
             
             return JsonResponse({
@@ -1694,7 +1914,11 @@ def buscar_relatorios_mes(request):
                     'lucro_liquido': lucro_liquido
                 },
                 'custos_fixos': custos_fixos_data,
-                'custos_gerais_mes': custos_gerais_data
+                'custos_gerais_mes': custos_gerais_data,
+                'todasParcelas': todas_parcelas_mes,
+                'totalParcelas': len(todas_parcelas_mes),
+                'parcelasPagas': len([p for p in todas_parcelas_mes if p['paga']]),
+                'parcelasPendentes': len([p for p in todas_parcelas_mes if not p['paga']])
             })
             
         except Exception as e:
@@ -1712,8 +1936,17 @@ def buscar_relatorios_mes(request):
 @login_required
 def atualizar_relatorio(request, relatorio_id):
     """View para atualizar um relatório existente"""
+    logger.info(f'=== ATUALIZAR RELATÓRIO ===')
+    logger.info(f'ID do relatório: {relatorio_id}')
+    logger.info(f'Tipo do ID: {type(relatorio_id)}')
+    
     # Buscar o relatório existente
-    relatorio = get_object_or_404(DailyReport, id=relatorio_id)
+    try:
+        relatorio = get_object_or_404(DailyReport, id=relatorio_id)
+        logger.info(f'Relatório encontrado: {relatorio.id} - {relatorio.data_viagem}')
+    except Exception as e:
+        logger.error(f'Erro ao buscar relatório {relatorio_id}: {e}')
+        return render(request, 'login/editar_relatorio.html', {'erro': f'Relatório não encontrado: {e}'})
     
     if request.method == 'GET':
         # Exibir formulário de edição com dados preenchidos
@@ -1847,6 +2080,10 @@ def teste_abas(request):
 @login_required
 def custos_fixos(request):
     """View para gerenciar custos fixos mensais"""
+    # Garantir que sempre retorne JSON para requisições AJAX
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'message': 'Requisição inválida'})
+    
     try:
         if request.method == 'POST':
             try:
@@ -1910,7 +2147,7 @@ def custos_fixos(request):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'custos_fixos': custos_data})
             else:
-                return render(request, 'login/custos_fixos.html', {'custos_fixos': custos_fixos})
+                return JsonResponse({'custos_fixos': custos_data})
         
         return JsonResponse({'success': False, 'message': 'Método não permitido'})
         
@@ -1919,11 +2156,96 @@ def custos_fixos(request):
         return JsonResponse({'success': False, 'message': f'Erro interno do servidor: {str(e)}'})
 
 @login_required
+def editar_custo_fixo(request, custo_id):
+    """View para editar custo fixo"""
+    try:
+        custo = get_object_or_404(CustoFixoMensal, id=custo_id)
+        
+        if request.method == 'POST':
+            try:
+                descricao = request.POST.get('descricao', '').strip()
+                tipo_custo = request.POST.get('tipo_custo', '')
+                valor_mensal = request.POST.get('valor_mensal', '0')
+                data_inicio = request.POST.get('data_inicio')
+                data_fim = request.POST.get('data_fim') or None
+                status = request.POST.get('status', 'ativo')
+                observacoes = request.POST.get('observacoes', '').strip()
+                
+                if not descricao or not tipo_custo or not valor_mensal or not data_inicio:
+                    return JsonResponse({'success': False, 'message': 'Preencha todos os campos obrigatórios!'})
+                
+                # Atualizar o custo fixo
+                custo.descricao = descricao
+                custo.tipo_custo = tipo_custo
+                custo.valor_mensal = Decimal(valor_mensal)
+                custo.data_inicio = data_inicio
+                custo.data_fim = data_fim
+                custo.status = status
+                custo.observacoes = observacoes
+                custo.save()
+                
+                mensagem = f'Custo fixo "{descricao}" atualizado com sucesso!'
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'message': mensagem})
+                else:
+                    messages.success(request, mensagem)
+                    return redirect('dashboard')
+                    
+            except Exception as e:
+                logger.error(f'Erro ao atualizar custo fixo: {e}')
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'message': f'Erro ao atualizar custo fixo: {str(e)}'})
+                else:
+                    messages.error(request, f'Erro ao atualizar custo fixo: {str(e)}')
+                    return redirect('dashboard')
+        
+        elif request.method == 'GET':
+            # Retornar dados do custo fixo para edição
+            custo_data = {
+                'id': custo.id,
+                'descricao': custo.descricao,
+                'tipo_custo': custo.tipo_custo,
+                'valor_mensal': float(custo.valor_mensal),
+                'data_inicio': custo.data_inicio.strftime('%Y-%m-%d'),
+                'data_fim': custo.data_fim.strftime('%Y-%m-%d') if custo.data_fim else None,
+                'status': custo.status,
+                'observacoes': custo.observacoes,
+            }
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'custo': custo_data})
+            else:
+                return JsonResponse({'success': True, 'custo': custo_data})
+                
+    except Exception as e:
+        logger.error(f'Erro ao buscar custo fixo: {e}')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': f'Erro ao buscar custo fixo: {str(e)}'})
+        else:
+            messages.error(request, f'Erro ao buscar custo fixo: {str(e)}')
+            return redirect('dashboard')
+
+@login_required
 def excluir_custo_fixo(request, custo_id):
     """View para excluir custo fixo"""
+    # Garantir que sempre retorne JSON para requisições AJAX
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'message': 'Requisição inválida'})
+    
     if request.method == 'POST':
         try:
-            custo = get_object_or_404(CustoFixoMensal, id=custo_id)
+            # Verificar se o custo existe
+            try:
+                custo = CustoFixoMensal.objects.get(id=custo_id)
+            except CustoFixoMensal.DoesNotExist:
+                mensagem = f'Custo fixo com ID {custo_id} não encontrado!'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'message': mensagem})
+                else:
+                    messages.error(request, mensagem)
+                    return redirect('dashboard')
+            
             descricao = custo.descricao
             custo.delete()
             
@@ -1945,145 +2267,8 @@ def excluir_custo_fixo(request, custo_id):
     
     return JsonResponse({'success': False, 'message': 'Método não permitido'})
 
-@login_required
-def parcelas_custos(request):
-    """View para listar e gerenciar parcelas de custos"""
-    # Parâmetros de filtro
-    status_pagamento = request.GET.get('status_pagamento', '')
-    caminhao_filtro = request.GET.get('caminhao', '')
-    placa_filtro = request.GET.get('placa', '')
-    
-    # Query base
-    parcelas = ParcelaCusto.objects.select_related('custo_geral__relatorio').all().order_by('data_vencimento', 'custo_geral__descricao')
-    
-    # Aplicar filtros
-    if status_pagamento:
-        parcelas = parcelas.filter(status_pagamento=status_pagamento)
-    
-    if caminhao_filtro:
-        parcelas = parcelas.filter(custo_geral__relatorio__caminhao=caminhao_filtro)
-    
-    if placa_filtro:
-        parcelas = parcelas.filter(custo_geral__veiculo_placa__icontains=placa_filtro)
-    
-    # Paginação
-    paginator = Paginator(parcelas, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    # Estatísticas
-    total_parcelas = parcelas.count()
-    parcelas_pagas = parcelas.filter(status_pagamento='pago').count()
-    parcelas_pendentes = parcelas.filter(status_pagamento='pendente').count()
-    valor_total_pendente = parcelas.filter(status_pagamento='pendente').aggregate(Sum('valor_parcela'))['valor_parcela__sum'] or Decimal('0')
-    
-    # Buscar lista de caminhões únicos
-    caminhoes = DailyReport.objects.values_list('caminhao', flat=True).distinct().order_by('caminhao')
-    
-    context = {
-        'page_obj': page_obj,
-        'status_pagamento': status_pagamento,
-        'caminhao_filtro': caminhao_filtro,
-        'placa_filtro': placa_filtro,
-        'caminhoes': caminhoes,
-        'total_parcelas': total_parcelas,
-        'parcelas_pagas': parcelas_pagas,
-        'parcelas_pendentes': parcelas_pendentes,
-        'valor_total_pendente': valor_total_pendente,
-        'status_pagamento_choices': CustosGerais.STATUS_PAGAMENTO_CHOICES,
-    }
-    
-    return render(request, 'login/parcelas_custos.html', context)
 
-@login_required
-def marcar_parcela_paga(request, parcela_id):
-    """View para marcar parcela como paga"""
-    if request.method == 'POST':
-        try:
-            parcela = get_object_or_404(ParcelaCusto, id=parcela_id)
-            parcela.status_pagamento = 'pago'
-            parcela.data_pagamento = datetime.now().date()
-            parcela.save()
-            
-            mensagem = f'Parcela {parcela.numero_parcela} marcada como paga!'
-            
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': mensagem})
-            else:
-                messages.success(request, mensagem)
-                return redirect('parcelas_custos')
-                
-        except Exception as e:
-            logger.error(f'Erro ao marcar parcela como paga: {e}')
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'message': f'Erro ao marcar parcela como paga: {str(e)}'})
-            else:
-                messages.error(request, f'Erro ao marcar parcela como paga: {str(e)}')
-                return redirect('parcelas_custos')
-    
-    return JsonResponse({'success': False, 'message': 'Método não permitido'})
 
-@login_required
-def excluir_parcela(request, parcela_id):
-    """View para excluir parcela"""
-    if request.method == 'POST':
-        try:
-            parcela = get_object_or_404(ParcelaCusto, id=parcela_id)
-            numero_parcela = parcela.numero_parcela
-            parcela.delete()
-            
-            mensagem = f'Parcela {numero_parcela} excluída com sucesso!'
-            
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': mensagem})
-            else:
-                messages.success(request, mensagem)
-                return redirect('parcelas_custos')
-                
-        except Exception as e:
-            logger.error(f'Erro ao excluir parcela: {e}')
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'message': f'Erro ao excluir parcela: {str(e)}'})
-            else:
-                messages.error(request, f'Erro ao excluir parcela: {str(e)}')
-                return redirect('parcelas_custos')
-    
-    return JsonResponse({'success': False, 'message': 'Método não permitido'})
-
-@login_required
-def editar_custo_fixo(request, custo_id):
-    """View para editar custo fixo mensal"""
-    custo = get_object_or_404(CustoFixoMensal, id=custo_id)
-    
-    if request.method == 'POST':
-        try:
-            custo.tipo_custo = request.POST.get('tipo_custo')
-            custo.descricao = request.POST.get('descricao')
-            custo.valor_mensal = Decimal(request.POST.get('valor_mensal', '0'))
-            custo.data_inicio = datetime.strptime(request.POST.get('data_inicio'), '%Y-%m-%d').date()
-            
-            data_fim = request.POST.get('data_fim')
-            if data_fim:
-                custo.data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
-            else:
-                custo.data_fim = None
-                
-            custo.observacoes = request.POST.get('observacoes', '')
-            custo.save()
-            
-            messages.success(request, 'Custo fixo atualizado com sucesso!')
-            return redirect('dashboard')
-            
-        except Exception as e:
-            logger.error(f'Erro ao editar custo fixo: {e}')
-            messages.error(request, f'Erro ao atualizar custo fixo: {str(e)}')
-    
-    context = {
-        'custo': custo,
-        'tipos_custo': CustoFixoMensal.TIPO_CUSTO_CHOICES
-    }
-    
-    return render(request, 'login/editar_custo_fixo.html', context)
 
 @login_required
 def apagar_custo_fixo(request, custo_id):

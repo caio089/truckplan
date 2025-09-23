@@ -206,18 +206,14 @@
                 </button>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data Inicial</label>
-                    <input type="date" id="dataInicial" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
-                </div>
-                <div>
-                    <label class="block text-gray-200 text-sm font-semibold mb-2">Data Final</label>
-                    <input type="date" id="dataFinal" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20">
+                    <label class="block text-gray-200 text-sm font-semibold mb-2">📅 Data Específica</label>
+                    <input type="date" id="dataEspecifica" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="Selecione a data">
                 </div>
                 <div class="flex items-end">
-                    <button onclick="buscarRelatoriosPorData()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
-                        🔍 Buscar
+                    <button onclick="buscarRelatorioPorData()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                        🔍 Buscar Relatório
                     </button>
                 </div>
             </div>
@@ -255,12 +251,6 @@
                     </div>
                 </button>
 
-                <a href="{% url 'parcelas_custos' %}" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white p-6 rounded-xl font-semibold text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-orange-500">
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <span class="text-3xl">📅</span>
-                        <span class="text-sm">Parcelas</span>
-                    </div>
-                </a>
             </div>
         </div>
 
@@ -286,34 +276,8 @@
                 </button>
             </div>
             
-            {% if custos_fixos_mensais or parcelas_semana %}
+            {% if custos_fixos_mensais %}
             <div class="mb-6">
-                <!-- Parcelas Vencidas na Semana -->
-                {% if parcelas_semana %}
-                <div class="mb-6">
-                    <h4 class="text-lg font-semibold text-orange-300 mb-4">📅 Parcelas Vencidas Esta Semana (R$ {{ total_parcelas_semana|floatformat:2 }})</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {% for parcela in parcelas_semana %}
-                        <div class="bg-gradient-to-r from-orange-600/20 to-orange-700/20 rounded-xl p-4 border border-orange-500/30">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-orange-200 text-sm font-medium">Parcela {{ parcela.numero_parcela }}</p>
-                                    <p class="text-lg font-bold text-white">{{ parcela.custo_geral.descricao }}</p>
-                                    <p class="text-sm text-orange-300">R$ {{ parcela.valor_parcela|floatformat:2 }}</p>
-                                    <p class="text-xs text-gray-400">Vence: {{ parcela.data_vencimento|date:"d/m/Y" }}</p>
-                                </div>
-                                <div class="text-2xl opacity-80">📅</div>
-                            </div>
-                            <div class="mt-2">
-                                <span class="px-2 py-1 rounded text-xs {% if parcela.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-yellow-600 text-white{% endif %}">
-                                    {{ parcela.get_status_pagamento_display }}
-                                </span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
                 
                 <!-- Custos Fixos Mensais -->
                 {% if custos_fixos_mensais %}
@@ -365,9 +329,9 @@
                 <div class="mt-4 p-4 bg-gradient-to-r from-gray-700/50 to-gray-800/50 rounded-xl">
                     <div class="flex justify-between items-center">
                         <span class="text-lg font-semibold text-white">Total de Custos Fixos</span>
-                        <span class="text-2xl font-bold text-blue-400">R$ {{ total_custos_fixos_mensais|add:total_parcelas_semana|floatformat:2 }}</span>
+                        <span class="text-2xl font-bold text-blue-400">R$ {{ total_custos_fixos_mensais|floatformat:2 }}</span>
                     </div>
-                    <p class="text-sm text-gray-400 mt-1">Mensais + Parcelas (proporcional para esta semana)</p>
+                    <p class="text-sm text-gray-400 mt-1">Custos fixos mensais</p>
                 </div>
             </div>
             {% else %}

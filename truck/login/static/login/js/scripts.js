@@ -8,39 +8,20 @@ let custosGeraisRelatorio = [];
 // Carregar relatórios do servidor
 async function carregarRelatoriosDoServidor() {
     try {
-        console.log('=== CARREGANDO RELATÓRIOS DO SERVIDOR ===');
         const response = await fetch('/login/listar-relatorios/');
-        console.log('Response status:', response.status);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('Dados recebidos do servidor:', data);
             reports = data.relatorios || [];
-            console.log('Relatórios carregados:', reports.length);
-            console.log('Primeiro relatório:', reports[0]);
             
-            if (reports.length > 0) {
-                console.log('Estrutura do primeiro relatório:', Object.keys(reports[0]));
-                console.log('Valores do primeiro relatório:', {
-                    id: reports[0].id,
-                    date: reports[0].date,
-                    localPartida: reports[0].localPartida,
-                    localChegada: reports[0].localChegada,
-                    nomeMotorista: reports[0].nomeMotorista,
-                    nomeCaminhao: reports[0].nomeCaminhao,
-                    receita: reports[0].receita,
-                    valorGasolina: reports[0].valorGasolina,
-                    totalDiarias: reports[0].totalDiarias
-                });
-            }
-            
-            updateWeekSummary();
-            updateMonthSummary();
-            updatePreviousReportsList();
+            // Usar requestAnimationFrame para atualizações
+            requestAnimationFrame(() => {
+                updateWeekSummary();
+                updateMonthSummary();
+                updatePreviousReportsList();
+            });
         } else {
-            console.error('Erro na resposta:', response.status, response.statusText);
-            const errorText = await response.text();
-            console.error('Texto do erro:', errorText);
+            console.error('Erro ao carregar relatórios:', response.status);
         }
     } catch (error) {
         console.error('Erro ao carregar relatórios:', error);
@@ -135,46 +116,39 @@ function irParaRelatorioMensal() {
 // ===== FUNÇÕES DE BUSCA E FILTROS =====
 
 function showPreviousReports() {
-    // Mostrar todos os relatórios em uma tabela
     mostrarResultadosBusca(reports);
 }
 
-function buscarRelatoriosPorData() {
-    const dataInicial = document.getElementById('dataInicial').value;
-    const dataFinal = document.getElementById('dataFinal').value;
+function buscarRelatorioPorData() {
+    const dataEspecifica = document.getElementById('dataEspecifica').value;
     
-    if (!dataInicial || !dataFinal) {
-        showNotification('Selecione as datas inicial e final!', 'error');
+    if (!dataEspecifica) {
+        showNotification('Selecione uma data específica!', 'error');
         return;
     }
     
     const relatoriosFiltrados = reports.filter(report => {
         const reportDate = new Date(report.date);
-        const inicio = new Date(dataInicial);
-        const fim = new Date(dataFinal);
-        return reportDate >= inicio && reportDate <= fim;
+        const dataSelecionada = new Date(dataEspecifica);
+        return reportDate.toDateString() === dataSelecionada.toDateString();
     });
     
     mostrarResultadosBusca(relatoriosFiltrados);
 }
 
 function mostrarResultadosBusca(relatorios) {
-    console.log('=== MOSTRANDO RESULTADOS BUSCA ===');
-    console.log('Relatórios recebidos:', relatorios.length);
-    console.log('Relatórios:', relatorios);
-    
-    const container = document.getElementById('resultadosBusca');
-    const resumo = document.getElementById('resumoResultados');
-    const tabela = document.getElementById('tabelaResultados');
-    
-    console.log('Container encontrado:', !!container);
-    console.log('Resumo encontrado:', !!resumo);
-    console.log('Tabela encontrada:', !!tabela);
-    
-    if (relatorios.length === 0) {
-        resumo.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Nenhum relatório encontrado no período selecionado</div>';
-        tabela.innerHTML = '';
-    } else {
+    // Usar requestAnimationFrame para evitar bloqueios
+    requestAnimationFrame(() => {
+        
+        const container = document.getElementById('resultadosBusca');
+        const resumo = document.getElementById('resumoResultados');
+        const tabela = document.getElementById('tabelaResultados');
+        
+        if (relatorios.length === 0) {
+            resumo.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Nenhum relatório encontrado para a data selecionada</div>';
+            tabela.innerHTML = '';
+        } else {
+        
         // Calcular resumo
         const totalLucros = relatorios.reduce((sum, report) => sum + (report.receita || 0), 0);
         const totalGastos = relatorios.reduce((sum, report) => {
@@ -226,8 +200,6 @@ function mostrarResultadosBusca(relatorios) {
         `;
         
         // Gerar tabela
-        console.log('Gerando tabela com relatórios:', relatorios);
-        
         tabela.innerHTML = `
             <table class="w-full text-white">
                 <thead>
@@ -243,7 +215,6 @@ function mostrarResultadosBusca(relatorios) {
                 </thead>
                 <tbody>
                     ${relatorios.map(report => {
-                        console.log('Processando relatório:', report);
                         const receita = report.receita || 0;
                         const valorGasolina = report.valorGasolina || 0;
                         const totalDiarias = report.totalDiarias || 0;
@@ -251,10 +222,6 @@ function mostrarResultadosBusca(relatorios) {
                         const salarioLiquido = report.salarioLiquido || 0;
                         const totalGastos = valorGasolina + totalDiarias + totalCustosGerais + salarioLiquido;
                         const lucro = receita - totalGastos;
-                        
-                        console.log('Valores calculados:', {
-                            receita, valorGasolina, totalDiarias, totalCustosGerais, salarioLiquido, totalGastos, lucro
-                        });
                         
                         return `
                         <tr class="border-b border-gray-700 hover:bg-gray-800/50">
@@ -279,7 +246,8 @@ function mostrarResultadosBusca(relatorios) {
         `;
     }
     
-    container.classList.remove('hidden');
+        container.classList.remove('hidden');
+    });
 }
 
 // ===== FUNÇÕES DE AÇÕES RÁPIDAS =====
@@ -295,7 +263,6 @@ function mostrarRelatoriosHoje() {
             showNotification('Erro: Token CSRF não encontrado', 'error');
             return;
         }
-        console.log('CSRF token encontrado:', csrfToken.substring(0, 10) + '...');
         
         // Buscar dados do servidor
         fetch('/login/buscar-relatorios-periodo/', {
@@ -349,7 +316,6 @@ function mostrarRelatoriosSemana() {
             showNotification('Erro: Token CSRF não encontrado', 'error');
             return;
         }
-        console.log('CSRF token encontrado:', csrfToken.substring(0, 10) + '...');
         
         // Buscar dados do servidor
         fetch('/login/buscar-relatorios-periodo/', {
@@ -402,7 +368,6 @@ function mostrarRelatoriosMes() {
             showNotification('Erro: Token CSRF não encontrado', 'error');
             return;
         }
-        console.log('CSRF token encontrado:', csrfToken.substring(0, 10) + '...');
         
         // Buscar dados do servidor
         fetch('/login/buscar-relatorios-periodo/', {
@@ -509,7 +474,6 @@ function salvarRelatorio() {
     
     
     if (!dataFinal || dataFinal.trim() === '') {
-        console.log('ERRO: Data vazia');
         showNotification('Data da viagem é obrigatória!', 'error');
         if (dataElement) dataElement.focus();
         return;
@@ -520,7 +484,6 @@ function salvarRelatorio() {
     const isValidFormat = dataRegex.test(dataFinal);
     
     if (!isValidFormat) {
-        console.log('ERRO: Formato inválido');
         showNotification(`Formato de data inválido. Use YYYY-MM-DD. Recebido: "${dataFinal}"`, 'error');
         if (dataElement) dataElement.focus();
         return;
@@ -551,17 +514,19 @@ function salvarRelatorio() {
 }
 
 function viewReportSummary(reportId) {
-    const report = reports.find(r => r.id === reportId);
-    if (!report) return;
-    
-    // Calcular totais
-    const totalDiarias = (report.quantidadeDiarias || 0) * 70;
-    const totalGastos = (report.valorGasolina || 0) + totalDiarias + (report.totalCustosGerais || 0) + (report.salarioLiquido || 0);
-    const lucroLiquido = (report.receita || 0) - totalGastos;
-    const margemLucro = totalGastos > 0 ? ((lucroLiquido / totalGastos) * 100) : 0;
-    
-    // Criar modal de detalhes
-    const modalHTML = `
+    // Usar requestAnimationFrame para evitar bloqueios
+    requestAnimationFrame(() => {
+        const report = reports.find(r => r.id === reportId);
+        if (!report) return;
+        
+        // Calcular totais
+        const totalDiarias = (report.quantidadeDiarias || 0) * 70;
+        const totalGastos = (report.valorGasolina || 0) + totalDiarias + (report.totalCustosGerais || 0) + (report.salarioLiquido || 0);
+        const lucroLiquido = (report.receita || 0) - totalGastos;
+        const margemLucro = totalGastos > 0 ? ((lucroLiquido / totalGastos) * 100) : 0;
+        
+        // Criar modal de detalhes
+        const modalHTML = `
         <div id="reportDetailsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="glass-effect rounded-2xl p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-6">
@@ -684,13 +649,77 @@ function viewReportSummary(reportId) {
                             
                             <!-- Custos Gerais -->
                             <div class="bg-gray-700/30 rounded-lg p-4">
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center mb-4">
                                     <div>
                                         <p class="text-white font-semibold">🔧 Custos Gerais</p>
                                         <p class="text-gray-300 text-sm">Manutenção, pedágios, multas, etc.</p>
                                         <p class="text-gray-400 text-xs">Gastos diversos relacionados à viagem</p>
                                     </div>
                                     <span class="text-red-400 font-bold text-xl">R$ ${(report.totalCustosGerais || 0).toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                
+                                <!-- Lista simples de custos gerais -->
+                                <div class="space-y-2">
+                                    ${(report.todasParcelas && report.todasParcelas.length > 0) ? 
+                                        report.todasParcelas.map(custo => `
+                                            <div class="flex justify-between items-center bg-gray-600/30 rounded-lg p-3">
+                                                <div class="flex-1">
+                                                    <p class="text-white font-medium">${custo.tipo_gasto || 'Tipo não informado'}</p>
+                                                    <p class="text-gray-300 text-sm">${custo.descricao || 'Sem descrição'}</p>
+                                                    <div class="flex gap-2 mt-1">
+                                                        <span class="text-gray-400 text-xs">🏪 ${custo.oficina_fornecedor || 'N/A'}</span>
+                                                        <span class="text-gray-400 text-xs">🚛 ${custo.veiculo_placa || 'N/A'}</span>
+                                                        <span class="text-gray-400 text-xs">📅 ${custo.data_vencimento}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-red-400 font-bold">R$ ${custo.valor_parcela.toFixed(2).replace('.', ',')}</p>
+                                                    <span class="px-2 py-1 text-xs rounded ${custo.paga ? 'bg-green-600/30 text-green-300' : 'bg-yellow-600/30 text-yellow-300'}">${custo.status_pagamento || 'Pendente'}</span>
+                                                </div>
+                                            </div>
+                                        `).join('') : 
+                                        '<div class="text-center text-gray-400 py-4"><p>Nenhum custo geral registrado</p></div>'
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Seção de Parcelas -->
+                            <div class="bg-gray-700/30 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <div>
+                                        <p class="text-white font-semibold text-lg">📋 Custos e Parcelas</p>
+                                        <p class="text-gray-300 text-sm">Todos os custos da viagem</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-white font-bold text-xl">${report.todasParcelas ? report.todasParcelas.length : 0} itens</p>
+                                    </div>
+                                </div>
+                                
+                                
+                                <!-- Lista de parcelas -->
+                                <div class="space-y-3" id="parcelas-container">
+                                    ${report.todasParcelas && report.todasParcelas.length > 0 ? 
+                                        report.todasParcelas.map(parcela => `
+                                            <div class="bg-gray-600/30 rounded-lg p-3 ${parcela.paga ? 'border-l-4 border-green-500' : 'border-l-4 border-yellow-500'}">
+                                                <div class="flex justify-between items-center">
+                                                    <div class="flex-1">
+                                                        <p class="text-white font-medium">${parcela.tipo_gasto || 'Custo'}</p>
+                                                        <p class="text-gray-300 text-sm">${parcela.descricao || 'Sem descrição'}</p>
+                                                        <div class="flex gap-2 mt-1">
+                                                            <span class="text-gray-400 text-xs">🏪 ${parcela.oficina_fornecedor || 'N/A'}</span>
+                                                            <span class="text-gray-400 text-xs">🚛 ${parcela.veiculo_placa || 'N/A'}</span>
+                                                            <span class="text-gray-400 text-xs">📅 ${parcela.data_vencimento}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <p class="text-white font-bold text-lg">R$ ${parcela.valor_parcela.toFixed(2).replace('.', ',')}</p>
+                                                        <span class="px-2 py-1 text-xs rounded ${parcela.paga ? 'bg-green-600/30 text-green-300' : 'bg-yellow-600/30 text-yellow-300'}">${parcela.status_pagamento}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('') : 
+                                        '<div class="text-center text-gray-400 py-4"><p>Nenhum custo registrado</p></div>'
+                                    }
                                 </div>
                             </div>
                             
@@ -762,7 +791,8 @@ function viewReportSummary(reportId) {
     `;
     
     // Adicionar modal ao body
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    });
 }
 
 function closeReportDetailsModal() {
@@ -773,34 +803,25 @@ function closeReportDetailsModal() {
 }
 
 function editReport(reportId) {
-    console.log('=== EDITAR RELATÓRIO ===');
-    console.log('ID do relatório:', reportId);
-    console.log('Redirecionando para:', `/login/atualizar-relatorio/${reportId}/`);
+    if (!reportId || isNaN(reportId) || reportId <= 0) {
+        showNotification('ID do relatório inválido', 'error');
+        return;
+    }
     
-    // Alert temporário para debug
-    alert(`Editando relatório ${reportId} - Redirecionando para página de edição`);
-    
-    // Redirecionar para a página de edição com dados preenchidos
+    showNotification('Carregando página de edição...', 'info');
     window.location.href = `/login/atualizar-relatorio/${reportId}/`;
 }
 
 async function deleteReport(reportId) {
-    console.log(`=== INÍCIO EXCLUSÃO RELATÓRIO ${reportId} ===`);
-    
     if (confirm('Tem certeza que deseja excluir este relatório?')) {
         try {
-            console.log('Usuário confirmou exclusão');
-            
             const csrfToken = getCSRFToken();
-            console.log('CSRF Token obtido:', csrfToken ? 'Sim' : 'Não');
             
             if (!csrfToken) {
                 console.error('CSRF Token não encontrado');
                 showNotification('Erro de autenticação. Faça login novamente.', 'error');
                 return;
             }
-            
-            console.log(`Fazendo requisição para: /login/excluir-relatorio/${reportId}/`);
             
             const response = await fetch(`/login/excluir-relatorio/${reportId}/`, {
                 method: 'POST',
@@ -1163,10 +1184,7 @@ function adicionarCustoGeral() {
 function atualizarListaCustosGerais() {
     const container = document.getElementById('listaCustosGeraisContent');
     
-    if (!container) {
-        console.log('Elemento listaCustosGeraisContent não encontrado');
-        return;
-    }
+    if (!container) return;
     
     if (custosGeraisRelatorio.length === 0) {
         container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Nenhum custo adicionado</p>';
@@ -1444,7 +1462,6 @@ async function excluirCustoFixo(custoId) {
 
 async function salvarRelatorioNoServidor(reportData, isEdit) {
     try {
-        
         const formData = new FormData();
         
         // Enviar tanto data_viagem quanto dataViagem para compatibilidade
@@ -1551,7 +1568,6 @@ function getCSRFToken() {
         return cookieToken;
     }
     
-    // Se não encontrar nenhum, retorna null
     return null;
 }
 
@@ -1573,19 +1589,10 @@ function showNotification(message, type) {
 }
 
 function formatDate(dateString) {
-    console.log('Formatando data:', dateString, 'tipo:', typeof dateString);
-    if (!dateString) {
-        console.log('Data vazia ou undefined');
-        return 'N/A';
-    }
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-        console.log('Data inválida:', dateString);
-        return 'Data inválida';
-    }
-    const formatted = date.toLocaleDateString('pt-BR');
-    console.log('Data formatada:', formatted);
-    return formatted;
+    if (isNaN(date.getTime())) return 'Data inválida';
+    return date.toLocaleDateString('pt-BR');
 }
 
 function getTipoDisplay(tipo) {
@@ -1603,14 +1610,7 @@ function getTipoDisplay(tipo) {
 // ===== FUNÇÕES ADICIONAIS =====
 
 function updatePreviousReportsList() {
-    console.log('=== ATUALIZANDO LISTA DE RELATÓRIOS ANTERIORES ===');
-    console.log('Total de relatórios:', reports.length);
-    
-    // Atualizar lista de relatórios anteriores
-    // Esta função é chamada quando os relatórios são carregados
-    // A lista é atualizada automaticamente pela função mostrarResultadosBusca
     if (reports.length > 0) {
-        // Se houver uma seção específica para relatórios anteriores, atualizar aqui
         const container = document.getElementById('relatoriosAnteriores');
         if (container) {
             container.innerHTML = `
@@ -1619,11 +1619,7 @@ function updatePreviousReportsList() {
                 </div>
             `;
         }
-        
-        // Mostrar todos os relatórios na seção de resultados
         mostrarResultadosBusca(reports);
-    } else {
-        console.log('Nenhum relatório para exibir');
     }
 }
 
