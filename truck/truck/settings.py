@@ -123,25 +123,22 @@ if DATABASE_URL:
     # Remover aspas se existirem
     DATABASE_URL = DATABASE_URL.strip('"').strip("'")
     
-    try:
-        # Tentar conectar com Supabase usando dj-database-url
-        DATABASES = {
-            'default': dj_database_url.parse(
-                DATABASE_URL,
-                conn_max_age=600,
-                ssl_require=not DEBUG
-            )
-        }
-    except Exception as e:
-        # Se falhar, usar SQLite como fallback
-        print(f"Erro ao conectar com Supabase: {e}")
-        print("Usando SQLite como fallback...")
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
-        }
+    # Se for Supabase, usar pooler para evitar IPv6
+    if 'supabase.co' in DATABASE_URL and 'pooler.supabase.com' not in DATABASE_URL:
+        # Converter URL direta para pooler
+        DATABASE_URL = DATABASE_URL.replace(
+            'db.esjnamnjnvkpbocsakfp.supabase.co:5432',
+            'aws-1-us-east-2.pooler.supabase.com:6543'
+        )
+    
+    # Tentar conectar com Supabase usando dj-database-url
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG
+        )
+    }
 else:
     # Configuração para desenvolvimento local com SQLite
     DATABASES = {
