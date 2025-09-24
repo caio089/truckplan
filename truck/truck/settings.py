@@ -53,12 +53,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
 CSRF_COOKIE_HTTPONLY = True
 
-# CSRF trusted origins for production
-if not DEBUG:
-    CSRF_TRUSTED_ORIGINS = [
-        'https://truckplan.onrender.com',
-        'https://*.onrender.com',
-    ]
+# CSRF trusted origins
+default_csrf = ['https://truckplan.onrender.com', 'https://*.onrender.com']
+env_csrf = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+if env_csrf:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in env_csrf.split(',') if o.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = default_csrf if not DEBUG else []
 
 
 # Application definition
@@ -179,3 +180,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/login/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# Logging to stdout (useful on Render)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO' if not DEBUG else 'DEBUG',
+    },
+}
