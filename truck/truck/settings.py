@@ -131,14 +131,34 @@ if DATABASE_URL:
             'aws-1-us-east-2.pooler.supabase.com:6543'
         )
     
-    # Tentar conectar com Supabase usando dj-database-url
-    DATABASES = {
-        'default': dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=not DEBUG
-        )
-    }
+    # Configuração específica para Supabase no Render
+    if 'supabase.co' in DATABASE_URL:
+        # Forçar IPv4 e configurações específicas para Supabase
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'postgres',
+                'USER': 'postgres',
+                'PASSWORD': '5252526363637373636363535',
+                'HOST': 'aws-1-us-east-2.pooler.supabase.com',
+                'PORT': '6543',
+                'OPTIONS': {
+                    'sslmode': 'require',
+                    'connect_timeout': 10,
+                    'options': '-c default_transaction_isolation=read_committed'
+                },
+                'CONN_MAX_AGE': 600,
+            }
+        }
+    else:
+        # Outros bancos usando dj-database-url
+        DATABASES = {
+            'default': dj_database_url.parse(
+                DATABASE_URL,
+                conn_max_age=600,
+                ssl_require=not DEBUG
+            )
+        }
 else:
     # Configuração para desenvolvimento local com SQLite
     DATABASES = {
