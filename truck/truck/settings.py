@@ -115,12 +115,24 @@ import dj_database_url
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     # Em produção (Render), exigir SSL para provedores externos (ex.: Supabase)
+    db_config = dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
+    
+    # Forçar IPv4 para evitar problemas de conectividade
+    if not DEBUG and 'supabase.co' in DATABASE_URL:
+        # Usar pooler do Supabase que funciona melhor com IPv4
+        if 'pooler.supabase.com' not in DATABASE_URL:
+            # Se não estiver usando pooler, forçar IPv4
+            db_config['OPTIONS'] = {
+                'connect_timeout': 10,
+                'options': '-c default_transaction_isolation=read_committed'
+            }
+    
     DATABASES = {
-        'default': dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=not DEBUG
-        )
+        'default': db_config
     }
 else:
     # Configuração para desenvolvimento local com SQLite
