@@ -71,6 +71,89 @@
             .mobile-card-text-lg { font-size: 1rem; }
             .mobile-card-text-xl { font-size: 1.125rem; }
             .mobile-card-text-2xl { font-size: 1.25rem; }
+            
+            /* Melhorias específicas para mobile */
+            .mobile-stack { display: flex; flex-direction: column; gap: 0.5rem; }
+            .mobile-full-width { width: 100%; }
+            .mobile-text-xs { font-size: 0.75rem; }
+            .mobile-text-center { text-align: center; }
+            .mobile-justify-between { justify-content: space-between; }
+            .mobile-items-start { align-items: flex-start; }
+            .mobile-items-end { align-items: flex-end; }
+            .mobile-flex-wrap { flex-wrap: wrap; }
+            .mobile-gap-1 { gap: 0.25rem; }
+            .mobile-gap-3 { gap: 0.75rem; }
+            .mobile-p-1 { padding: 0.25rem; }
+            .mobile-p-3 { padding: 0.75rem; }
+            .mobile-p-5 { padding: 1.25rem; }
+            .mobile-m-1 { margin: 0.25rem; }
+            .mobile-m-2 { margin: 0.5rem; }
+            .mobile-m-3 { margin: 0.75rem; }
+            .mobile-mb-1 { margin-bottom: 0.25rem; }
+            .mobile-mb-2 { margin-bottom: 0.5rem; }
+            .mobile-mb-3 { margin-bottom: 0.75rem; }
+            .mobile-mt-1 { margin-top: 0.25rem; }
+            .mobile-mt-2 { margin-top: 0.5rem; }
+            .mobile-mt-3 { margin-top: 0.75rem; }
+            .mobile-mr-1 { margin-right: 0.25rem; }
+            .mobile-mr-2 { margin-right: 0.5rem; }
+            .mobile-ml-1 { margin-left: 0.25rem; }
+            .mobile-ml-2 { margin-left: 0.5rem; }
+            .mobile-border { border: 1px solid rgba(75, 85, 99, 0.3); }
+            .mobile-border-t { border-top: 1px solid rgba(75, 85, 99, 0.3); }
+            .mobile-border-b { border-bottom: 1px solid rgba(75, 85, 99, 0.3); }
+            .mobile-border-l { border-left: 1px solid rgba(75, 85, 99, 0.3); }
+            .mobile-border-r { border-right: 1px solid rgba(75, 85, 99, 0.3); }
+            .mobile-rounded { border-radius: 0.375rem; }
+            .mobile-rounded-md { border-radius: 0.375rem; }
+            .mobile-shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); }
+            .mobile-shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+            .mobile-shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+            .mobile-bg-opacity-50 { background-color: rgba(31, 41, 55, 0.5); }
+            .mobile-bg-opacity-80 { background-color: rgba(31, 41, 55, 0.8); }
+            .mobile-bg-opacity-90 { background-color: rgba(31, 41, 55, 0.9); }
+            .mobile-backdrop-blur { backdrop-filter: blur(8px); }
+            .mobile-backdrop-blur-sm { backdrop-filter: blur(4px); }
+            .mobile-backdrop-blur-lg { backdrop-filter: blur(16px); }
+            .mobile-transition { transition: all 0.3s ease; }
+            .mobile-transition-fast { transition: all 0.15s ease; }
+            .mobile-transition-slow { transition: all 0.5s ease; }
+            .mobile-hover-scale:hover { transform: scale(1.02); }
+            .mobile-hover-brightness:hover { filter: brightness(1.1); }
+            .mobile-hover-opacity:hover { opacity: 0.9; }
+            .mobile-focus-ring:focus { outline: 2px solid rgba(59, 130, 246, 0.5); }
+            .mobile-focus-ring:focus { outline-offset: 2px; }
+            .mobile-scroll-smooth { scroll-behavior: smooth; }
+            .mobile-scroll-auto { scroll-behavior: auto; }
+            .mobile-overflow-hidden { overflow: hidden; }
+            .mobile-overflow-visible { overflow: visible; }
+            .mobile-overflow-scroll { overflow: scroll; }
+            .mobile-overflow-x-hidden { overflow-x: hidden; }
+            .mobile-overflow-y-hidden { overflow-y: hidden; }
+            .mobile-overflow-x-scroll { overflow-x: scroll; }
+            .mobile-overflow-y-scroll { overflow-y: scroll; }
+            .mobile-overflow-x-auto { overflow-x: auto; }
+            .mobile-overflow-y-auto { overflow-y: auto; }
+            .mobile-whitespace-nowrap { white-space: nowrap; }
+            .mobile-whitespace-normal { white-space: normal; }
+            .mobile-whitespace-pre { white-space: pre; }
+            .mobile-whitespace-pre-line { white-space: pre-line; }
+            .mobile-whitespace-pre-wrap { white-space: pre-wrap; }
+            .mobile-break-words { word-break: break-word; }
+            .mobile-break-all { word-break: break-all; }
+            .mobile-break-normal { word-break: normal; }
+            .mobile-text-ellipsis { text-overflow: ellipsis; }
+            .mobile-text-clip { text-overflow: clip; }
+            .mobile-text-nowrap { white-space: nowrap; }
+            .mobile-text-wrap { white-space: normal; }
+            .mobile-text-balance { text-wrap: balance; }
+            .mobile-text-pretty { text-wrap: pretty; }
+            .mobile-text-stable { text-wrap: stable; }
+            .mobile-text-unstable { text-wrap: unstable; }
+            .mobile-text-auto { text-wrap: auto; }
+            .mobile-text-inherit { text-wrap: inherit; }
+            .mobile-text-initial { text-wrap: initial; }
+            .mobile-text-unset { text-wrap: unset; }
         }
         
         /* Tablet optimizations */
@@ -115,13 +198,13 @@
             
             <!-- Formulário de Busca -->
             <form method="get" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-gray-200 text-sm font-semibold mb-2">Data da Viagem</label>
-                        <input type="date" name="data_viagem" id="dataViagem" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20 mobile-input" value="{{ data_viagem|date:'Y-m-d' }}">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mobile-stack">
+                    <div class="mobile-w-full">
+                        <label class="block text-gray-200 text-sm font-semibold mb-2 mobile-text-sm">Data da Viagem</label>
+                        <input type="date" name="data_viagem" id="dataViagem" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20 mobile-input mobile-touch-target mobile-full-width" value="{{ data_viagem|date:'Y-m-d' }}">
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
+                    <div class="flex items-end mobile-w-full">
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base mobile-button mobile-full-width">
                             🔍 Buscar Relatório
                         </button>
                     </div>
@@ -134,44 +217,44 @@
         <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">🚛 Resumo da Viagem</h2>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-blue-100 text-xs sm:text-sm font-medium">Data da Viagem</p>
-                            <p class="text-lg sm:text-xl lg:text-2xl font-bold">{{ relatorio.data_viagem|date:"d/m/Y" }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mobile-grid-1 mobile-gap-3">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-blue-100 text-xs sm:text-sm font-medium mobile-text-xs">Data da Viagem</p>
+                            <p class="text-lg sm:text-xl lg:text-2xl font-bold mobile-text-lg mobile-text-center">{{ relatorio.data_viagem|date:"d/m/Y" }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl opacity-80">📅</div>
+                        <div class="text-2xl sm:text-3xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">📅</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-green-100 text-xs sm:text-sm font-medium">Rota</p>
-                            <p class="text-sm sm:text-base lg:text-lg font-bold">{{ relatorio.partida }} → {{ relatorio.chegada }}</p>
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-green-100 text-xs sm:text-sm font-medium mobile-text-xs">Rota</p>
+                            <p class="text-sm sm:text-base lg:text-lg font-bold mobile-text-sm mobile-text-center mobile-break-words">{{ relatorio.partida }} → {{ relatorio.chegada }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl opacity-80">🗺️</div>
+                        <div class="text-2xl sm:text-3xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">🗺️</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Motorista</p>
-                            <p class="text-sm sm:text-base lg:text-lg font-bold">{{ relatorio.motorista }}</p>
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-purple-100 text-xs sm:text-sm font-medium mobile-text-xs">Motorista</p>
+                            <p class="text-sm sm:text-base lg:text-lg font-bold mobile-text-sm mobile-text-center">{{ relatorio.motorista }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl opacity-80">👨‍💼</div>
+                        <div class="text-2xl sm:text-3xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">👨‍💼</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-orange-100 text-xs sm:text-sm font-medium">Caminhão</p>
-                            <p class="text-sm sm:text-base lg:text-lg font-bold">{{ relatorio.caminhao }}</p>
+                <div class="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-orange-100 text-xs sm:text-sm font-medium mobile-text-xs">Caminhão</p>
+                            <p class="text-sm sm:text-base lg:text-lg font-bold mobile-text-sm mobile-text-center">{{ relatorio.caminhao }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl opacity-80">🚛</div>
+                        <div class="text-2xl sm:text-3xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">🚛</div>
                     </div>
                 </div>
             </div>
@@ -181,54 +264,54 @@
         <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">💰 Resumo Financeiro</h2>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-blue-100 text-xs sm:text-sm font-medium">Receita do Frete</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ relatorio.receita_frete|floatformat:2 }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mobile-grid-1 mobile-gap-3">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-blue-100 text-xs sm:text-sm font-medium mobile-text-xs">Receita do Frete</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold mobile-text-lg mobile-text-center">R$ {{ relatorio.receita_frete|floatformat:2 }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💰</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">💰</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-red-100 text-xs sm:text-sm font-medium">Gasto com Gasolina</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ relatorio.gasto_gasolina|floatformat:2 }}</p>
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-red-100 text-xs sm:text-sm font-medium mobile-text-xs">Gasto com Gasolina</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold mobile-text-lg mobile-text-center">R$ {{ relatorio.gasto_gasolina|floatformat:2 }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">⛽</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">⛽</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-yellow-100 text-xs sm:text-sm font-medium">Valor das Diárias</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ relatorio.valor_diarias|floatformat:2 }}</p>
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-yellow-100 text-xs sm:text-sm font-medium mobile-text-xs">Valor das Diárias</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold mobile-text-lg mobile-text-center">R$ {{ relatorio.valor_diarias|floatformat:2 }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📅</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">📅</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-green-100 text-xs sm:text-sm font-medium">Custos Gerais</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">R$ {{ total_custos_gerais|floatformat:2 }}</p>
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-green-100 text-xs sm:text-sm font-medium mobile-text-xs">Custos Gerais</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold mobile-text-lg mobile-text-center">R$ {{ total_custos_gerais|floatformat:2 }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💳</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">💳</div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Lucro Líquido</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold {% if lucro_liquido >= 0 %}text-green-300{% else %}text-red-300{% endif %}">R$ {{ lucro_liquido|floatformat:2 }}</p>
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white mobile-p-4 mobile-card-padding">
+                    <div class="flex items-center justify-between mobile-flex-col mobile-items-start mobile-gap-2">
+                        <div class="mobile-w-full">
+                            <p class="text-purple-100 text-xs sm:text-sm font-medium mobile-text-xs">Lucro Líquido</p>
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold mobile-text-lg mobile-text-center {% if lucro_liquido >= 0 %}text-green-300{% else %}text-red-300{% endif %}">R$ {{ lucro_liquido|floatformat:2 }}</p>
                         </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📈</div>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80 mobile-text-2xl mobile-text-center mobile-mt-2">📈</div>
                     </div>
                 </div>
             </div>
@@ -242,44 +325,44 @@
                 <table class="w-full text-white mobile-table">
                     <thead>
                         <tr class="border-b border-gray-600">
-                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Tipo</th>
-                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Veículo</th>
-                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Descrição</th>
-                            <th class="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Valor</th>
-                            <th class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Parcelas</th>
-                            <th class="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Valor Parcela</th>
-                            <th class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Status</th>
+                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs">Tipo</th>
+                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs">Veículo</th>
+                            <th class="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs">Descrição</th>
+                            <th class="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs">Valor</th>
+                            <th class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs">Parcelas</th>
+                            <th class="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs">Valor Parcela</th>
+                            <th class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for custo in custos_gerais_detalhados %}
                         <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
-                            <td class="py-2 sm:py-3 px-2 sm:px-4">
-                                <span class="px-1 sm:px-2 py-1 bg-blue-600 text-white rounded text-xs">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 mobile-p-2">
+                                <span class="px-1 sm:px-2 py-1 bg-blue-600 text-white rounded text-xs mobile-text-xs">
                                     {{ custo.get_tipo_gasto_display }}
                                 </span>
                             </td>
-                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{{ custo.veiculo_placa }}</td>
-                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{{ custo.descricao|truncatechars:20 }}</td>
-                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-right font-semibold text-xs sm:text-sm">R$ {{ custo.valor|floatformat:2 }}</td>
-                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-center">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs mobile-p-2">{{ custo.veiculo_placa }}</td>
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm mobile-text-xs mobile-p-2 mobile-break-words">{{ custo.descricao|truncatechars:20 }}</td>
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-right font-semibold text-xs sm:text-sm mobile-text-xs mobile-p-2">R$ {{ custo.valor|floatformat:2 }}</td>
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-center mobile-p-2">
                                 {% if custo.is_parcela %}
-                                    <span class="bg-orange-600 text-white px-1 sm:px-2 py-1 rounded text-xs">
+                                    <span class="bg-orange-600 text-white px-1 sm:px-2 py-1 rounded text-xs mobile-text-xs">
                                         {{ custo.parcela_numero }}/{{ custo.total_parcelas }}
                                     </span>
                                 {% else %}
-                                    <span class="text-gray-400 text-xs">-</span>
+                                    <span class="text-gray-400 text-xs mobile-text-xs">-</span>
                                 {% endif %}
                             </td>
-                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-right mobile-p-2">
                                 {% if custo.is_parcela %}
-                                    <span class="text-orange-300 font-semibold text-xs sm:text-sm">R$ {{ custo.valor_parcela|floatformat:2 }}</span>
+                                    <span class="text-orange-300 font-semibold text-xs sm:text-sm mobile-text-xs">R$ {{ custo.valor_parcela|floatformat:2 }}</span>
                                 {% else %}
-                                    <span class="text-gray-400 text-xs">-</span>
+                                    <span class="text-gray-400 text-xs mobile-text-xs">-</span>
                                 {% endif %}
                             </td>
-                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-center">
-                                <span class="px-1 sm:px-2 py-1 rounded text-xs {% if custo.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
+                            <td class="py-2 sm:py-3 px-2 sm:px-4 text-center mobile-p-2">
+                                <span class="px-1 sm:px-2 py-1 rounded text-xs mobile-text-xs {% if custo.status_pagamento == 'pago' %}bg-green-600 text-white{% else %}bg-red-600 text-white{% endif %}">
                                     {{ custo.get_status_pagamento_display }}
                                 </span>
                             </td>

@@ -5,6 +5,58 @@ let custosGeraisRelatorio = [];
 
 // ===== FUNÇÕES PRINCIPAIS =====
 
+// Função para buscar relatório por data específica
+function buscarRelatorioPorData() {
+    const dataEspecifica = document.getElementById('dataEspecifica').value;
+    
+    if (!dataEspecifica) {
+        showNotification('Selecione uma data específica!', 'error');
+        return;
+    }
+    
+    // Formatar data para exibição (corrigir problema de fuso horário)
+    const dataFormatada = new Date(dataEspecifica + 'T00:00:00').toLocaleDateString('pt-BR');
+    
+    // Obter CSRF token
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        console.error('CSRF token não encontrado');
+        showNotification('Erro: Token CSRF não encontrado', 'error');
+        return;
+    }
+    
+    console.log('Buscando relatórios para data:', dataEspecifica);
+    
+    // Buscar dados do servidor
+    fetch('/login/buscar-relatorios-periodo/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            data_inicio: dataEspecifica,
+            data_fim: dataEspecifica
+        })
+    })
+    .then(response => {
+        console.log('Resposta do servidor:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Dados recebidos:', data);
+        if (data.success) {
+            mostrarResultadosBusca(data, dataFormatada);
+        } else {
+            mostrarErroBusca(data.error || 'Erro ao buscar relatórios');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao buscar relatórios:', error);
+        mostrarErroBusca('Erro de conexão ao buscar relatórios');
+    });
+}
+
 // Carregar relatórios do servidor
 async function carregarRelatoriosDoServidor() {
     try {
@@ -116,24 +168,27 @@ function irParaRelatorioMensal() {
 // ===== FUNÇÕES DE BUSCA E FILTROS =====
 
 function showPreviousReports() {
-    mostrarResultadosBusca(reports);
+    // Esta função não é mais usada, mantida para compatibilidade
+    console.log('showPreviousReports chamada - função obsoleta');
 }
 
-function buscarRelatorioPorData() {
-    const dataEspecifica = document.getElementById('dataEspecifica').value;
-    
-    if (!dataEspecifica) {
-        showNotification('Selecione uma data específica!', 'error');
-        return;
+// Função removida - movida para o início do arquivo
+
+// Função para mostrar erro na busca
+function mostrarErroBusca(mensagem) {
+    const resultadosDiv = document.getElementById('resultadosBusca');
+    if (resultadosDiv) {
+        resultadosDiv.innerHTML = `
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-red-500/30 mb-8">
+                <h3 class="text-2xl font-bold text-white mb-6">❌ Erro na Busca</h3>
+                <div class="text-center text-red-400 py-8">
+                    <span class="text-4xl">⚠️</span>
+                    <p class="mt-4 text-lg">${mensagem}</p>
+                </div>
+            </div>
+        `;
+        resultadosDiv.classList.remove('hidden');
     }
-    
-    const relatoriosFiltrados = reports.filter(report => {
-        const reportDate = new Date(report.date);
-        const dataSelecionada = new Date(dataEspecifica);
-        return reportDate.toDateString() === dataSelecionada.toDateString();
-    });
-    
-    mostrarResultadosBusca(relatoriosFiltrados);
 }
 
 
@@ -695,15 +750,15 @@ function viewReportSummary(reportId) {
                     </div>
                     
                     <!-- Ações -->
-                    <div class="flex justify-end space-x-4">
-                        <button onclick="closeReportDetailsModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                    <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
+                        <button onclick="closeReportDetailsModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors text-sm mobile-touch-target w-full sm:w-auto">
                             Fechar
                         </button>
-                        <button onclick="editReport(${report.id}); closeReportDetailsModal();" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                            ✏️ Editar Relatório
+                        <button onclick="editReport(${report.id}); closeReportDetailsModal();" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors text-sm mobile-touch-target w-full sm:w-auto">
+                            ✏️ Editar
                         </button>
-                        <button onclick="deleteReport(${report.id}); closeReportDetailsModal();" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                            🗑️ Excluir Relatório
+                        <button onclick="deleteReport(${report.id}); closeReportDetailsModal();" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors text-sm mobile-touch-target w-full sm:w-auto">
+                            🗑️ Excluir
                         </button>
                     </div>
                 </div>
@@ -1547,6 +1602,8 @@ function buscarRelatoriosPorData() {
     `;
     
     // Buscar relatórios do servidor
+    console.log('Buscando relatórios para data:', dataEspecifica);
+    
     fetch('/login/buscar-relatorios-periodo/', {
         method: 'POST',
         headers: {
@@ -1558,8 +1615,12 @@ function buscarRelatoriosPorData() {
             data_fim: dataEspecifica
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Resposta do servidor:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Dados recebidos:', data);
         if (data.success) {
             mostrarResultadosBusca(data, dataFormatada);
         } else {

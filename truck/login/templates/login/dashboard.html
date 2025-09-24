@@ -718,11 +718,20 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{% static 'login/js/scripts.js' %}?v=20250122194500"></script>
+    <script src="{% static 'login/js/scripts.js' %}?v=20250124162500"></script>
     <script>
-        // Limpar dados de teste
+        // Limpar dados de teste e cache
         localStorage.removeItem('truckReports');
         localStorage.removeItem('truckCosts');
+        
+        // Forçar atualização do cache
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+        }
         
         // Carregar dados do servidor quando a página carregar
         document.addEventListener('DOMContentLoaded', function() {

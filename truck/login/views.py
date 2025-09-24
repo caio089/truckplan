@@ -1214,7 +1214,9 @@ def relatorio_diario(request):
                     'data_viagem': data_viagem,
                     'relatorio': None,
                     'custos_gerais_detalhados': [],
-                    'total_custos_gerais': 0
+                    'total_custos_gerais': 0,
+                    'total_gastos': 0,
+                    'lucro_liquido': 0
                 })
             
             # Buscar custos gerais do dia
