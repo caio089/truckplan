@@ -17,6 +17,11 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
+# Configurações específicas para Render
+if os.environ.get('RENDER'):
+    # Configurações específicas para o ambiente Render
+    pass
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -110,30 +115,33 @@ WSGI_APPLICATION = 'truck.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 import dj_database_url
+import os
 
 # Configuração do banco de dados usando dj-database-url
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
-    # Em produção (Render), exigir SSL para provedores externos (ex.: Supabase)
-    db_config = dj_database_url.parse(
-        DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=not DEBUG
-    )
+    # Remover aspas se existirem
+    DATABASE_URL = DATABASE_URL.strip('"').strip("'")
     
-    # Forçar IPv4 para evitar problemas de conectividade
-    if not DEBUG and 'supabase.co' in DATABASE_URL:
-        # Usar pooler do Supabase que funciona melhor com IPv4
-        if 'pooler.supabase.com' not in DATABASE_URL:
-            # Se não estiver usando pooler, forçar IPv4
-            db_config['OPTIONS'] = {
-                'connect_timeout': 10,
-                'options': '-c default_transaction_isolation=read_committed'
+    try:
+        # Tentar conectar com Supabase usando dj-database-url
+        DATABASES = {
+            'default': dj_database_url.parse(
+                DATABASE_URL,
+                conn_max_age=600,
+                ssl_require=not DEBUG
+            )
+        }
+    except Exception as e:
+        # Se falhar, usar SQLite como fallback
+        print(f"Erro ao conectar com Supabase: {e}")
+        print("Usando SQLite como fallback...")
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
             }
-    
-    DATABASES = {
-        'default': db_config
-    }
+        }
 else:
     # Configuração para desenvolvimento local com SQLite
     DATABASES = {
