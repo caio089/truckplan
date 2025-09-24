@@ -3,7 +3,7 @@ services:
     name: truckplan
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py create_default_user
     startCommand: gunicorn truck.wsgi:application
     envVars:
       - key: DEBUG

@@ -114,8 +114,13 @@ import dj_database_url
 # Configuração do banco de dados usando dj-database-url
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
+    # Em produção (Render), exigir SSL para provedores externos (ex.: Supabase)
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG
+        )
     }
 else:
     # Configuração para desenvolvimento local com SQLite
