@@ -136,125 +136,14 @@ function buscarRelatorioPorData() {
     mostrarResultadosBusca(relatoriosFiltrados);
 }
 
-function mostrarResultadosBusca(relatorios) {
-    // Usar requestAnimationFrame para evitar bloqueios
-    requestAnimationFrame(() => {
-        
-        const container = document.getElementById('resultadosBusca');
-        const resumo = document.getElementById('resumoResultados');
-        const tabela = document.getElementById('tabelaResultados');
-        
-        if (relatorios.length === 0) {
-            resumo.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Nenhum relatório encontrado para a data selecionada</div>';
-            tabela.innerHTML = '';
-        } else {
-        
-        // Calcular resumo
-        const totalLucros = relatorios.reduce((sum, report) => sum + (report.receita || 0), 0);
-        const totalGastos = relatorios.reduce((sum, report) => {
-            const gastosViagem = (report.valorGasolina || 0) + (report.totalDiarias || 0);
-            const custosGerais = report.totalCustosGerais || 0;
-            const salario = report.salarioLiquido || 0;
-            return sum + gastosViagem + custosGerais + salario;
-        }, 0);
-        const lucroLiquido = totalLucros - totalGastos;
-        const mediaDiaria = relatorios.length > 0 ? lucroLiquido / relatorios.length : 0;
-        
-        resumo.innerHTML = `
-            <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-red-100 text-sm font-medium">Total de Gastos</p>
-                        <p class="text-3xl font-bold">R$ ${totalGastos.toFixed(2).replace('.', ',')}</p>
-                    </div>
-                    <div class="text-4xl opacity-80">💰</div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
-                        <p class="text-3xl font-bold">R$ ${totalLucros.toFixed(2).replace('.', ',')}</p>
-                    </div>
-                    <div class="text-4xl opacity-80">📈</div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
-                        <p class="text-3xl font-bold">R$ ${lucroLiquido.toFixed(2).replace('.', ',')}</p>
-                    </div>
-                    <div class="text-4xl opacity-80">💎</div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-2xl p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-yellow-100 text-sm font-medium">Média Diária</p>
-                        <p class="text-3xl font-bold">R$ ${mediaDiaria.toFixed(2).replace('.', ',')}</p>
-                    </div>
-                    <div class="text-4xl opacity-80">📊</div>
-                </div>
-            </div>
-        `;
-        
-        // Gerar tabela
-        tabela.innerHTML = `
-            <table class="w-full text-white">
-                <thead>
-                    <tr class="border-b border-gray-600">
-                        <th class="text-left py-3 px-4">Data</th>
-                        <th class="text-left py-3 px-4">Rota</th>
-                        <th class="text-left py-3 px-4">Motorista</th>
-                        <th class="text-left py-3 px-4">Receita</th>
-                        <th class="text-left py-3 px-4">Gastos</th>
-                        <th class="text-left py-3 px-4">Lucro</th>
-                        <th class="text-left py-3 px-4">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${relatorios.map(report => {
-                        const receita = report.receita || 0;
-                        const valorGasolina = report.valorGasolina || 0;
-                        const totalDiarias = report.totalDiarias || 0;
-                        const totalCustosGerais = report.totalCustosGerais || 0;
-                        const salarioLiquido = report.salarioLiquido || 0;
-                        const totalGastos = valorGasolina + totalDiarias + totalCustosGerais + salarioLiquido;
-                        const lucro = receita - totalGastos;
-                        
-                        return `
-                        <tr class="border-b border-gray-700 hover:bg-gray-800/50">
-                            <td class="py-3 px-4">${formatDate(report.date)}</td>
-                            <td class="py-3 px-4">${report.localPartida || 'N/A'} → ${report.localChegada || 'N/A'}</td>
-                            <td class="py-3 px-4">${report.nomeMotorista || 'N/A'}</td>
-                            <td class="py-3 px-4 text-green-400">R$ ${receita.toFixed(2).replace('.', ',')}</td>
-                            <td class="py-3 px-4 text-red-400">R$ ${totalGastos.toFixed(2).replace('.', ',')}</td>
-                            <td class="py-3 px-4 ${lucro >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                R$ ${lucro.toFixed(2).replace('.', ',')}
-                            </td>
-                            <td class="py-3 px-4">
-                                <button onclick="viewReportSummary(${report.id})" class="text-blue-400 hover:text-blue-300 mr-2">Ver</button>
-                                <button onclick="editReport(${report.id})" class="text-yellow-400 hover:text-yellow-300 mr-2">Editar</button>
-                                <button onclick="deleteReport(${report.id})" class="text-red-400 hover:text-red-300">Excluir</button>
-                            </td>
-                        </tr>
-                    `;
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
-    }
-    
-        container.classList.remove('hidden');
-    });
-}
 
 // ===== FUNÇÕES DE AÇÕES RÁPIDAS =====
 
 function mostrarRelatoriosHoje() {
     try {
+        console.log('Mostrando relatórios de hoje...');
         const hoje = new Date().toISOString().split('T')[0];
+        console.log('Data de hoje:', hoje);
         
         // Obter CSRF token de forma mais robusta
         const csrfToken = getCSRFToken();
@@ -263,6 +152,7 @@ function mostrarRelatoriosHoje() {
             showNotification('Erro: Token CSRF não encontrado', 'error');
             return;
         }
+        console.log('CSRF token encontrado:', csrfToken);
         
         // Buscar dados do servidor
         fetch('/login/buscar-relatorios-periodo/', {
@@ -283,8 +173,10 @@ function mostrarRelatoriosHoje() {
             return response.json();
         })
         .then(data => {
+            console.log('Dados recebidos:', data);
             if (data.success) {
-                mostrarResultadosBusca(data.relatorios);
+                console.log('Chamando mostrarResultadosBusca com:', data.relatorios);
+                mostrarResultadosBusca(data, 'Período');
             } else {
                 console.error('Erro do servidor:', data.error);
                 showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
@@ -302,12 +194,14 @@ function mostrarRelatoriosHoje() {
 
 function mostrarRelatoriosSemana() {
     try {
+        console.log('Mostrando relatórios da semana...');
         const hoje = new Date();
         const inicioSemana = new Date(hoje);
         inicioSemana.setDate(hoje.getDate() - hoje.getDay());
         
         const dataInicio = inicioSemana.toISOString().split('T')[0];
         const dataFim = hoje.toISOString().split('T')[0];
+        console.log('Período da semana:', dataInicio, 'a', dataFim);
         
         // Obter CSRF token de forma mais robusta
         const csrfToken = getCSRFToken();
@@ -336,8 +230,10 @@ function mostrarRelatoriosSemana() {
             return response.json();
         })
         .then(data => {
+            console.log('Dados recebidos:', data);
             if (data.success) {
-                mostrarResultadosBusca(data.relatorios);
+                console.log('Chamando mostrarResultadosBusca com:', data.relatorios);
+                mostrarResultadosBusca(data, 'Período');
             } else {
                 console.error('Erro do servidor:', data.error);
                 showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
@@ -355,11 +251,13 @@ function mostrarRelatoriosSemana() {
 
 function mostrarRelatoriosMes() {
     try {
+        console.log('Mostrando relatórios do mês...');
         const hoje = new Date();
         const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
         
         const dataInicio = inicioMes.toISOString().split('T')[0];
         const dataFim = hoje.toISOString().split('T')[0];
+        console.log('Período do mês:', dataInicio, 'a', dataFim);
         
         // Obter CSRF token de forma mais robusta
         const csrfToken = getCSRFToken();
@@ -388,8 +286,10 @@ function mostrarRelatoriosMes() {
             return response.json();
         })
         .then(data => {
+            console.log('Dados recebidos:', data);
             if (data.success) {
-                mostrarResultadosBusca(data.relatorios);
+                console.log('Chamando mostrarResultadosBusca com:', data.relatorios);
+                mostrarResultadosBusca(data, 'Período');
             } else {
                 console.error('Erro do servidor:', data.error);
                 showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
@@ -409,16 +309,37 @@ function mostrarRelatoriosMes() {
 
 function openReportModal() {
     try {
+        console.log('=== ABRINDO MODAL DE RELATÓRIO ===');
+        console.log('Chamando limparFormularioViagem...');
         limparFormularioViagem();
+        
+        console.log('Buscando elemento reportModal...');
         const modal = document.getElementById('reportModal');
+        console.log('Elemento reportModal encontrado:', modal);
+        
         if (modal) {
+            console.log('Removendo classe hidden do modal...');
             modal.classList.remove('hidden');
+            console.log('Modal deve estar visível agora');
+        } else {
+            console.error('Elemento reportModal não encontrado!');
         }
+        
+        console.log('Buscando campo dataViagem...');
         const dataField = document.getElementById('dataViagem');
+        console.log('Campo dataViagem encontrado:', dataField);
+        
         if (dataField) {
-            dataField.value = new Date().toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0];
+            console.log('Definindo data para hoje:', today);
+            dataField.value = today;
+        } else {
+            console.error('Campo dataViagem não encontrado!');
         }
+        
+        console.log('Chamando updateReportPreview...');
         updateReportPreview();
+        console.log('=== MODAL DE RELATÓRIO ABERTO ===');
     } catch (error) {
         console.error('Erro ao abrir modal de relatório:', error);
     }
@@ -906,19 +827,30 @@ async function deleteReport(reportId) {
 // ===== FORMULÁRIOS =====
 
 function limparFormularioViagem() {
-    document.getElementById('dataViagem').value = new Date().toISOString().split('T')[0];
-    document.getElementById('localPartida').value = '';
-    document.getElementById('localChegada').value = '';
-    document.getElementById('quantidadeDiarias').value = '';
-    document.getElementById('litrosGasolina').value = '';
-    document.getElementById('valorGasolina').value = '';
-    document.getElementById('nomeMotorista').value = '';
-    document.getElementById('nomeCaminhao').value = '';
-    document.getElementById('receita').value = '';
-    document.getElementById('editReportId').value = '';
+    const setValueIfExists = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    };
+
+    setValueIfExists('dataViagem', new Date().toISOString().split('T')[0]);
+    setValueIfExists('localPartida', '');
+    setValueIfExists('localChegada', '');
+    setValueIfExists('quantidadeDiarias', '');
+    setValueIfExists('litrosGasolina', '');
+    setValueIfExists('valorGasolina', '');
+    setValueIfExists('nomeMotorista', '');
+    setValueIfExists('nomeCaminhao', '');
+    setValueIfExists('receita', '');
+    setValueIfExists('editReportId', '');
+
     custosGeraisRelatorio = [];
-    atualizarListaCustosGerais();
-    limparFormularioCusto();
+    if (typeof atualizarListaCustosGerais === 'function') {
+        atualizarListaCustosGerais();
+    }
+    // Só limpar o formulário de custo se os campos existirem
+    if (document.getElementById('tipoGasto')) {
+        limparFormularioCusto();
+    }
 }
 
 function limparFormularioCustoFixo() {
@@ -1236,84 +1168,43 @@ function removerCustoGeral(index) {
 }
 
 function limparFormularioCusto() {
-    document.getElementById('tipoGasto').value = '';
-    document.getElementById('dataCusto').value = '';
-    document.getElementById('placaCusto').value = '';
-    document.getElementById('oficinaFornecedor').value = '';
-    document.getElementById('descricaoCusto').value = '';
-    document.getElementById('valorCusto').value = '';
-    document.getElementById('formaPagamento').value = '';
-    document.getElementById('statusPagamento').value = '';
-    document.getElementById('dataVencimento').value = '';
-    document.getElementById('comprovante').value = '';
-    
-    // Limpar campos de parcelas
-    document.getElementById('quantidadeParcelas').value = '';
-    document.getElementById('valorParcela').value = '';
-    document.getElementById('dataPrimeiraParcela').value = '';
-    document.getElementById('diaVencimento').value = '15';
-    
-    // Ocultar campos de parcelas
-    document.getElementById('camposParcelas').classList.add('hidden');
-    document.getElementById('previewParcelas').classList.add('hidden');
+    const resetField = (id, value = '') => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    };
+
+    resetField('tipoGasto');
+    resetField('dataCusto');
+    resetField('placaCusto');
+    resetField('oficinaFornecedor');
+    resetField('descricaoCusto');
+    resetField('valorCusto');
+    resetField('formaPagamento');
+    resetField('statusPagamento');
+    resetField('dataVencimento');
+
+    // Arquivo
+    const comprovante = document.getElementById('comprovante');
+    if (comprovante) {
+        try { comprovante.value = ''; } catch (e) { /* ignore */ }
+    }
+
+    // Campos de parcelas (se existirem)
+    resetField('quantidadeParcelas');
+    resetField('valorParcela');
+    resetField('dataPrimeiraParcela');
+    resetField('diaVencimento', '15');
+
+    const camposParcelas = document.getElementById('camposParcelas');
+    if (camposParcelas) camposParcelas.classList.add('hidden');
+
+    const previewParcelas = document.getElementById('previewParcelas');
+    if (previewParcelas) previewParcelas.classList.add('hidden');
 }
 
 // ===== PARCELAS =====
 
-function toggleParcelas() {
-    const formaPagamento = document.getElementById('formaPagamento').value;
-    const camposParcelas = document.getElementById('camposParcelas');
-    
-    if (formaPagamento === 'credito' || formaPagamento === 'parcelado') {
-        camposParcelas.classList.remove('hidden');
-    } else {
-        camposParcelas.classList.add('hidden');
-        document.getElementById('quantidadeParcelas').value = '';
-        document.getElementById('valorParcela').value = '';
-        document.getElementById('dataPrimeiraParcela').value = '';
-        document.getElementById('diaVencimento').value = '';
-        document.getElementById('previewParcelas').classList.add('hidden');
-    }
-}
 
-function calcularParcelas() {
-    const quantidade = parseInt(document.getElementById('quantidadeParcelas').value);
-    const valorParcela = parseFloat(document.getElementById('valorParcela').value);
-    const dataPrimeira = document.getElementById('dataPrimeiraParcela').value;
-    const diaVencimento = parseInt(document.getElementById('diaVencimento').value) || 15;
-    
-    if (!quantidade || !valorParcela || !dataPrimeira) {
-        showNotification('Preencha todos os campos obrigatórios!', 'error');
-        return;
-    }
-    
-    const preview = document.getElementById('previewParcelas');
-    const lista = document.getElementById('listaParcelas');
-    
-    let html = '';
-    const dataInicio = new Date(dataPrimeira);
-    
-    for (let i = 1; i <= quantidade; i++) {
-        const dataVencimento = new Date(dataInicio);
-        dataVencimento.setMonth(dataVencimento.getMonth() + (i - 1));
-        dataVencimento.setDate(diaVencimento);
-        
-        const dataFormatada = dataVencimento.toLocaleDateString('pt-BR');
-        
-        html += `
-            <div class="flex justify-between items-center p-2 bg-gray-700/50 rounded-lg">
-                <div class="flex items-center space-x-3">
-                    <span class="text-blue-400 font-semibold">${i}ª</span>
-                    <span class="text-white">${dataFormatada}</span>
-                </div>
-                <span class="text-green-400 font-bold">R$ ${valorParcela.toFixed(2).replace('.', ',')}</span>
-            </div>
-        `;
-    }
-    
-    lista.innerHTML = html;
-    preview.classList.remove('hidden');
-}
 
 // ===== CUSTOS FIXOS MENSAIS =====
 
@@ -1627,6 +1518,207 @@ function atualizarTodasAsSecoes() {
     updateWeekSummary();
     updateMonthSummary();
     updatePreviousReportsList();
+}
+
+// Função para buscar relatórios por data (que estava faltando)
+function buscarRelatoriosPorData() {
+    const dataEspecifica = document.getElementById('dataEspecifica').value;
+    
+    if (!dataEspecifica) {
+        alert('Por favor, selecione uma data.');
+        return;
+    }
+    
+    // Converter data para formato brasileiro para exibição
+    const dataObj = new Date(dataEspecifica);
+    const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+    
+    // Mostrar loading
+    const resultadosDiv = document.getElementById('resultadosBusca');
+    resultadosDiv.classList.remove('hidden');
+    resultadosDiv.innerHTML = `
+        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+            <h3 class="text-2xl font-bold text-white mb-6">📊 Buscando Relatórios para ${dataFormatada}</h3>
+            <div class="text-center text-gray-400 py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                <p class="mt-4">Carregando dados...</p>
+            </div>
+        </div>
+    `;
+    
+    // Buscar relatórios do servidor
+    fetch('/login/buscar-relatorios-periodo/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            data_inicio: dataEspecifica,
+            data_fim: dataEspecifica
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarResultadosBusca(data, dataFormatada);
+        } else {
+            mostrarErroBusca(data.error || 'Erro ao buscar relatórios');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao buscar relatórios:', error);
+        mostrarErroBusca('Erro de conexão. Tente novamente.');
+    });
+}
+
+// Função para mostrar resultados da busca
+function mostrarResultadosBusca(data, dataFormatada) {
+    console.log('=== MOSTRAR RESULTADOS BUSCA ===');
+    console.log('Data recebida:', data);
+    console.log('Data formatada:', dataFormatada);
+    
+    const resultadosDiv = document.getElementById('resultadosBusca');
+    console.log('Elemento resultadosDiv:', resultadosDiv);
+    
+    const relatorios = data.relatorios || [];
+    console.log('Relatórios encontrados:', relatorios.length);
+    
+    if (relatorios.length === 0) {
+        console.log('Nenhum relatório encontrado, exibindo mensagem');
+        resultadosDiv.innerHTML = `
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+                <h3 class="text-2xl font-bold text-white mb-6">📊 Resultados da Busca - ${dataFormatada}</h3>
+                <div class="text-center text-gray-400 py-8">
+                    <span class="text-4xl">📅</span>
+                    <p class="mt-4 text-lg">Nenhum relatório encontrado para esta data</p>
+                </div>
+            </div>
+        `;
+        resultadosDiv.classList.remove('hidden');
+        console.log('Elemento resultadosDiv exibido');
+        return;
+    }
+    
+    console.log('Relatórios encontrados, exibindo resultados');
+    
+    // Calcular totais
+    const totalGastos = relatorios.reduce((sum, r) => sum + (r.totalGastos || 0), 0);
+    const totalReceitas = relatorios.reduce((sum, r) => sum + (r.receita_frete || 0), 0);
+    const lucroLiquido = totalReceitas - totalGastos;
+    
+    console.log('Totais calculados:', { totalGastos, totalReceitas, lucroLiquido });
+    
+    resultadosDiv.innerHTML = `
+        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
+            <h3 class="text-2xl font-bold text-white mb-6">📊 Resultados da Busca - ${dataFormatada}</h3>
+            
+            <!-- Resumo -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100 text-sm font-medium">Total de Gastos</p>
+                            <p class="text-2xl font-bold">R$ ${totalGastos.toFixed(2)}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">💰</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
+                            <p class="text-2xl font-bold">R$ ${totalReceitas.toFixed(2)}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">📈</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-2xl font-bold">R$ ${lucroLiquido.toFixed(2)}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">💎</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">Total de Viagens</p>
+                            <p class="text-2xl font-bold">${relatorios.length}</p>
+                        </div>
+                        <div class="text-3xl opacity-80">🚛</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabela de Relatórios -->
+            <div class="bg-gray-800/50 rounded-xl p-6">
+                <h4 class="text-lg font-semibold text-white mb-4">📋 Relatórios Encontrados</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-white">
+                        <thead>
+                            <tr class="border-b border-gray-600">
+                                <th class="text-left py-3 px-4">Data</th>
+                                <th class="text-left py-3 px-4">Rota</th>
+                                <th class="text-left py-3 px-4">Motorista</th>
+                                <th class="text-left py-3 px-4">Receita</th>
+                                <th class="text-left py-3 px-4">Gastos</th>
+                                <th class="text-left py-3 px-4">Lucro</th>
+                                <th class="text-left py-3 px-4">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${relatorios.map(relatorio => {
+                                const receita = relatorio.receita_frete || 0;
+                                const gastos = (relatorio.gasto_gasolina || 0) + (relatorio.valor_diarias || 0);
+                                const lucro = receita - gastos;
+                                
+                                return `
+                                <tr class="border-b border-gray-700 hover:bg-gray-800/50">
+                                    <td class="py-3 px-4">${relatorio.data_viagem || 'N/A'}</td>
+                                    <td class="py-3 px-4">${relatorio.partida || 'N/A'} → ${relatorio.chegada || 'N/A'}</td>
+                                    <td class="py-3 px-4">${relatorio.motorista || 'N/A'}</td>
+                                    <td class="py-3 px-4 text-green-400">R$ ${receita.toFixed(2).replace('.', ',')}</td>
+                                    <td class="py-3 px-4 text-red-400">R$ ${gastos.toFixed(2).replace('.', ',')}</td>
+                                    <td class="py-3 px-4 ${lucro >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                        R$ ${lucro.toFixed(2).replace('.', ',')}
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <button onclick="viewReportSummary(${relatorio.id})" class="text-blue-400 hover:text-blue-300 mr-2">Ver</button>
+                                        <button onclick="editReport(${relatorio.id})" class="text-yellow-400 hover:text-yellow-300 mr-2">Editar</button>
+                                        <button onclick="deleteReport(${relatorio.id})" class="text-red-400 hover:text-red-300">Excluir</button>
+                                    </td>
+                                </tr>
+                            `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    resultadosDiv.classList.remove('hidden');
+    console.log('Elemento resultadosDiv exibido com relatórios');
+}
+
+// Função para mostrar erro na busca
+function mostrarErroBusca(erro) {
+    const resultadosDiv = document.getElementById('resultadosBusca');
+    resultadosDiv.innerHTML = `
+        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-red-600/30 mb-8">
+            <h3 class="text-2xl font-bold text-white mb-6">❌ Erro na Busca</h3>
+            <div class="text-center text-red-300 py-8">
+                <span class="text-4xl">⚠️</span>
+                <p class="mt-4 text-lg">${erro}</p>
+            </div>
+        </div>
+    `;
 }
 
 // ===== INICIALIZAÇÃO =====

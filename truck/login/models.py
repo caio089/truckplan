@@ -167,7 +167,6 @@ class CustosGerais(models.Model):
         ('pix', 'PIX'),
         ('transferencia', 'Transferência'),
         ('cheque', 'Cheque'),
-        ('parcelado', 'Parcelado'),
     ]
     
     STATUS_PAGAMENTO_CHOICES = [
@@ -243,48 +242,11 @@ class CustosGerais(models.Model):
         return dict(self.STATUS_PAGAMENTO_CHOICES).get(self.status_pagamento, self.status_pagamento)
 
 
-class ParcelaCusto(models.Model):
-    """Modelo para parcelas de custos"""
-    custo_geral = models.ForeignKey(
-        CustosGerais, 
-        on_delete=models.CASCADE, 
-        related_name='parcelas',
-        verbose_name="Custo Geral"
-    )
-    numero_parcela = models.PositiveIntegerField(verbose_name="Número da Parcela")
-    valor_parcela = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        verbose_name="Valor da Parcela"
-    )
-    data_vencimento = models.DateField(verbose_name="Data de Vencimento")
-    status_pagamento = models.CharField(
-        max_length=20,
-        choices=CustosGerais.STATUS_PAGAMENTO_CHOICES,
-        default='pendente',
-        verbose_name="Status do Pagamento"
-    )
-    data_pagamento = models.DateField(null=True, blank=True, verbose_name="Data do Pagamento")
-    observacoes = models.TextField(blank=True, verbose_name="Observações")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
-
-    class Meta:
-        verbose_name = "Parcela de Custo"
-        verbose_name_plural = "Parcelas de Custos"
-        ordering = ['custo_geral', 'numero_parcela']
-
-    def __str__(self):
-        return f"Parcela {self.numero_parcela} - {self.custo_geral.descricao} - R$ {self.valor_parcela}"
-
-    def get_status_pagamento_display(self):
-        return dict(CustosGerais.STATUS_PAGAMENTO_CHOICES).get(self.status_pagamento, self.status_pagamento)
 
 
 class CustoFixoMensal(models.Model):
-    """Modelo para custos fixos mensais (parcela do caminhão, seguro, IPVA, etc.)"""
+    """Modelo para custos fixos mensais (seguro, IPVA, etc.)"""
     TIPO_CUSTO_CHOICES = [
-        ('parcela_caminhao', 'Parcela do Caminhão'),
         ('seguro', 'Seguro'),
         ('ipva', 'IPVA'),
         ('licenciamento', 'Licenciamento'),

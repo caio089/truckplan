@@ -14,7 +14,7 @@ from django.db.models import Sum, Count, Q
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 import logging
-from .models import DailyReport, MonthlyCost, MotoristaSalario, CustosGerais, CustoFixoMensal, ParcelaCusto
+from .models import DailyReport, MonthlyCost, MotoristaSalario, CustosGerais, CustoFixoMensal
 
 logger = logging.getLogger(__name__)
 
@@ -50,57 +50,67 @@ def login(request):
 @login_required
 def dashboard(request):
     """Dashboard principal com resumo da semana atual"""
-    from datetime import datetime, timedelta
-    
-    # Calcular início da semana atual
-    hoje = datetime.now().date()
-    inicio_semana = hoje - timedelta(days=hoje.weekday())
-    
-    # Buscar viagens da semana atual
-    viagens_semana = DailyReport.objects.filter(
-        data_viagem__range=[inicio_semana, hoje]
-    ).order_by('-data_viagem')
-    
-    # Calcular totais
-    total_viagens = viagens_semana.count()
-    total_diarias = viagens_semana.aggregate(Sum('diarias'))['diarias__sum'] or 0
-    total_valor_diarias = viagens_semana.aggregate(Sum('valor_diarias'))['valor_diarias__sum'] or Decimal('0')
-    total_gasto_gasolina = viagens_semana.aggregate(Sum('gasto_gasolina'))['gasto_gasolina__sum'] or Decimal('0')
-    
-    # Buscar custos fixos mensais ativos
-    custos_fixos_mensais = CustoFixoMensal.objects.filter(
-        status='ativo'
-    ).filter(
-        Q(data_fim__isnull=True) | Q(data_fim__gte=hoje)
-    )
-    
-    # Buscar parcelas vencidas na semana
-    parcelas_semana = ParcelaCusto.objects.filter(
-        data_vencimento__range=[inicio_semana, hoje]
-    ).order_by('data_vencimento')
-    
-    # Calcular total de custos fixos mensais
-    total_custos_fixos_mensais = sum(float(custo.valor_mensal) for custo in custos_fixos_mensais)
-    
-    # Calcular total de parcelas vencidas na semana
-    total_parcelas_semana = sum(float(parcela.valor_parcela) for parcela in parcelas_semana)
-    
-    # Buscar últimas 5 viagens
-    ultimas_viagens = DailyReport.objects.all().order_by('-data_viagem', '-created_at')[:5]
-    
-    context = {
-        'total_viagens': total_viagens,
-        'total_diarias': total_diarias,
-        'total_valor_diarias': total_valor_diarias,
-        'total_gasto_gasolina': total_gasto_gasolina,
-        'custos_fixos_mensais': custos_fixos_mensais,
-        'total_custos_fixos_mensais': total_custos_fixos_mensais,
-        'parcelas_semana': parcelas_semana,
-        'total_parcelas_semana': total_parcelas_semana,
-        'ultimas_viagens': ultimas_viagens,
-    }
-    
-    return render(request, 'login/dashboard.html', context)
+    try:
+        from datetime import datetime, timedelta
+        
+        # Calcular início da semana atual
+        hoje = datetime.now().date()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Buscar viagens da semana atual
+        viagens_semana = DailyReport.objects.filter(
+            data_viagem__range=[inicio_semana, hoje]
+        ).order_by('-data_viagem')
+        
+        # Calcular totais
+        total_viagens = viagens_semana.count()
+        total_diarias = viagens_semana.aggregate(Sum('diarias'))['diarias__sum'] or 0
+        total_valor_diarias = viagens_semana.aggregate(Sum('valor_diarias'))['valor_diarias__sum'] or Decimal('0')
+        total_gasto_gasolina = viagens_semana.aggregate(Sum('gasto_gasolina'))['gasto_gasolina__sum'] or Decimal('0')
+        
+        # Buscar custos fixos mensais ativos
+        custos_fixos_mensais = CustoFixoMensal.objects.filter(
+            status='ativo'
+        ).filter(
+            Q(data_fim__isnull=True) | Q(data_fim__gte=hoje)
+        )
+        
+        # Calcular total de custos fixos mensais
+        total_custos_fixos_mensais = sum(float(custo.valor_mensal) for custo in custos_fixos_mensais)
+        
+        logger.info(f'Dashboard - Custos fixos encontrados: {custos_fixos_mensais.count()}')
+        logger.info(f'Dashboard - Total custos fixos: {total_custos_fixos_mensais}')
+        logger.info(f'Dashboard - Lista custos fixos: {list(custos_fixos_mensais.values())}')
+        
+        # Buscar últimas 5 viagens
+        ultimas_viagens = DailyReport.objects.all().order_by('-data_viagem', '-created_at')[:5]
+        
+        context = {
+            'total_viagens': total_viagens,
+            'total_diarias': total_diarias,
+            'total_valor_diarias': total_valor_diarias,
+            'total_gasto_gasolina': total_gasto_gasolina,
+            'custos_fixos_mensais': custos_fixos_mensais,
+            'total_custos_fixos_mensais': total_custos_fixos_mensais,
+            'ultimas_viagens': ultimas_viagens,
+        }
+        
+        return render(request, 'login/dashboard.html', context)
+        
+    except Exception as e:
+        logger.error(f'Erro no dashboard: {str(e)}', exc_info=True)
+        # Retornar dashboard vazio em caso de erro
+        context = {
+            'total_viagens': 0,
+            'total_diarias': 0,
+            'total_valor_diarias': Decimal('0'),
+            'total_gasto_gasolina': Decimal('0'),
+            'custos_fixos_mensais': [],
+            'total_custos_fixos_mensais': 0,
+            'ultimas_viagens': [],
+            'erro': str(e)
+        }
+        return render(request, 'login/dashboard.html', context)
 
 def logout_view(request):
     logout(request)
@@ -292,198 +302,189 @@ def cadastrar_viagem(request):
 @login_required
 def listar_relatorios(request):
     """View para listar todos os relatórios"""
-    
-    # Usar raw SQL para evitar problemas de conversão Decimal
-    from django.db import connection
-    
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id, data_viagem, partida, chegada, diarias, 
-                   litros_gasolina, gasto_gasolina, receita_frete, 
-                   motorista, caminhao, valor_diarias
-            FROM login_dailyreport 
-            ORDER BY data_viagem DESC, created_at DESC
-        """)
+    try:
+        # Usar raw SQL para evitar problemas de conversão Decimal
+        from django.db import connection
         
-        columns = [col[0] for col in cursor.description]
-        relatorios_raw = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, data_viagem, partida, chegada, diarias, 
+                       litros_gasolina, gasto_gasolina, receita_frete, 
+                       motorista, caminhao, valor_diarias
+                FROM login_dailyreport 
+                ORDER BY data_viagem DESC, created_at DESC
+            """)
+            
+            columns = [col[0] for col in cursor.description]
+            relatorios_raw = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    except Exception as e:
+        logger.error(f'Erro ao buscar relatórios: {e}', exc_info=True)
+        return JsonResponse({'relatorios': []})
     
     
     # Converter para formato JSON
     relatorios_data = []
-    for relatorio in relatorios_raw:
-        # Buscar salário do motorista para o mês da viagem
-        from datetime import datetime
-        data_obj = datetime.strptime(str(relatorio['data_viagem']), '%Y-%m-%d')
-        ano_mes = data_obj.strftime('%Y-%m')
+    try:
+        for relatorio in relatorios_raw:
+            # Buscar salário do motorista para o mês da viagem
+            from datetime import datetime
+            data_obj = datetime.strptime(str(relatorio['data_viagem']), '%Y-%m-%d')
+            ano_mes = data_obj.strftime('%Y-%m')
         
-        try:
-            salario = MotoristaSalario.objects.get(
-                motorista=relatorio['motorista'],
-                ano_mes=ano_mes
-            )
-            salario_liquido = salario.get_salario_liquido()
-        except MotoristaSalario.DoesNotExist:
-            salario = None
-            salario_liquido = 0
-        
-        # Buscar custos gerais da viagem usando o relacionamento
-        custos_gerais = CustosGerais.objects.filter(relatorio_id=relatorio['id'])
-        total_custos_gerais = custos_gerais.aggregate(Sum('valor'))['valor__sum'] or Decimal('0')
-        
-        # Buscar TODAS as parcelas de custos gerais da viagem
-        todas_parcelas = []
-        print(f"=== RELATÓRIO {relatorio['id']} - COLETANDO PARCELAS ===")
-        print(f"Total de custos gerais: {len(custos_gerais)}")
-        
-        for custo in custos_gerais:
-            print(f"Custo {custo.id}: {custo.descricao} - Forma: {custo.forma_pagamento}")
-            # Sempre adicionar o custo como uma "parcela"
-            todas_parcelas.append({
-                'id': f"custo_{custo.id}",
-                'custo_id': custo.id,
-                'tipo_gasto': custo.get_tipo_gasto_display(),
-                'descricao': custo.descricao,
-                'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
-                'veiculo_placa': custo.veiculo_placa or 'N/A',
-                'numero_parcela': 1,
-                'valor_parcela': float(custo.valor),
-                'data_vencimento': custo.data.strftime('%d/%m/%Y'),
-                'status_pagamento': custo.get_status_pagamento_display(),
-                'paga': custo.status_pagamento == 'pago',
-                'forma_pagamento': custo.get_forma_pagamento_display(),
-                'observacoes': custo.observacoes or ''
-            })
+            try:
+                salario = MotoristaSalario.objects.get(
+                    motorista=relatorio['motorista'],
+                    ano_mes=ano_mes
+                )
+                salario_liquido = salario.get_salario_liquido()
+            except MotoristaSalario.DoesNotExist:
+                salario = None
+                salario_liquido = 0
             
-            # Se tem parcelas reais, adicionar também
-            parcelas = custo.parcelas.all().order_by('numero_parcela')
-            print(f"  -> Parcelas reais encontradas: {parcelas.count()}")
+            # Buscar custos gerais da viagem usando o relacionamento
+            custos_gerais = CustosGerais.objects.filter(relatorio_id=relatorio['id'])
+            total_custos_gerais = custos_gerais.aggregate(Sum('valor'))['valor__sum'] or Decimal('0')
             
-            for parcela in parcelas:
-                print(f"    * Parcela {parcela.numero_parcela}: R$ {parcela.valor_parcela} - {parcela.status_pagamento}")
+            # Buscar TODAS as parcelas de custos gerais da viagem
+            todas_parcelas = []
+            print(f"=== RELATÓRIO {relatorio['id']} - COLETANDO PARCELAS ===")
+            print(f"Total de custos gerais: {len(custos_gerais)}")
+            
+            for custo in custos_gerais:
+                print(f"Custo {custo.id}: {custo.descricao} - Forma: {custo.forma_pagamento}")
+                # Sempre adicionar o custo como uma "parcela"
                 todas_parcelas.append({
-                    'id': parcela.id,
+                    'id': f"custo_{custo.id}",
                     'custo_id': custo.id,
                     'tipo_gasto': custo.get_tipo_gasto_display(),
                     'descricao': custo.descricao,
                     'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
                     'veiculo_placa': custo.veiculo_placa or 'N/A',
-                    'numero_parcela': parcela.numero_parcela,
-                    'valor_parcela': float(parcela.valor_parcela),
-                    'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
-                    'status_pagamento': parcela.get_status_pagamento_display(),
-                    'paga': parcela.status_pagamento == 'pago',
+                    'numero_parcela': 1,
+                    'valor_parcela': float(custo.valor),
+                    'data_vencimento': custo.data.strftime('%d/%m/%Y'),
+                    'status_pagamento': custo.get_status_pagamento_display(),
+                    'paga': custo.status_pagamento == 'pago',
                     'forma_pagamento': custo.get_forma_pagamento_display(),
                     'observacoes': custo.observacoes or ''
                 })
+            
+                # Se tem parcelas reais, adicionar também
+                parcelas = custo.parcelas.all().order_by('numero_parcela')
+                print(f"  -> Parcelas reais encontradas: {parcelas.count()}")
+                
+                for parcela in parcelas:
+                    print(f"    * Parcela {parcela.numero_parcela}: R$ {parcela.valor_parcela} - {parcela.status_pagamento}")
+                    todas_parcelas.append({
+                        'id': parcela.id,
+                        'custo_id': custo.id,
+                        'tipo_gasto': custo.get_tipo_gasto_display(),
+                        'descricao': custo.descricao,
+                        'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
+                        'veiculo_placa': custo.veiculo_placa or 'N/A',
+                        'numero_parcela': parcela.numero_parcela,
+                        'valor_parcela': float(parcela.valor_parcela),
+                        'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
+                        'status_pagamento': parcela.get_status_pagamento_display(),
+                        'paga': parcela.status_pagamento == 'pago',
+                        'forma_pagamento': custo.get_forma_pagamento_display(),
+                        'observacoes': custo.observacoes or ''
+                    })
+            
+            # NÃO incluir custos fixos mensais aqui (mostrados apenas no relatório mensal)
         
-        # Buscar custos fixos mensais ativos no período da viagem (sem parcelas)
-        data_viagem = relatorio['data_viagem']
-        if isinstance(data_viagem, str):
-            data_viagem = datetime.strptime(data_viagem, '%Y-%m-%d').date()
+            # Ordenar todas as parcelas por data de vencimento
+            todas_parcelas.sort(key=lambda x: datetime.strptime(x['data_vencimento'], '%d/%m/%Y'))
+            
+            print(f"Total de parcelas coletadas: {len(todas_parcelas)}")
+            print(f"Primeiras 3 parcelas: {todas_parcelas[:3] if todas_parcelas else 'Nenhuma'}")
+            
+            # Preparar lista de custos gerais para o frontend (sem parcelas individuais)
+            custos_gerais_list = []
+            for custo in custos_gerais:
+                custos_gerais_list.append({
+                    'id': custo.id,
+                    'tipo_gasto': custo.get_tipo_gasto_display(),
+                    'oficina_fornecedor': custo.oficina_fornecedor,
+                    'descricao': custo.descricao,
+                    'valor': float(custo.valor),
+                    'forma_pagamento': custo.get_forma_pagamento_display(),
+                    'status_pagamento': custo.get_status_pagamento_display(),
+                    'veiculo_placa': custo.veiculo_placa,
+                    'data_vencimento': custo.data_vencimento.strftime('%d/%m/%Y') if custo.data_vencimento else None,
+                    'observacoes': custo.observacoes
+                })
         
-        custos_fixos_mensais = CustoFixoMensal.objects.filter(
-            status='ativo',
-            data_inicio__lte=data_viagem
-        ).filter(
-            Q(data_fim__isnull=True) | Q(data_fim__gte=data_viagem)
-        )
-        
-        # Adicionar custos fixos como "parcelas" únicas (já que não têm parcelas reais)
-        for custo_fixo in custos_fixos_mensais:
-            todas_parcelas.append({
-                'id': f"fixo_{custo_fixo.id}",
-                'custo_id': custo_fixo.id,
-                'tipo_gasto': 'Custo Fixo Mensal',
-                'descricao': custo_fixo.descricao,
-                'oficina_fornecedor': custo_fixo.oficina_fornecedor or 'N/A',
-                'veiculo_placa': custo_fixo.veiculo_placa or 'N/A',
-                'numero_parcela': 1,
-                'valor_parcela': float(custo_fixo.valor_mensal),
-                'data_vencimento': data_viagem.strftime('%d/%m/%Y'),
-                'status_pagamento': 'Pago',
-                'paga': True,
-                'forma_pagamento': 'Mensal',
-                'observacoes': custo_fixo.observacoes or ''
+            # Calcular totais com conversões seguras
+            try:
+                total_diarias = float(relatorio['valor_diarias']) if relatorio['valor_diarias'] else 0.0
+            except (TypeError, ValueError, InvalidOperation):
+                total_diarias = 0.0
+                
+            try:
+                gasto_gasolina = float(relatorio['gasto_gasolina']) if relatorio['gasto_gasolina'] else 0.0
+            except (TypeError, ValueError, InvalidOperation):
+                gasto_gasolina = 0.0
+                
+            try:
+                receita_frete = float(relatorio['receita_frete']) if relatorio['receita_frete'] else 0.0
+            except (TypeError, ValueError, InvalidOperation):
+                receita_frete = 0.0
+                
+            try:
+                custos_gerais_float = float(total_custos_gerais) if total_custos_gerais else 0.0
+            except (TypeError, ValueError, InvalidOperation):
+                custos_gerais_float = 0.0
+                
+            total_despesas = gasto_gasolina + total_diarias + float(salario_liquido) + custos_gerais_float
+            lucro_liquido = receita_frete - total_despesas
+            
+            relatorio_data = {
+                'id': relatorio['id'],
+                'date': str(relatorio['data_viagem']),
+                'localPartida': relatorio['partida'],
+                'localChegada': relatorio['chegada'],
+                'quantidadeDiarias': relatorio['diarias'],
+                'totalDiarias': total_diarias,
+                'litrosGasolina': float(relatorio['litros_gasolina']) if relatorio['litros_gasolina'] else 0.0,
+                'valorGasolina': gasto_gasolina,
+                'nomeMotorista': relatorio['motorista'],
+                'nomeCaminhao': relatorio['caminhao'],
+                'receita': receita_frete,
+                'totalGastosViagem': gasto_gasolina + total_diarias,
+                'totalCustosGerais': custos_gerais_float,
+                'totalDespesas': total_despesas,
+                'lucroLiquido': lucro_liquido,
+                'salarioBase': float(salario.salario_base) if salario and salario.salario_base else 0,
+                'bonusViagens': float(salario.bonus_viagens) if salario and salario.bonus_viagens else 0,
+                'descontoFaltas': float(salario.desconto_faltas) if salario and salario.desconto_faltas else 0,
+                'salarioLiquido': float(salario_liquido),
+                'custosGerais': custos_gerais_list,
+                'todasParcelas': todas_parcelas,
+                'totalParcelas': len(todas_parcelas),
+                'parcelasPagas': len([p for p in todas_parcelas if p['paga']]),
+                'parcelasPendentes': len([p for p in todas_parcelas if not p['paga']])
+            }
+
+            # Campos de compatibilidade esperados pelo frontend da tabela
+            relatorio_data.update({
+                'data_viagem': str(relatorio['data_viagem']) if relatorio.get('data_viagem') else '',
+                'partida': relatorio.get('partida') or '',
+                'chegada': relatorio.get('chegada') or '',
+                'motorista': relatorio.get('motorista') or '',
+                'receita_frete': receita_frete or 0.0,
+                'gasto_gasolina': gasto_gasolina or 0.0,
+                'valor_diarias': total_diarias or 0.0,
+                # Usado no resumo da busca
+                'totalGastos': (gasto_gasolina + total_diarias)
             })
-        
-        # Ordenar todas as parcelas por data de vencimento
-        todas_parcelas.sort(key=lambda x: datetime.strptime(x['data_vencimento'], '%d/%m/%Y'))
-        
-        print(f"Total de parcelas coletadas: {len(todas_parcelas)}")
-        print(f"Primeiras 3 parcelas: {todas_parcelas[:3] if todas_parcelas else 'Nenhuma'}")
-        
-        # Preparar lista de custos gerais para o frontend (sem parcelas individuais)
-        custos_gerais_list = []
-        for custo in custos_gerais:
-            custos_gerais_list.append({
-                'id': custo.id,
-                'tipo_gasto': custo.get_tipo_gasto_display(),
-                'oficina_fornecedor': custo.oficina_fornecedor,
-                'descricao': custo.descricao,
-                'valor': float(custo.valor),
-                'forma_pagamento': custo.get_forma_pagamento_display(),
-                'status_pagamento': custo.get_status_pagamento_display(),
-                'veiculo_placa': custo.veiculo_placa,
-                'data_vencimento': custo.data_vencimento.strftime('%d/%m/%Y') if custo.data_vencimento else None,
-                'observacoes': custo.observacoes
-            })
-        
-        # Calcular totais com conversões seguras
-        try:
-            total_diarias = float(relatorio['valor_diarias']) if relatorio['valor_diarias'] else 0.0
-        except (TypeError, ValueError, InvalidOperation):
-            total_diarias = 0.0
             
-        try:
-            gasto_gasolina = float(relatorio['gasto_gasolina']) if relatorio['gasto_gasolina'] else 0.0
-        except (TypeError, ValueError, InvalidOperation):
-            gasto_gasolina = 0.0
-            
-        try:
-            receita_frete = float(relatorio['receita_frete']) if relatorio['receita_frete'] else 0.0
-        except (TypeError, ValueError, InvalidOperation):
-            receita_frete = 0.0
-            
-        try:
-            custos_gerais_float = float(total_custos_gerais) if total_custos_gerais else 0.0
-        except (TypeError, ValueError, InvalidOperation):
-            custos_gerais_float = 0.0
-            
-        total_despesas = gasto_gasolina + total_diarias + float(salario_liquido) + custos_gerais_float
-        lucro_liquido = receita_frete - total_despesas
+            relatorios_data.append(relatorio_data)
         
-        relatorio_data = {
-            'id': relatorio['id'],
-            'date': str(relatorio['data_viagem']),
-            'localPartida': relatorio['partida'],
-            'localChegada': relatorio['chegada'],
-            'quantidadeDiarias': relatorio['diarias'],
-            'totalDiarias': total_diarias,
-            'litrosGasolina': float(relatorio['litros_gasolina']) if relatorio['litros_gasolina'] else 0.0,
-            'valorGasolina': gasto_gasolina,
-            'nomeMotorista': relatorio['motorista'],
-            'nomeCaminhao': relatorio['caminhao'],
-            'receita': receita_frete,
-            'totalGastosViagem': gasto_gasolina + total_diarias,
-            'totalCustosGerais': custos_gerais_float,
-            'totalDespesas': total_despesas,
-            'lucroLiquido': lucro_liquido,
-            'salarioBase': float(salario.salario_base) if salario and salario.salario_base else 0,
-            'bonusViagens': float(salario.bonus_viagens) if salario and salario.bonus_viagens else 0,
-            'descontoFaltas': float(salario.desconto_faltas) if salario and salario.desconto_faltas else 0,
-            'salarioLiquido': float(salario_liquido),
-            'custosGerais': custos_gerais_list,
-            'todasParcelas': todas_parcelas,
-            'totalParcelas': len(todas_parcelas),
-            'parcelasPagas': len([p for p in todas_parcelas if p['paga']]),
-            'parcelasPendentes': len([p for p in todas_parcelas if not p['paga']])
-        }
-        
-        
-        relatorios_data.append(relatorio_data)
-    
-    return JsonResponse({'relatorios': relatorios_data})
+        return JsonResponse({'relatorios': relatorios_data})
+    except Exception as e:
+        logger.error(f'Erro ao processar relatórios: {e}', exc_info=True)
+        return JsonResponse({'relatorios': []})
 
 @login_required
 def excluir_relatorio(request, relatorio_id):
@@ -643,10 +644,8 @@ def relatorio_semanal(request):
                     Q(data_fim__isnull=True) | Q(data_fim__gte=data_inicio)
                 )
                 
-                # Buscar parcelas vencidas no período
-                parcelas_periodo = ParcelaCusto.objects.filter(
-                    data_vencimento__range=[data_inicio, data_fim]
-                ).order_by('data_vencimento')
+                # Sistema simplificado - sem parcelas
+                parcelas_periodo = []
                 
                 # Calcular total de custos fixos mensais (proporcional ao período)
                 total_custos_fixos_mensais = 0
@@ -671,7 +670,8 @@ def relatorio_semanal(request):
                 custos_gerais_detalhados = []
                 
                 for custo in custos_gerais_periodo:
-                    if custo.forma_pagamento == 'parcelado' and custo.parcelas.exists():
+                    # Sistema simplificado - sem parcelas
+                    if False:  # Desabilitado
                         # Para custos parcelados, mostrar cada parcela como um custo separado
                         for parcela in custo.parcelas.all():
                             # Criar um objeto similar ao custo original mas com dados da parcela
@@ -774,6 +774,10 @@ def relatorio_mensal(request):
                 data_viagem__year=ano_mes[:4],
                 data_viagem__month=ano_mes[5:7]
             ).order_by('data_viagem')
+            
+            # Debug: verificar dados dos relatórios
+            for relatorio in relatorios:
+                logger.info(f'Relatório {relatorio.id}: motorista={relatorio.motorista}, caminhao={relatorio.caminhao}, partida={relatorio.partida}, chegada={relatorio.chegada}')
             
             logger.info(f'Encontrados {relatorios.count()} relatórios para {ano_mes}')
             
@@ -891,13 +895,9 @@ def relatorio_mensal(request):
                 data_fim_mes = (data_inicio_mes + relativedelta(months=1) - timedelta(days=1))
                 logger.info(f'Período: {data_inicio_mes} a {data_fim_mes}')
                 
-                # Buscar parcelas de custos do mês
-                parcelas_mes = ParcelaCusto.objects.filter(
-                    data_vencimento__gte=data_inicio_mes,
-                    data_vencimento__lte=data_fim_mes,
-                    paga=False
-                )
-                total_parcelas_mes = parcelas_mes.aggregate(Sum('valor'))['valor__sum'] or Decimal('0')
+                # Sistema simplificado - sem parcelas
+                parcelas_mes = []
+                total_parcelas_mes = 0
                 
                 # Se é um novo registro, pedir para preencher os custos
                 if created:
@@ -915,7 +915,10 @@ def relatorio_mensal(request):
                     })
                 
                 # Calcular lucro líquido
-                total_custos_fixos = custos_fixos.get_total_custos_fixos()
+                try:
+                    total_custos_fixos = custos_fixos.get_total_custos_fixos() if custos_fixos else Decimal('0')
+                except:
+                    total_custos_fixos = Decimal('0')
                 
                 # Converter para float para evitar problemas com Decimal
             except Exception as e:
@@ -938,15 +941,12 @@ def relatorio_mensal(request):
                 total_custos_fixos_mensais = 0
             
             try:
-                # Buscar parcelas vencidas no mês
-                parcelas_mes = ParcelaCusto.objects.filter(
-                    data_vencimento__range=[data_inicio_mes, data_fim_mes]
-                ).order_by('data_vencimento')
-                total_parcelas_mes = sum(float(parcela.valor_parcela) for parcela in parcelas_mes)
-                logger.info(f'Total parcelas: {total_parcelas_mes}')
+                # Não usar parcelas - simplificado
+                total_parcelas_mes = 0
+                logger.info('Sistema simplificado - sem parcelas')
             except Exception as e:
                 logger.error(f'Erro ao calcular parcelas: {e}')
-                parcelas_mes = ParcelaCusto.objects.none()
+                parcelas_mes = []
                 total_parcelas_mes = 0
             
             # Se é um novo registro, pedir para preencher os custos
@@ -981,18 +981,30 @@ def relatorio_mensal(request):
             
             # Converter para float para evitar problemas com Decimal
             try:
-                total_gasto_gasolina_float = float(total_gasto_gasolina)
-                total_valor_diarias_float = float(total_valor_diarias)
-                total_custos_gerais_float = float(total_custos_gerais)
-                total_receita_frete_float = float(total_receita_frete)
-                total_custos_fixos_float = float(total_custos_fixos)
-                total_custos_fixos_mensais_float = float(total_custos_fixos_mensais)
-                total_parcelas_mes_float = float(total_parcelas_mes)
+                # Converter valores com tratamento de erro
+                total_gasto_gasolina_float = float(total_gasto_gasolina) if total_gasto_gasolina else 0.0
+                total_valor_diarias_float = float(total_valor_diarias) if total_valor_diarias else 0.0
+                total_custos_gerais_float = float(total_custos_gerais) if total_custos_gerais else 0.0
+                total_receita_frete_float = float(total_receita_frete) if total_receita_frete else 0.0
+                total_custos_fixos_float = float(total_custos_fixos) if total_custos_fixos else 0.0
+                total_custos_fixos_mensais_float = float(total_custos_fixos_mensais) if total_custos_fixos_mensais else 0.0
+                total_parcelas_mes_float = 0.0
+                
+                logger.info(f'Valores convertidos - Gasolina: {total_gasto_gasolina_float}, Diárias: {total_valor_diarias_float}, Receita: {total_receita_frete_float}')
                 
                 # Incluir custos fixos mensais e parcelas no cálculo
                 total_despesas = total_gasto_gasolina_float + total_valor_diarias_float + total_custos_fixos_float + total_custos_gerais_float + total_custos_fixos_mensais_float + total_parcelas_mes_float
                 lucro_liquido = total_receita_frete_float - total_despesas
+                
+                # Garantir que os valores não sejam negativos ou NaN
+                if total_despesas < 0:
+                    total_despesas = 0.0
+                if lucro_liquido != lucro_liquido:  # Check for NaN
+                    lucro_liquido = 0.0
+                
                 logger.info(f'Total despesas: {total_despesas}, Lucro: {lucro_liquido}')
+                logger.info(f'Receita: {total_receita_frete_float}, Gasolina: {total_gasto_gasolina_float}, Diárias: {total_valor_diarias_float}')
+                logger.info(f'Custos fixos: {total_custos_fixos_float}, Custos gerais: {total_custos_gerais_float}, Custos fixos mensais: {total_custos_fixos_mensais_float}, Parcelas: {total_parcelas_mes_float}')
                 
                 context = {
                     'ano_mes': ano_mes,
@@ -1007,11 +1019,15 @@ def relatorio_mensal(request):
                     'total_litros': float(total_litros),
                     'total_gasto_gasolina': total_gasto_gasolina_float,
                     'total_receita_frete': total_receita_frete_float,
-                    'total_custos_fixos': total_custos_fixos,
+                    'total_custos_fixos': total_custos_fixos_float,
                     'total_despesas': total_despesas,
                     'lucro_liquido': lucro_liquido,
                     'preencher_custos': False
                 }
+                
+                logger.info(f'Contexto criado - Total despesas: {total_despesas}, Lucro: {lucro_liquido}')
+                logger.info(f'Valores finais - Receita: {total_receita_frete_float}, Gasolina: {total_gasto_gasolina_float}, Diárias: {total_valor_diarias_float}')
+                logger.info(f'Custos - Fixos: {total_custos_fixos_float}, Gerais: {total_custos_gerais_float}, Fixos Mensais: {total_custos_fixos_mensais_float}')
                 
                 return render(request, 'login/relatorio_mensal.html', context)
                 
@@ -1026,7 +1042,8 @@ def relatorio_mensal(request):
             custos_gerais_detalhados = []
             
             for custo in custos_gerais_mes:
-                if custo.forma_pagamento == 'parcelado' and custo.parcelas.exists():
+                # Sistema simplificado - sem parcelas
+                if False:  # Desabilitado
                     # Para custos parcelados, mostrar cada parcela como um custo separado
                     for parcela in custo.parcelas.all():
                         # Criar um objeto similar ao custo original mas com dados da parcela
@@ -1079,7 +1096,7 @@ def relatorio_mensal(request):
                 'custos_fixos_mensais': custos_fixos_mensais,
                 'total_custos_fixos_mensais': total_custos_fixos_mensais,
                 'parcelas_mes': parcelas_mes,
-                'total_parcelas_mes': total_parcelas_mes,
+                'total_parcelas_mes': 0,
                 'custos_gerais_mes': custos_gerais_detalhados,
                 'total_custos_gerais': total_custos_gerais_detalhados,
                 'relatorios': relatorios,
@@ -1098,9 +1115,23 @@ def relatorio_mensal(request):
             return render(request, 'login/relatorio_mensal.html', context)
             
         except Exception as e:
-            logger.error(f'Erro no relatório mensal: {e}')
+            logger.error(f'Erro no relatório mensal: {e}', exc_info=True)
             messages.error(request, f'Erro ao gerar relatório: {str(e)}')
-            return render(request, 'login/relatorio_mensal.html', {'erro': str(e)})
+            # Retornar template com dados vazios em caso de erro
+            return render(request, 'login/relatorio_mensal.html', {
+                'ano_mes': ano_mes if 'ano_mes' in locals() else None,
+                'relatorios': [],
+                'total_diarias': 0,
+                'total_valor_diarias': 0,
+                'total_litros': 0,
+                'total_gasto_gasolina': 0,
+                'total_receita_frete': 0,
+                'total_custos_fixos': 0,
+                'total_despesas': 0,
+                'lucro_liquido': 0,
+                'preencher_custos': False,
+                'erro': str(e)
+            })
     
     logger.info('Renderizando página inicial do relatório mensal')
     return render(request, 'login/relatorio_mensal.html')
@@ -1193,7 +1224,8 @@ def relatorio_diario(request):
             custos_gerais_detalhados = []
             
             for custo in custos_gerais_dia:
-                if custo.forma_pagamento == 'parcelado' and custo.parcelas.exists():
+                # Sistema simplificado - sem parcelas
+                if False:  # Desabilitado
                     # Para custos parcelados, mostrar cada parcela como um custo separado
                     for parcela in custo.parcelas.all():
                         # Criar um objeto similar ao custo original mas com dados da parcela
@@ -1426,14 +1458,8 @@ def adicionar_custo_geral(request):
                             # Ajustar para o dia de vencimento especificado
                             data_vencimento_parcela = data_vencimento_parcela.replace(day=min(dia_vencimento, 28))
                         
-                        ParcelaCusto.objects.create(
-                            custo_geral=custo,
-                            numero_parcela=i + 1,
-                            valor_parcela=valor_parcela,
-                            data_vencimento=data_vencimento_parcela,
-                            status_pagamento='pendente',
-                            observacoes=f'Parcela {i + 1} de {quantidade_parcelas}'
-                        )
+                        # Sistema simplificado - sem parcelas
+                        pass
                     
                     messages.success(request, f'Custo parcelado criado com {quantidade_parcelas} parcelas!')
                     
@@ -1738,6 +1764,18 @@ def buscar_relatorios_periodo(request):
                     'parcelasPagas': len([p for p in todas_parcelas if p['paga']]),
                     'parcelasPendentes': len([p for p in todas_parcelas if not p['paga']])
                 }
+
+                # Campos de compatibilidade esperados pelo frontend (tabela de busca)
+                relatorio_data.update({
+                    'data_viagem': relatorio.data_viagem.isoformat(),
+                    'partida': relatorio.partida or '',
+                    'chegada': relatorio.chegada or '',
+                    'motorista': relatorio.motorista or '',
+                    'receita_frete': float(relatorio.receita_frete) if relatorio.receita_frete is not None else 0.0,
+                    'gasto_gasolina': float(relatorio.gasto_gasolina) if relatorio.gasto_gasolina is not None else 0.0,
+                    'valor_diarias': float(relatorio.valor_diarias) if relatorio.valor_diarias is not None else 0.0,
+                    'totalGastos': float(relatorio.valor_diarias) + float(relatorio.gasto_gasolina)
+                })
                 
                 
                 relatorios_data.append(relatorio_data)

@@ -117,18 +117,11 @@ if DATABASE_URL:
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
 else:
-    # Fallback para variáveis individuais
+    # Configuração para desenvolvimento local com SQLite
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('SUPABASE_DB_NAME', 'postgres'),
-            'USER': os.environ.get('SUPABASE_DB_USER', 'postgres'),
-            'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD', ''),
-            'HOST': os.environ.get('SUPABASE_DB_HOST', 'localhost'),
-            'PORT': os.environ.get('SUPABASE_DB_PORT', '5432'),
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
