@@ -66,6 +66,11 @@ if env_csrf:
 else:
     CSRF_TRUSTED_ORIGINS = default_csrf if not DEBUG else []
 
+# Configurações de segurança para produção
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
@@ -123,7 +128,7 @@ if DATABASE_URL:
     # Remover aspas se existirem
     DATABASE_URL = DATABASE_URL.strip('"').strip("'")
     
-    # Se for Supabase, usar pooler para evitar IPv6
+    # Garantir que está usando pooler do Supabase
     if 'supabase.co' in DATABASE_URL and 'pooler.supabase.com' not in DATABASE_URL:
         # Converter URL direta para pooler
         DATABASE_URL = DATABASE_URL.replace(
@@ -131,34 +136,19 @@ if DATABASE_URL:
             'aws-1-us-east-2.pooler.supabase.com:6543'
         )
     
-    # Configuração específica para Supabase no Render
-    if 'supabase.co' in DATABASE_URL:
-        # Forçar IPv4 e configurações específicas para Supabase
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'postgres',
-                'USER': 'postgres',
-                'PASSWORD': '5252526363637373636363535',
-                'HOST': 'aws-1-us-east-2.pooler.supabase.com',
-                'PORT': '6543',
-                'OPTIONS': {
-                    'sslmode': 'require',
-                    'connect_timeout': 10,
-                    'options': '-c default_transaction_isolation=read_committed'
-                },
-                'CONN_MAX_AGE': 600,
-            }
-        }
-    else:
-        # Outros bancos usando dj-database-url
-        DATABASES = {
-            'default': dj_database_url.parse(
-                DATABASE_URL,
-                conn_max_age=600,
-                ssl_require=not DEBUG
-            )
-        }
+    # Garantir que SSL está habilitado para Supabase
+    if 'supabase.co' in DATABASE_URL and 'sslmode=require' not in DATABASE_URL:
+        separator = '&' if '?' in DATABASE_URL else '?'
+        DATABASE_URL += f'{separator}sslmode=require'
+    
+    # Usar dj-database-url para parsing automático
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
 else:
     # Configuração para desenvolvimento local com SQLite
     DATABASES = {
@@ -227,9 +217,28 @@ LOGOUT_REDIRECT_URL = '/login/'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO' if not DEBUG else 'DEBUG',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'WARNING' if not DEBUG else 'DEBUG',
+            'propagate': False,
         },
     },
     'root': {
