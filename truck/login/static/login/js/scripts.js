@@ -406,11 +406,14 @@ function closeReportModal() {
 
 function openCustosFixosModal() {
     document.getElementById('custosFixosModal').classList.remove('hidden');
-    carregarCustosFixos();
 }
 
 function closeCustosFixosModal() {
-    document.getElementById('custosFixosModal').classList.add('hidden');
+    const modal = document.getElementById('custosFixosModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        console.log('Modal de custos fixos fechado');
+    }
     limparFormularioCustoFixo();
 }
 
@@ -794,7 +797,6 @@ async function deleteReport(reportId) {
             const csrfToken = getCSRFToken();
             
             if (!csrfToken) {
-                console.error('CSRF Token não encontrado');
                 showNotification('Erro de autenticação. Faça login novamente.', 'error');
                 return;
             }
@@ -807,76 +809,32 @@ async function deleteReport(reportId) {
                 },
             });
             
-            console.log('Resposta recebida:', response.status, response.statusText);
-            
             if (response.ok) {
-                const result = await response.json();
-                console.log('Resultado da exclusão:', result);
-                
-                showNotification(result.message || 'Relatório excluído com sucesso!', 'success');
+                // Mostrar apenas mensagem de sucesso
+                showNotification('Relatório excluído com sucesso!', 'success');
                 
                 // Remover da lista local
                 reports = reports.filter(r => r.id !== reportId);
-                console.log('Relatório removido da lista local');
                 
                 // Atualizar resumos
                 updateWeekSummary();
                 updateMonthSummary();
-                console.log('Resumos atualizados');
                 
                 // Atualizar resultados de busca se estiverem visíveis
                 const resultadosBusca = document.getElementById('resultadosBusca');
                 if (resultadosBusca && !resultadosBusca.classList.contains('hidden')) {
-                    console.log('Atualizando resultados de busca...');
-                    
                     // Recarregar todos os relatórios do servidor para garantir consistência
                     await carregarRelatoriosDoServidor();
-                    
-                    // Verificar se há filtros de data aplicados
-                    const dataInicial = document.getElementById('dataInicial').value;
-                    const dataFinal = document.getElementById('dataFinal').value;
-                    if (dataInicial && dataFinal) {
-                        // Aplicar filtro de data
-                        const relatoriosFiltrados = reports.filter(report => {
-                            const reportDate = new Date(report.date);
-                            const inicio = new Date(dataInicial);
-                            const fim = new Date(dataFinal);
-                            return reportDate >= inicio && reportDate <= fim;
-                        });
-                        mostrarResultadosBusca(relatoriosFiltrados);
-                    } else {
-                        // Mostrar todos os relatórios
-                        mostrarResultadosBusca(reports);
-                    }
                 }
             } else {
-                console.error('Erro na resposta:', response.status, response.statusText);
-                
-                // Verificar se é erro de autenticação
-                if (response.status === 403) {
-                    showNotification('Erro de autenticação. Faça login novamente.', 'error');
-                    return;
-                }
-                
-                // Tentar ler como JSON, se falhar, mostrar erro genérico
-                try {
-                    const result = await response.json();
-                    console.error('Erro detalhado:', result);
-                    showNotification(result.message || 'Erro ao excluir relatório!', 'error');
-                } catch (jsonError) {
-                    console.error('Erro ao ler JSON da resposta:', jsonError);
-                    showNotification(`Erro ao excluir relatório! (Status: ${response.status})`, 'error');
-                }
+                // Apenas log do erro, sem mostrar mensagem para o usuário
+                console.log('Erro na exclusão:', response.status);
             }
         } catch (error) {
-            console.error('Erro ao excluir relatório:', error);
-            showNotification('Erro de conexão ao excluir relatório!', 'error');
+            // Apenas log do erro, sem mostrar mensagem para o usuário
+            console.log('Erro na exclusão:', error);
         }
-    } else {
-        console.log('Usuário cancelou exclusão');
     }
-    
-    console.log(`=== FIM EXCLUSÃO RELATÓRIO ${reportId} ===`);
 }
 
 // ===== FORMULÁRIOS =====
@@ -1301,7 +1259,13 @@ async function salvarCustoFixo() {
             if (result.success) {
                 showNotification(result.message, 'success');
                 limparFormularioCustoFixo();
-                carregarCustosFixos();
+                
+                // Fechar o modal automaticamente
+                console.log('Fechando modal de custos fixos...');
+                closeCustosFixosModal();
+                
+                // Atualizar automaticamente todos os dados da tela
+                await atualizarDashboardCompleto();
             } else {
                 showNotification(result.message, 'error');
             }
@@ -1391,8 +1355,8 @@ async function excluirCustoFixo(custoId) {
                 const result = await response.json();
                 showNotification(result.message || 'Custo fixo excluído com sucesso!', 'success');
                 
-                // Recarregar lista de custos fixos
-                carregarCustosFixos();
+                // Atualizar automaticamente todos os dados da tela
+                await atualizarDashboardCompleto();
             } else {
                 const result = await response.json();
                 showNotification(result.message || 'Erro ao excluir custo fixo!', 'error');
@@ -1468,10 +1432,9 @@ async function salvarRelatorioNoServidor(reportData, isEdit) {
                 showNotification(result.message, 'success');
                 closeReportModal();
                 limparFormularioViagem();
-                await carregarRelatoriosDoServidor();
-                updateWeekSummary();
-                updateMonthSummary();
-                updatePreviousReportsList();
+                
+                // Atualizar automaticamente todos os dados da tela
+                await atualizarDashboardCompleto();
             } else {
                 showNotification(result.message, 'error');
             }
@@ -1481,6 +1444,135 @@ async function salvarRelatorioNoServidor(reportData, isEdit) {
     } catch (error) {
         console.error('Erro ao salvar relatório:', error);
         showNotification('Erro ao salvar relatório!', 'error');
+    }
+}
+
+// ===== ATUALIZAÇÃO AUTOMÁTICA =====
+
+async function atualizarDashboardCompleto() {
+    try {
+        console.log('🔄 Atualizando dashboard completo...');
+        
+        // Recarregar relatórios do servidor
+        await carregarRelatoriosDoServidor();
+        
+        // Atualizar resumos financeiros
+        updateWeekSummary();
+        updateMonthSummary();
+        
+        // Atualizar lista de relatórios anteriores
+        updatePreviousReportsList();
+        
+        // Recarregar custos fixos se o modal estiver aberto
+        const custosFixosModal = document.getElementById('custosFixosModal');
+        if (custosFixosModal && !custosFixosModal.classList.contains('hidden')) {
+            await carregarCustosFixos();
+        }
+        
+        // Atualizar seção de custos fixos no dashboard principal
+        await atualizarSecaoCustosFixos();
+        
+        console.log('✅ Dashboard atualizado com sucesso!');
+    } catch (error) {
+        console.error('❌ Erro ao atualizar dashboard:', error);
+    }
+}
+
+async function atualizarSecaoCustosFixos() {
+    try {
+        const response = await fetch('/login/custos-fixos/');
+        if (response.ok) {
+            const result = await response.json();
+            const custosFixos = result.custos_fixos || [];
+            
+            // Recalcular total de custos fixos
+            const totalCustosFixos = custosFixos.reduce((sum, custo) => sum + parseFloat(custo.valor_mensal || 0), 0);
+            
+            // Atualizar o total exibido no dashboard principal
+            const totalElement = document.querySelector('.text-xl.sm\\:text-2xl.font-bold.text-blue-400');
+            if (totalElement) {
+                totalElement.textContent = `R$ ${totalCustosFixos.toFixed(2).replace('.', ',')}`;
+            }
+            
+            // Atualizar a seção de custos fixos no dashboard principal
+            const custosContainer = document.querySelector('.mb-6');
+            if (custosContainer && custosFixos.length > 0) {
+                // Recriar a seção de custos fixos com os dados atualizados
+                let html = '<div class="mb-6">';
+                
+                // Custos Fixos Mensais
+                html += `
+                    <div>
+                        <h4 class="text-base sm:text-lg font-semibold text-blue-300 mb-3 sm:mb-4">📅 Custos Fixos Mensais (R$ ${totalCustosFixos.toFixed(2).replace('.', ',')})</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                `;
+                
+                custosFixos.forEach(custo => {
+                    const icone = custo.tipo_custo === 'parcela_caminhao' ? '🚛' :
+                                 custo.tipo_custo === 'seguro' ? '🛡️' :
+                                 custo.tipo_custo === 'ipva' ? '📋' :
+                                 custo.tipo_custo === 'licenciamento' ? '📄' :
+                                 custo.tipo_custo === 'manutencao_preventiva' ? '🔧' : '💰';
+                    
+                    html += `
+                        <div class="bg-gradient-to-r from-blue-600/20 to-blue-700/20 rounded-xl p-3 sm:p-4 border border-blue-500/30">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-blue-200 text-xs sm:text-sm font-medium">${custo.tipo_custo_display || custo.tipo_custo}</p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-bold text-white truncate">${custo.descricao}</p>
+                                    <p class="text-xs sm:text-sm text-blue-300">R$ ${parseFloat(custo.valor_mensal).toFixed(2).replace('.', ',')}/mês</p>
+                                    ${custo.data_fim ? `<p class="text-xs text-gray-400">Até ${custo.data_fim}</p>` : ''}
+                                </div>
+                                <div class="flex items-center space-x-1 sm:space-x-2 ml-2">
+                                    <div class="text-lg sm:text-xl lg:text-2xl opacity-80">${icone}</div>
+                                    <div class="flex flex-col space-y-1">
+                                        <a href="/login/editar-custo-fixo/${custo.id}/" class="bg-yellow-600 hover:bg-yellow-700 text-white px-1 sm:px-2 py-1 rounded text-xs transition-colors text-center mobile-touch-target" title="Editar">
+                                            ✏️
+                                        </a>
+                                        <form method="post" action="/login/apagar-custo-fixo/${custo.id}/" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja apagar este custo fixo? Esta ação não pode ser desfeita.');">
+                                            <input type="hidden" name="csrfmiddlewaretoken" value="${getCSRFToken()}">
+                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-1 sm:px-2 py-1 rounded text-xs transition-colors w-full mobile-touch-target" title="Apagar">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            ${custo.observacoes ? `<p class="text-xs text-gray-400 mt-2 break-words">${custo.observacoes.substring(0, 50)}${custo.observacoes.length > 50 ? '...' : ''}</p>` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+                
+                // Total de custos fixos
+                html += `
+                    <div class="mt-3 sm:mt-4 p-3 sm:p-4 bg-gradient-to-r from-gray-700/50 to-gray-800/50 rounded-xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <span class="text-base sm:text-lg font-semibold text-white">Total de Custos Fixos</span>
+                            <span class="text-xl sm:text-2xl font-bold text-blue-400">R$ ${totalCustosFixos.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-400 mt-1">Custos fixos mensais</p>
+                    </div>
+                </div>
+                `;
+                
+                custosContainer.innerHTML = html;
+            } else if (custosContainer && custosFixos.length === 0) {
+                custosContainer.innerHTML = `
+                    <div class="text-center text-gray-400 py-6 sm:py-8">
+                        <span class="text-3xl sm:text-4xl">💳</span>
+                        <p class="mt-2 text-sm sm:text-base">Nenhum custo fixo cadastrado</p>
+                        <p class="text-xs sm:text-sm">Adicione custos fixos mensais como seguro, IPVA, etc.</p>
+                    </div>
+                `;
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar seção de custos fixos:', error);
     }
 }
 

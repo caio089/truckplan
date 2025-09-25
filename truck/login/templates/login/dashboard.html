@@ -506,7 +506,7 @@
                         <h4 class="text-lg font-semibold text-white mb-4">Salário do Motorista</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Salário Base (R$)</label>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Salário por Viagem (R$)</label>
                                 <input type="number" id="salario_base" name="salario_base" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00">
                             </div>
                             <div>
@@ -594,10 +594,6 @@
                                     <input type="date" id="dataVencimento" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
                                 </div>
                                 
-                                <div>
-                                    <label class="block text-gray-200 text-sm font-semibold mb-2">Comprovante</label>
-                                    <input type="file" id="comprovante" accept="image/*,.pdf" class="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-gray-400 focus:ring-2 focus:ring-gray-200/20">
-                                </div>
                             </div>
                             
                             
@@ -703,14 +699,6 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                    
-                    <!-- Lista de Custos Fixos Existentes -->
-                    <div class="bg-gray-800/30 rounded-xl p-6 border border-gray-600/30">
-                        <h4 class="text-lg font-semibold text-white mb-4">📋 Custos Fixos Cadastrados</h4>
-                        <div id="listaCustosFixos" class="space-y-3">
-                            <!-- Custos fixos serão carregados aqui via JavaScript -->
-                        </div>
                     </div>
                 </div>
             </div>
