@@ -157,6 +157,10 @@ function updateMonthSummary() {
 
 // ===== NAVEGAÇÃO =====
 
+function irParaRelatorioDiario() {
+    window.location.href = '/login/relatorio-diario/';
+}
+
 function irParaRelatorioSemanal() {
     window.location.href = '/login/relatorio-semanal/';
 }
@@ -1069,7 +1073,6 @@ function adicionarCustoGeral() {
         const formaPagamento = document.getElementById('formaPagamento').value;
         const statusPagamento = document.getElementById('statusPagamento').value;
         const dataVencimento = document.getElementById('dataVencimento').value;
-        const comprovante = document.getElementById('comprovante').files[0];
         
 
         // Validação mínima - apenas campos essenciais
@@ -1095,7 +1098,6 @@ function adicionarCustoGeral() {
             formaPagamento: formaPagamento || 'Não informado',
             statusPagamento: statusPagamento || 'Pendente',
             dataVencimento: dataVencimento || null,
-            comprovante: comprovante || null,
             isNew: true
         };
 
@@ -1195,24 +1197,6 @@ function limparFormularioCusto() {
     resetField('formaPagamento');
     resetField('statusPagamento');
     resetField('dataVencimento');
-
-    // Arquivo
-    const comprovante = document.getElementById('comprovante');
-    if (comprovante) {
-        try { comprovante.value = ''; } catch (e) { /* ignore */ }
-    }
-
-    // Campos de parcelas (se existirem)
-    resetField('quantidadeParcelas');
-    resetField('valorParcela');
-    resetField('dataPrimeiraParcela');
-    resetField('diaVencimento', '15');
-
-    const camposParcelas = document.getElementById('camposParcelas');
-    if (camposParcelas) camposParcelas.classList.add('hidden');
-
-    const previewParcelas = document.getElementById('previewParcelas');
-    if (previewParcelas) previewParcelas.classList.add('hidden');
 }
 
 // ===== PARCELAS =====
@@ -1408,9 +1392,6 @@ async function salvarRelatorioNoServidor(reportData, isEdit) {
             formData.append(`custo_${index}_forma_pagamento`, custo.formaPagamento || 'vista');
             formData.append(`custo_${index}_status_pagamento`, custo.statusPagamento || 'pago');
             formData.append(`custo_${index}_data_vencimento`, custo.dataVencimento || '');
-            if (custo.comprovante) {
-                formData.append(`custo_${index}_comprovante`, custo.comprovante);
-            }
         });
         
         const editReportId = document.getElementById('editReportId').value;
@@ -1885,13 +1866,19 @@ window.closeReportModal = closeReportModal;
 window.openCustosFixosModal = openCustosFixosModal;
 window.closeCustosFixosModal = closeCustosFixosModal;
 window.buscarRelatoriosPorData = buscarRelatoriosPorData;
+window.buscarRelatorioPorData = buscarRelatorioPorData;
 window.showPreviousReports = showPreviousReports;
+window.irParaRelatorioDiario = irParaRelatorioDiario;
 window.irParaRelatorioSemanal = irParaRelatorioSemanal;
 window.irParaRelatorioMensal = irParaRelatorioMensal;
 window.alternarResumo = alternarResumo;
 window.viewReportSummary = viewReportSummary;
 window.editReport = editReport;
 window.deleteReport = deleteReport;
+window.salvarCustoFixo = salvarCustoFixo;
+window.adicionarCustoGeral = adicionarCustoGeral;
+window.removerCustoGeral = removerCustoGeral;
+window.salvarRelatorio = salvarRelatorio;
 
 // Debug: verificar se a função editReport está correta
 console.log('=== DEBUG FUNÇÃO EDITREPORT ===');

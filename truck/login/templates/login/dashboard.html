@@ -5,6 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruckPlan - Dashboard</title>
+    <script>
+        // Suprimir completamente o aviso do Tailwind CDN
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                // Filtrar avisos do Tailwind CDN
+                if (args[0] && typeof args[0] === 'string' && 
+                    (args[0].includes('cdn.tailwindcss.com') || 
+                     args[0].includes('should not be used in production'))) {
+                    return;
+                }
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'login/css/styles.css' %}">
     
@@ -40,81 +55,300 @@
         }
     </script>
     <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            overflow-x: hidden;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
         .gradient-bg {
             background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+            min-height: 100vh;
         }
+        
         .glass-effect {
             background: rgba(31, 41, 55, 0.8);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(75, 85, 99, 0.3);
         }
         
-        /* Mobile optimizations */
+        /* Garantir que inputs não causem zoom no iOS */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        
+        /* Melhorar touch targets */
+        button, a, [onclick] {
+            min-height: 44px;
+            min-width: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Scroll suave */
+        * {
+            scroll-behavior: smooth;
+        }
+        
+        /* Mobile First - Base styles for mobile */
         @media (max-width: 640px) {
-            .mobile-p-2 { padding: 0.5rem; }
-            .mobile-p-4 { padding: 1rem; }
-            .mobile-p-6 { padding: 1.5rem; }
-            .mobile-mb-4 { margin-bottom: 1rem; }
-            .mobile-mb-6 { margin-bottom: 1.5rem; }
-            .mobile-mb-8 { margin-bottom: 2rem; }
-            .mobile-text-sm { font-size: 0.875rem; }
-            .mobile-text-base { font-size: 1rem; }
-            .mobile-text-lg { font-size: 1.125rem; }
-            .mobile-text-xl { font-size: 1.25rem; }
-            .mobile-text-2xl { font-size: 1.5rem; }
-            .mobile-text-3xl { font-size: 1.875rem; }
-            .mobile-text-4xl { font-size: 2.25rem; }
-            .mobile-grid-1 { grid-template-columns: 1fr; }
-            .mobile-grid-2 { grid-template-columns: repeat(2, 1fr); }
-            .mobile-flex-col { flex-direction: column; }
-            .mobile-items-center { align-items: center; }
-            .mobile-justify-center { justify-content: center; }
-            .mobile-text-center { text-align: center; }
-            .mobile-space-y-2 > * + * { margin-top: 0.5rem; }
-            .mobile-space-y-4 > * + * { margin-top: 1rem; }
-            .mobile-gap-2 { gap: 0.5rem; }
-            .mobile-gap-4 { gap: 1rem; }
-            .mobile-gap-6 { gap: 1.5rem; }
-            .mobile-rounded-lg { border-radius: 0.5rem; }
-            .mobile-rounded-xl { border-radius: 0.75rem; }
-            .mobile-rounded-2xl { border-radius: 1rem; }
-            .mobile-hidden { display: none; }
-            .mobile-block { display: block; }
-            .mobile-w-full { width: 100%; }
-            .mobile-touch-target { min-height: 44px; min-width: 44px; }
-            .mobile-button { padding: 0.75rem 1rem; font-size: 0.875rem; }
-            .mobile-input { font-size: 16px; padding: 0.75rem; }
-            .mobile-overflow-x-auto { overflow-x: auto; }
-            .mobile-table { min-width: 100%; }
-            .mobile-table th, .mobile-table td { padding: 0.5rem; font-size: 0.875rem; }
+            html {
+                font-size: 14px;
+            }
+            
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            
+            /* Navegação mobile */
+            nav {
+                padding: 0.5rem !important;
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                background: rgba(31, 41, 55, 0.95);
+                backdrop-filter: blur(10px);
+            }
+            
+            /* Container principal */
+            .max-w-7xl {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            
+            /* Cards de resumo financeiro */
+            .glass-effect {
+                padding: 0.75rem !important;
+                margin-bottom: 0.75rem !important;
+                border-radius: 1rem !important;
+            }
+            
+            /* Grid responsivo - força 1 coluna em mobile */
+            .grid {
+                display: grid !important;
+                gap: 0.75rem !important;
+            }
+            
+            .grid-cols-1,
+            .sm\:grid-cols-2,
+            .lg\:grid-cols-4,
+            .md\:grid-cols-2,
+            .lg\:grid-cols-3 {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Cards de métricas */
+            .rounded-xl, .rounded-2xl {
+                border-radius: 0.75rem !important;
+                padding: 0.75rem !important;
+            }
+            
+            /* Textos responsivos */
+            .text-2xl, .text-3xl, .text-4xl {
+                font-size: 1.25rem !important;
+                line-height: 1.75rem !important;
+            }
+            
+            .text-xl {
+                font-size: 1.125rem !important;
+                line-height: 1.5rem !important;
+            }
+            
+            .text-lg {
+                font-size: 1rem !important;
+                line-height: 1.5rem !important;
+            }
+            
+            .text-base {
+                font-size: 0.875rem !important;
+            }
+            
+            .text-sm {
+                font-size: 0.75rem !important;
+            }
+            
+            .text-xs {
+                font-size: 0.625rem !important;
+            }
+            
+            /* Botões responsivos */
+            button, .btn {
+                padding: 0.625rem 1rem !important;
+                font-size: 0.875rem !important;
+                min-height: 44px !important;
+                width: 100% !important;
+                border-radius: 0.5rem !important;
+            }
+            
+            /* Inputs responsivos */
+            input, select, textarea {
+                padding: 0.625rem !important;
+                font-size: 16px !important;
+                width: 100% !important;
+                border-radius: 0.5rem !important;
+            }
+            
+            /* Modais responsivos */
+            #reportModal .glass-effect,
+            #custosFixosModal .glass-effect {
+                max-width: 95vw !important;
+                max-height: 90vh !important;
+                padding: 1rem !important;
+                margin: 0.5rem !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            
+            /* Tabelas responsivas */
+            table {
+                font-size: 0.75rem !important;
+                display: block !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            
+            table thead {
+                display: none !important;
+            }
+            
+            table tr {
+                display: block !important;
+                margin-bottom: 1rem !important;
+                border: 1px solid rgba(75, 85, 99, 0.3) !important;
+                border-radius: 0.5rem !important;
+                padding: 0.75rem !important;
+            }
+            
+            table td {
+                display: block !important;
+                text-align: right !important;
+                padding: 0.5rem !important;
+                border: none !important;
+            }
+            
+            table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: bold;
+                color: #9ca3af;
+            }
+            
+            /* Espaçamentos mobile */
+            .p-8, .p-6 {
+                padding: 1rem !important;
+            }
+            
+            .px-6, .px-4 {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            
+            .py-6, .py-4 {
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+            
+            .mb-8, .mb-6 {
+                margin-bottom: 0.75rem !important;
+            }
+            
+            .mt-8, .mt-6 {
+                margin-top: 0.75rem !important;
+            }
+            
+            /* Gap responsivo */
+            .gap-6, .gap-4 {
+                gap: 0.75rem !important;
+            }
+            
+            .space-x-4 > * + * {
+                margin-left: 0.5rem !important;
+            }
+            
+            .space-y-6 > * + * {
+                margin-top: 0.75rem !important;
+            }
+            
+            /* Flex responsivo */
+            .flex {
+                flex-wrap: wrap !important;
+            }
+            
+            .space-x-4 {
+                gap: 0.5rem !important;
+            }
+            
+            /* Ocultar elementos desnecessários em mobile */
+            .mobile-hide {
+                display: none !important;
+            }
+            
+            /* Emojis menores em mobile */
+            .text-2xl:has(emoji), .text-3xl:has(emoji), .text-4xl:has(emoji) {
+                font-size: 1.5rem !important;
+            }
         }
         
-        /* Tablet optimizations */
+        /* Tablet (641px - 1024px) */
         @media (min-width: 641px) and (max-width: 1024px) {
-            .tablet-grid-2 { grid-template-columns: repeat(2, 1fr); }
-            .tablet-grid-3 { grid-template-columns: repeat(3, 1fr); }
-            .tablet-p-4 { padding: 1rem; }
-            .tablet-p-6 { padding: 1.5rem; }
-            .tablet-text-lg { font-size: 1.125rem; }
-            .tablet-text-xl { font-size: 1.25rem; }
+            .grid-cols-1,
+            .sm\:grid-cols-2,
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            .lg\:grid-cols-4,
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
         }
         
-        /* Very small screens */
+        /* Telas muito pequenas (< 375px) */
         @media (max-width: 375px) {
-            .xs-mobile-p-1 { padding: 0.25rem; }
-            .xs-mobile-p-2 { padding: 0.5rem; }
-            .xs-mobile-text-xs { font-size: 0.75rem; }
-            .xs-mobile-text-sm { font-size: 0.875rem; }
-            .xs-mobile-text-base { font-size: 1rem; }
-            .xs-mobile-gap-2 { gap: 0.5rem; }
-            .xs-mobile-gap-4 { gap: 1rem; }
+            html {
+                font-size: 13px;
+            }
+            
+            .glass-effect {
+                padding: 0.5rem !important;
+            }
+            
+            button, .btn {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.75rem !important;
+            }
         }
         
         /* Landscape mobile */
         @media (max-width: 896px) and (orientation: landscape) {
-            .landscape-mobile-p-2 { padding: 0.5rem; }
-            .landscape-mobile-mb-2 { margin-bottom: 0.5rem; }
-            .landscape-mobile-text-sm { font-size: 0.875rem; }
+            .glass-effect {
+                padding: 0.5rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            nav {
+                padding: 0.25rem !important;
+            }
+        }
+        
+        /* Desktop (> 1024px) - estilos originais */
+        @media (min-width: 1025px) {
+            button, .btn {
+                width: auto !important;
+            }
         }
     </style>
 </head>

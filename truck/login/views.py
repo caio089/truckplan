@@ -369,27 +369,8 @@ def listar_relatorios(request):
                     'observacoes': custo.observacoes or ''
                 })
             
-                # Se tem parcelas reais, adicionar também
-                parcelas = custo.parcelas.all().order_by('numero_parcela')
-                print(f"  -> Parcelas reais encontradas: {parcelas.count()}")
-                
-                for parcela in parcelas:
-                    print(f"    * Parcela {parcela.numero_parcela}: R$ {parcela.valor_parcela} - {parcela.status_pagamento}")
-                    todas_parcelas.append({
-                        'id': parcela.id,
-                        'custo_id': custo.id,
-                        'tipo_gasto': custo.get_tipo_gasto_display(),
-                        'descricao': custo.descricao,
-                        'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
-                        'veiculo_placa': custo.veiculo_placa or 'N/A',
-                        'numero_parcela': parcela.numero_parcela,
-                        'valor_parcela': float(parcela.valor_parcela),
-                        'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
-                        'status_pagamento': parcela.get_status_pagamento_display(),
-                        'paga': parcela.status_pagamento == 'pago',
-                        'forma_pagamento': custo.get_forma_pagamento_display(),
-                        'observacoes': custo.observacoes or ''
-                    })
+                # REMOVIDO: Sistema simplificado sem parcelas
+                # O modelo CustosGerais não tem atributo 'parcelas'
             
             # NÃO incluir custos fixos mensais aqui (mostrados apenas no relatório mensal)
         
@@ -673,7 +654,9 @@ def relatorio_semanal(request):
                     # Sistema simplificado - sem parcelas
                     if False:  # Desabilitado
                         # Para custos parcelados, mostrar cada parcela como um custo separado
-                        for parcela in custo.parcelas.all():
+                        # for parcela in custo.parcelas.all():  # COMENTADO: modelo não tem parcelas
+
+                        if False:  # Bloco desabilitado
                             # Criar um objeto similar ao custo original mas com dados da parcela
                             class ParcelaCustoWrapper:
                                 def __init__(self, custo_original, parcela):
@@ -707,8 +690,8 @@ def relatorio_semanal(request):
                         # Para custos não parcelados, adicionar normalmente
                         custo.is_parcela = False
                         custo.total_parcelas = 0
-                        custo.parcelas_pagas = 0
-                        custo.parcelas_pendentes = 0
+                        # # custo.parcelas_pagas = 0  # REMOVIDO: atributo não existe  # REMOVIDO: atributo não existe
+                        # # custo.parcelas_pendentes = 0  # REMOVIDO: atributo não existe  # REMOVIDO: atributo não existe
                         custo.valor_parcela = 0
                         custos_gerais_detalhados.append(custo)
                 
@@ -1045,7 +1028,9 @@ def relatorio_mensal(request):
                 # Sistema simplificado - sem parcelas
                 if False:  # Desabilitado
                     # Para custos parcelados, mostrar cada parcela como um custo separado
-                    for parcela in custo.parcelas.all():
+                    # for parcela in custo.parcelas.all():  # COMENTADO: modelo não tem parcelas
+
+                    if False:  # Bloco desabilitado
                         # Criar um objeto similar ao custo original mas com dados da parcela
                         class ParcelaCustoWrapper:
                             def __init__(self, custo_original, parcela):
@@ -1079,8 +1064,8 @@ def relatorio_mensal(request):
                     # Para custos não parcelados, adicionar normalmente
                     custo.is_parcela = False
                     custo.total_parcelas = 0
-                    custo.parcelas_pagas = 0
-                    custo.parcelas_pendentes = 0
+                    # custo.parcelas_pagas = 0  # REMOVIDO: atributo não existe
+                    # custo.parcelas_pendentes = 0  # REMOVIDO: atributo não existe
                     custo.valor_parcela = 0
                     custos_gerais_detalhados.append(custo)
             
@@ -1229,7 +1214,9 @@ def relatorio_diario(request):
                 # Sistema simplificado - sem parcelas
                 if False:  # Desabilitado
                     # Para custos parcelados, mostrar cada parcela como um custo separado
-                    for parcela in custo.parcelas.all():
+                    # for parcela in custo.parcelas.all():  # COMENTADO: modelo não tem parcelas
+
+                    if False:  # Bloco desabilitado
                         # Criar um objeto similar ao custo original mas com dados da parcela
                         class ParcelaCustoWrapper:
                             def __init__(self, custo_original, parcela):
@@ -1263,8 +1250,8 @@ def relatorio_diario(request):
                     # Para custos não parcelados, adicionar normalmente
                     custo.is_parcela = False
                     custo.total_parcelas = 0
-                    custo.parcelas_pagas = 0
-                    custo.parcelas_pendentes = 0
+                    # custo.parcelas_pagas = 0  # REMOVIDO: atributo não existe
+                    # custo.parcelas_pendentes = 0  # REMOVIDO: atributo não existe
                     custo.valor_parcela = 0
                     custos_gerais_detalhados.append(custo)
             
@@ -1725,24 +1712,9 @@ def buscar_relatorios_periodo(request):
                         'observacoes': custo.observacoes or ''
                     })
                     
-                    # Se tem parcelas reais, adicionar também
-                    parcelas = custo.parcelas.all().order_by('numero_parcela')
-                    for parcela in parcelas:
-                        todas_parcelas.append({
-                            'id': parcela.id,
-                            'custo_id': custo.id,
-                            'tipo_gasto': custo.get_tipo_gasto_display(),
-                            'descricao': custo.descricao,
-                            'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
-                            'veiculo_placa': custo.veiculo_placa or 'N/A',
-                            'numero_parcela': parcela.numero_parcela,
-                            'valor_parcela': float(parcela.valor_parcela),
-                            'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
-                            'status_pagamento': parcela.get_status_pagamento_display(),
-                            'paga': parcela.status_pagamento == 'pago',
-                            'forma_pagamento': custo.get_forma_pagamento_display(),
-                            'observacoes': custo.observacoes or ''
-                        })
+                    # REMOVIDO: Sistema simplificado sem parcelas
+                    # parcelas = custo.parcelas.all().order_by('numero_parcela')
+                    # for parcela in parcelas: ...
                 
                 relatorio_data = {
                     'id': relatorio.id,
@@ -1920,24 +1892,9 @@ def buscar_relatorios_mes(request):
                     'observacoes': custo.observacoes or ''
                 })
                 
-                # Adicionar parcelas reais se existirem
-                parcelas = custo.parcelas.all().order_by('numero_parcela')
-                for parcela in parcelas:
-                    todas_parcelas_mes.append({
-                        'id': parcela.id,
-                        'custo_id': custo.id,
-                        'tipo_gasto': custo.get_tipo_gasto_display(),
-                        'descricao': custo.descricao,
-                        'oficina_fornecedor': custo.oficina_fornecedor or 'N/A',
-                        'veiculo_placa': custo.veiculo_placa or 'N/A',
-                        'numero_parcela': parcela.numero_parcela,
-                        'valor_parcela': float(parcela.valor_parcela),
-                        'data_vencimento': parcela.data_vencimento.strftime('%d/%m/%Y'),
-                        'status_pagamento': parcela.get_status_pagamento_display(),
-                        'paga': parcela.status_pagamento == 'pago',
-                        'forma_pagamento': custo.get_forma_pagamento_display(),
-                        'observacoes': custo.observacoes or ''
-                })
+                # REMOVIDO: Sistema simplificado sem parcelas
+                # parcelas = custo.parcelas.all().order_by('numero_parcela')
+                # for parcela in parcelas: ...
             
             return JsonResponse({
                 'success': True,
