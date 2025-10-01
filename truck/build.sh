@@ -6,7 +6,10 @@ set -o errexit  # Exit on error
 echo "🔧 Installing dependencies..."
 pip install -r requirements.txt
 
-echo "📦 Collecting static files..."
+echo "🧹 Clearing old static files..."
+rm -rf staticfiles/*
+
+echo "📦 Collecting static files (with force clear)..."
 python manage.py collectstatic --noinput --clear
 
 echo "🗄️ Running migrations..."
@@ -16,3 +19,4 @@ echo "👤 Creating default user..."
 python manage.py create_default_user || echo "User already exists"
 
 echo "✅ Build completed successfully!"
+echo "📋 Static files collected at: staticfiles/"
