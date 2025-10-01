@@ -75,125 +75,105 @@
             background-clip: text;
         }
         
-        /* Mobile optimizations */
+        /* Reset e base */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Prevenir zoom em inputs no iOS */
+        input, select, textarea {
+            font-size: 16px;
+        }
+        
+        /* Touch targets */
+        button, a[href] {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Mobile: até 640px */
         @media (max-width: 640px) {
-            .mobile-padding {
-                padding: 1rem;
+            html {
+                font-size: 14px;
             }
-            .mobile-text-sm {
-                font-size: 0.875rem;
-            }
-            .mobile-text-lg {
-                font-size: 1.125rem;
-            }
-            .mobile-text-xl {
-                font-size: 1.25rem;
-            }
-            .mobile-text-2xl {
-                font-size: 1.5rem;
-            }
-            .mobile-text-3xl {
-                font-size: 1.875rem;
-            }
-            .mobile-space-y-4 > * + * {
-                margin-top: 1rem;
-            }
-            .mobile-grid-1 {
-                grid-template-columns: 1fr;
-            }
-            .mobile-full-width {
-                width: 100%;
-            }
-            .mobile-hidden {
-                display: none;
-            }
-            .mobile-block {
-                display: block;
-            }
-            .mobile-flex-col {
-                flex-direction: column;
-            }
-            .mobile-items-center {
-                align-items: center;
-            }
-            .mobile-justify-center {
-                justify-content: center;
-            }
-            .mobile-text-center {
-                text-align: center;
-            }
-            .mobile-mb-4 {
-                margin-bottom: 1rem;
-            }
-            .mobile-mb-6 {
-                margin-bottom: 1.5rem;
-            }
-            .mobile-p-4 {
-                padding: 1rem;
-            }
-            .mobile-p-6 {
-                padding: 1.5rem;
-            }
-            .mobile-p-8 {
-                padding: 2rem;
-            }
-            .mobile-gap-4 {
-                gap: 1rem;
-            }
-            .mobile-gap-6 {
-                gap: 1.5rem;
-            }
-            .mobile-rounded-xl {
-                border-radius: 0.75rem;
-            }
-            .mobile-rounded-2xl {
-                border-radius: 1rem;
-            }
-            .mobile-rounded-3xl {
-                border-radius: 1.5rem;
-            }
-            .mobile-input {
-                font-size: 16px; /* Prevents zoom on iOS */
-                padding: 0.75rem 1rem;
-            }
-            .mobile-button {
-                padding: 0.75rem 1.5rem;
-                font-size: 1rem;
-                min-height: 44px; /* Touch target size */
-            }
-            .mobile-touch-target {
-                min-height: 44px;
-                min-width: 44px;
-            }
-        }
-        
-        /* Landscape mobile optimizations */
-        @media (max-width: 896px) and (orientation: landscape) {
-            .landscape-mobile-p-4 {
-                padding: 1rem;
-            }
-            .landscape-mobile-mb-4 {
-                margin-bottom: 1rem;
-            }
-            .landscape-mobile-text-sm {
-                font-size: 0.875rem;
-            }
-        }
-        
-        /* Very small screens */
-        @media (max-width: 375px) {
-            .xs-mobile-p-2 {
+            
+            body {
                 padding: 0.5rem;
             }
-            .xs-mobile-text-xs {
-                font-size: 0.75rem;
+            
+            .glass-effect {
+                padding: 1.5rem;
+                border-radius: 1rem;
             }
-            .xs-mobile-text-sm {
-                font-size: 0.875rem;
-            }
-            .xs-mobile-text-base {
+            
+            /* Textos */
+            h1, .text-4xl { font-size: 1.75rem; line-height: 2.25rem; }
+            h2, .text-3xl { font-size: 1.5rem; line-height: 2rem; }
+            .text-2xl { font-size: 1.25rem; line-height: 1.75rem; }
+            .text-xl { font-size: 1.125rem; line-height: 1.625rem; }
+            .text-lg { font-size: 1rem; line-height: 1.5rem; }
+            
+            /* Espaçamentos */
+            .space-y-6 > * + * { margin-top: 1rem; }
+            .space-y-4 > * + * { margin-top: 0.75rem; }
+            .mb-8 { margin-bottom: 1.5rem; }
+            .mb-6 { margin-bottom: 1rem; }
+            .mb-4 { margin-bottom: 0.75rem; }
+            
+            /* Botões */
+            button {
+                width: 100%;
+                padding: 0.875rem 1rem;
                 font-size: 1rem;
             }
+            
+            /* Inputs */
+            input {
+                width: 100%;
+                padding: 0.875rem 1rem;
+            }
+            
+            /* Emojis */
+            .text-5xl { font-size: 2.5rem; }
+            .text-4xl { font-size: 2rem; }
+        }
+        
+        /* Telas muito pequenas: até 375px */
+        @media (max-width: 375px) {
+            html {
+                font-size: 13px;
+            }
+            
+            .glass-effect {
+                padding: 1rem;
+            }
+            
+            button {
+                padding: 0.75rem 0.875rem;
+            }
+        }
+        
+        /* Landscape mobile */
+        @media (max-width: 896px) and (orientation: landscape) {
+            body {
+                padding: 0.25rem;
+            }
+            
+            .glass-effect {
+                padding: 1rem;
+            }
+            
+            .mb-8 { margin-bottom: 1rem; }
         }
     </style>
 </head>

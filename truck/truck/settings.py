@@ -123,8 +123,10 @@ import dj_database_url
 import os
 
 # Configuração do banco de dados usando dj-database-url
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL:
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+
+# Verificar se DATABASE_URL está válida (não vazia e contém protocolo)
+if DATABASE_URL and DATABASE_URL.startswith('postgresql'):
     # Remover aspas se existirem
     DATABASE_URL = DATABASE_URL.strip('"').strip("'")
     
@@ -151,6 +153,9 @@ if DATABASE_URL:
     }
 else:
     # Configuração para desenvolvimento local com SQLite
+    print(f"⚠️ DATABASE_URL não está configurada corretamente: '{DATABASE_URL}'")
+    print("📝 Usando SQLite para desenvolvimento local")
+    print("💡 Para usar PostgreSQL, configure DATABASE_URL no arquivo truck/.env")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

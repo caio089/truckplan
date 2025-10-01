@@ -1,11 +1,30 @@
+/* Reset e base */
+* {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 .gradient-bg {
     background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+    min-height: 100vh;
 }
 
 .glass-effect {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(31, 41, 55, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(75, 85, 99, 0.3);
 }
 
 .text-gradient {
@@ -15,3 +34,234 @@
     background-clip: text;
 }
 
+/* Prevenir zoom em inputs no iOS */
+input, select, textarea {
+    font-size: 16px;
+}
+
+/* Touch targets acessíveis */
+button, a[href], [onclick] {
+    min-height: 44px;
+}
+
+/* Scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Mobile: até 640px */
+@media (max-width: 640px) {
+    html {
+        font-size: 14px;
+    }
+    
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    
+    /* Navegação fixa no topo */
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        padding: 0.75rem;
+        background: rgba(31, 41, 55, 0.98);
+        backdrop-filter: blur(12px);
+    }
+    
+    /* Compensar espaço do header fixo */
+    body.gradient-bg {
+        padding-top: 70px;
+    }
+    
+    /* Containers */
+    .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Cards */
+    .glass-effect {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Grid sempre 1 coluna */
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    /* Textos ajustados */
+    h1, .text-4xl { font-size: 1.5rem; line-height: 2rem; }
+    h2, .text-3xl { font-size: 1.375rem; line-height: 1.875rem; }
+    h3, .text-2xl { font-size: 1.25rem; line-height: 1.75rem; }
+    h4, .text-xl { font-size: 1.125rem; line-height: 1.625rem; }
+    .text-lg { font-size: 1rem; line-height: 1.5rem; }
+    
+    /* Botões principais 100% em mobile */
+    button:not(.inline-btn):not(.text-xs):not([class*="bg-yellow"]):not([class*="bg-red"]), 
+    a.btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.9375rem;
+    }
+    
+    /* Botões inline mantêm tamanho */
+    .inline-btn,
+    button.text-xs,
+    button[class*="bg-yellow-"],
+    button[class*="bg-red-"],
+    button[title="Editar"],
+    button[title="Apagar"],
+    a[class*="bg-yellow-"],
+    a[class*="bg-red-"],
+    form button[type="submit"].text-xs {
+        width: auto;
+        min-width: 44px;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Inputs ajustados */
+    input, select, textarea {
+        width: 100%;
+        padding: 0.75rem;
+    }
+    
+    /* Modais responsivos */
+    .fixed > .glass-effect,
+    [id$="Modal"] > div {
+        width: calc(100vw - 1rem);
+        max-height: 90vh;
+        max-width: calc(100vw - 1rem);
+        margin: 0.5rem;
+        padding: 1rem;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Tabelas em cards */
+    table {
+        font-size: 0.875rem;
+    }
+    
+    table thead {
+        display: none;
+    }
+    
+    table tbody {
+        display: block;
+    }
+    
+    table tr {
+        display: block;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        border-radius: 0.75rem;
+        background: rgba(31, 41, 55, 0.5);
+    }
+    
+    table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border: none;
+        text-align: right;
+    }
+    
+    table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #9ca3af;
+        text-align: left;
+    }
+    
+    /* Espaçamentos reduzidos */
+    .p-8 { padding: 1rem; }
+    .p-6 { padding: 1rem; }
+    .px-6, .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .py-6, .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+    
+    .mb-8, .mb-6 { margin-bottom: 1rem; }
+    .mt-8, .mt-6 { margin-top: 1rem; }
+    
+    .gap-6, .gap-4 { gap: 0.75rem; }
+    
+    /* Ocultar em mobile */
+    .mobile-hide {
+        display: none;
+    }
+    
+    /* Ocultar animações de fundo */
+    body > div.absolute.inset-0 > div {
+        display: none;
+    }
+}
+
+/* Tablet: 641px até 1024px */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Telas muito pequenas: até 375px */
+@media (max-width: 375px) {
+    html {
+        font-size: 13px;
+    }
+    
+    .glass-effect {
+        padding: 0.75rem;
+    }
+    
+    button {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+    }
+    
+    body.gradient-bg {
+        padding-top: 60px;
+    }
+}
+
+/* Landscape mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+    .glass-effect {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    nav {
+        padding: 0.5rem;
+    }
+    
+    [id$="Modal"] > div {
+        max-height: 85vh;
+    }
+    
+    body.gradient-bg {
+        padding-top: 60px;
+    }
+}
+
+/* Desktop: acima de 1024px */
+@media (min-width: 1025px) {
+    button:not(.w-full) {
+        width: auto;
+    }
+    
+    /* Remover padding do body em desktop */
+    body.gradient-bg {
+        padding-top: 0;
+    }
+    
+    /* Nav volta a ser relative em desktop */
+    nav {
+        position: relative;
+    }
+}
