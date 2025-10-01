@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # Build script for Render deployment
 
-# Install dependencies
+set -o errexit  # Exit on error
+
+echo "🔧 Installing dependencies..."
 pip install -r requirements.txt
 
-# Collect static files
-python manage.py collectstatic --noinput
+echo "📦 Collecting static files..."
+python manage.py collectstatic --noinput --clear
 
-# Run migrations
-python manage.py migrate
+echo "🗄️ Running migrations..."
+python manage.py migrate --noinput
 
-echo "Build completed successfully!"
+echo "👤 Creating default user..."
+python manage.py create_default_user || echo "User already exists"
+
+echo "✅ Build completed successfully!"
