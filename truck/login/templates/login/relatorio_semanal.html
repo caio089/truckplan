@@ -3,11 +3,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>TruckPlan - Relatório Semanal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}?v=20251001">
     <script>
         tailwind.config = {
             theme: {
@@ -34,14 +37,14 @@
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
     <!-- Header -->
     <div class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-4">
-                    <h1 class="text-2xl font-bold text-white">📊 Relatório Semanal</h1>
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-3 sm:py-4">
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <h1 class="text-base sm:text-2xl font-bold text-white">📊 Relatório Semanal</h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'dashboard' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        ← Voltar ao Dashboard
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <a href="{% url 'dashboard' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-xs sm:text-base">
+                        ← Voltar
                     </a>
                 </div>
             </div>
@@ -49,10 +52,10 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         <!-- Filtros -->
-        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
-            <h2 class="text-xl font-semibold text-white mb-4">Filtros de Período</h2>
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700/50">
+            <h2 class="text-base sm:text-xl font-semibold text-white mb-3 sm:mb-4">📅 Filtros de Período</h2>
             <form method="get" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -288,101 +291,132 @@
         {% endif %}
 
         <!-- Resumo por Motorista -->
-        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
-            <h3 class="text-xl font-semibold text-white mb-6">Resumo por Motorista</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-white">
-                    <thead>
-                        <tr class="border-b border-gray-600">
-                            <th class="text-left py-3 px-4">Motorista</th>
-                            <th class="text-right py-3 px-4">Viagens</th>
-                            <th class="text-right py-3 px-4">Diárias</th>
-                            <th class="text-right py-3 px-4">Valor Diárias</th>
-                            <th class="text-right py-3 px-4">Gasolina</th>
-                            <th class="text-right py-3 px-4">Receita</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in resumo_motorista %}
-                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
-                            <td class="py-3 px-4 font-medium">{{ item.motorista }}</td>
-                            <td class="py-3 px-4 text-right">{{ item.total_viagens }}</td>
-                            <td class="py-3 px-4 text-right">{{ item.total_diarias }}</td>
-                            <td class="py-3 px-4 text-right">R$ {{ item.total_valor_diarias|floatformat:2 }}</td>
-                            <td class="py-3 px-4 text-right">R$ {{ item.total_gasto_gasolina|floatformat:2 }}</td>
-                            <td class="py-3 px-4 text-right">R$ {{ item.total_receita_frete|floatformat:2 }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700/50">
+            <h3 class="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">👨‍💼 Resumo por Motorista</h3>
+            
+            <!-- Grid de Cards -->
+            <div class="grid grid-cols-1 gap-3 sm:gap-4">
+                {% for item in resumo_motorista %}
+                <div class="bg-gray-700/50 rounded-lg p-4 border border-gray-600/30 hover:bg-gray-700/70 transition-colors">
+                    <!-- Nome do Motorista -->
+                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-600/30">
+                        <h4 class="text-base sm:text-lg font-bold text-white">{{ item.motorista }}</h4>
+                        <span class="text-xs sm:text-sm bg-blue-600 text-white px-2 py-1 rounded">{{ item.total_viagens }} viagens</span>
+                    </div>
+                    
+                    <!-- Dados Financeiros -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <p class="text-xs text-gray-400">🏨 Diárias</p>
+                            <p class="text-sm font-semibold text-white">{{ item.total_diarias }}</p>
+                            <p class="text-xs text-orange-400">R$ {{ item.total_valor_diarias|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">⛽ Gasolina</p>
+                            <p class="text-sm font-semibold text-red-400">R$ {{ item.total_gasto_gasolina|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">💰 Receita</p>
+                            <p class="text-sm font-semibold text-green-400">R$ {{ item.total_receita_frete|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">📊 Lucro</p>
+                            <p class="text-sm font-bold {% if item.total_receita_frete|add:'-'|add:item.total_valor_diarias|add:'-'|add:item.total_gasto_gasolina >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                                R$ {{ item.total_receita_frete|floatformat:2|add:'-'|add:item.total_valor_diarias|floatformat:2|add:'-'|add:item.total_gasto_gasolina|floatformat:2 }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
 
         <!-- Resumo por Caminhão -->
-        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
-            <h3 class="text-xl font-semibold text-white mb-6">Resumo por Caminhão</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-white">
-                    <thead>
-                        <tr class="border-b border-gray-600">
-                            <th class="text-left py-3 px-4">Caminhão</th>
-                            <th class="text-right py-3 px-4">Viagens</th>
-                            <th class="text-right py-3 px-4">Diárias</th>
-                            <th class="text-right py-3 px-4">Valor Diárias</th>
-                            <th class="text-right py-3 px-4">Gasolina</th>
-                            <th class="text-right py-3 px-4">Receita</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in resumo_caminhao %}
-                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
-                            <td class="py-3 px-4 font-medium">{{ item.caminhao }}</td>
-                            <td class="py-3 px-4 text-right">{{ item.total_viagens }}</td>
-                            <td class="py-3 px-4 text-right">{{ item.total_diarias }}</td>
-                            <td class="py-3 px-4 text-right">R$ {{ item.total_valor_diarias|floatformat:2 }}</td>
-                            <td class="py-3 px-4 text-right">R$ {{ item.total_gasto_gasolina|floatformat:2 }}</td>
-                            <td class="py-3 px-4 text-right">R$ {{ item.total_receita_frete|floatformat:2 }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700/50">
+            <h3 class="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">🚛 Resumo por Caminhão</h3>
+            
+            <!-- Grid de Cards -->
+            <div class="grid grid-cols-1 gap-3 sm:gap-4">
+                {% for item in resumo_caminhao %}
+                <div class="bg-gray-700/50 rounded-lg p-4 border border-gray-600/30 hover:bg-gray-700/70 transition-colors">
+                    <!-- Nome do Caminhão -->
+                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-600/30">
+                        <h4 class="text-base sm:text-lg font-bold text-white">{{ item.caminhao }}</h4>
+                        <span class="text-xs sm:text-sm bg-purple-600 text-white px-2 py-1 rounded">{{ item.total_viagens }} viagens</span>
+                    </div>
+                    
+                    <!-- Dados Financeiros -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <p class="text-xs text-gray-400">🏨 Diárias</p>
+                            <p class="text-sm font-semibold text-white">{{ item.total_diarias }}</p>
+                            <p class="text-xs text-orange-400">R$ {{ item.total_valor_diarias|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">⛽ Gasolina</p>
+                            <p class="text-sm font-semibold text-red-400">R$ {{ item.total_gasto_gasolina|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">💰 Receita</p>
+                            <p class="text-sm font-semibold text-green-400">R$ {{ item.total_receita_frete|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">📊 Lucro Estimado</p>
+                            <p class="text-sm font-bold text-blue-400">R$ {{ item.total_receita_frete|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
 
         <!-- Detalhes das Viagens -->
-        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
-            <h3 class="text-xl font-semibold text-white mb-6">Detalhes das Viagens ({{ relatorios|length }} encontradas)</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-white">
-                    <thead>
-                        <tr class="border-b border-gray-600">
-                            <th class="text-left py-3 px-4">Data</th>
-                            <th class="text-left py-3 px-4">Motorista</th>
-                            <th class="text-left py-3 px-4">Caminhão</th>
-                            <th class="text-left py-3 px-4">Rota</th>
-                            <th class="text-right py-3 px-4">Diárias</th>
-                            <th class="text-right py-3 px-4">Gasolina</th>
-                            <th class="text-right py-3 px-4">Receita</th>
-                            <th class="text-right py-3 px-4">Lucro</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for relatorio in relatorios %}
-                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
-                            <td class="py-3 px-4">{{ relatorio.data_viagem|date:"d/m/Y" }}</td>
-                            <td class="py-3 px-4 font-medium">{{ relatorio.motorista }}</td>
-                            <td class="py-3 px-4">{{ relatorio.caminhao }}</td>
-                            <td class="py-3 px-4">{{ relatorio.partida }} → {{ relatorio.chegada }}</td>
-                            <td class="py-3 px-4 text-right">{{ relatorio.diarias }} (R$ {{ relatorio.valor_diarias|floatformat:2 }})</td>
-                            <td class="py-3 px-4 text-right">{{ relatorio.litros_gasolina|floatformat:2 }}L (R$ {{ relatorio.gasto_gasolina|floatformat:2 }})</td>
-                            <td class="py-3 px-4 text-right">R$ {{ relatorio.receita_frete|floatformat:2 }}</td>
-                            <td class="py-3 px-4 text-right {% if relatorio.get_lucro >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-700/50">
+            <h3 class="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">📋 Detalhes das Viagens ({{ relatorios|length }})</h3>
+            
+            <!-- Grid de Cards -->
+            <div class="grid grid-cols-1 gap-3 sm:gap-4">
+                {% for relatorio in relatorios %}
+                <div class="bg-gray-700/50 rounded-lg p-4 border border-gray-600/30 hover:bg-gray-700/70 transition-colors">
+                    <!-- Cabeçalho do Card -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <p class="text-gray-400 text-xs mb-1">📅 {{ relatorio.data_viagem|date:"d/m/Y" }}</p>
+                            <p class="text-white font-semibold text-sm sm:text-base">{{ relatorio.partida }} → {{ relatorio.chegada }}</p>
+                            <p class="text-gray-300 text-xs mt-1">👨‍💼 {{ relatorio.motorista }} | 🚛 {{ relatorio.caminhao }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400">Lucro</p>
+                            <p class="text-base sm:text-lg font-bold {% if relatorio.get_lucro >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
                                 R$ {{ relatorio.get_lucro|floatformat:2 }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Detalhes Financeiros -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 pb-3 border-b border-gray-600/30">
+                        <div>
+                            <p class="text-xs text-gray-400">💰 Receita</p>
+                            <p class="text-sm text-green-400 font-semibold">R$ {{ relatorio.receita_frete|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">⛽ Gasolina</p>
+                            <p class="text-sm text-red-400 font-semibold">R$ {{ relatorio.gasto_gasolina|floatformat:2 }}</p>
+                            <p class="text-xs text-gray-500">{{ relatorio.litros_gasolina|floatformat:2 }}L</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">🏨 Diárias</p>
+                            <p class="text-sm text-orange-400 font-semibold">R$ {{ relatorio.valor_diarias|floatformat:2 }}</p>
+                            <p class="text-xs text-gray-500">{{ relatorio.diarias }} dias</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">📊 Total Gastos</p>
+                            <p class="text-sm text-yellow-400 font-semibold">R$ {% widthratio relatorio.gasto_gasolina 1 1 as gas %}{% widthratio relatorio.valor_diarias 1 1 as dia %}{{ gas|add:dia|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                {% endfor %}
             </div>
         </div>
         {% else %}

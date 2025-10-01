@@ -3,11 +3,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>TruckPlan - Relatório Mensal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}?v=20251001">
     <script>
         tailwind.config = {
             theme: {
@@ -34,14 +37,14 @@
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
     <!-- Header -->
     <div class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-4">
-                    <h1 class="text-2xl font-bold text-white">📅 Relatório Mensal</h1>
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-3 sm:py-4">
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <h1 class="text-base sm:text-2xl font-bold text-white">📅 Relatório Mensal</h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'dashboard' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        ← Voltar ao Dashboard
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <a href="{% url 'dashboard' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-xs sm:text-base">
+                        ← Voltar
                     </a>
                 </div>
             </div>
@@ -49,10 +52,10 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         <!-- Filtros -->
-        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700/50">
-            <h2 class="text-xl font-semibold text-white mb-4">Selecionar Mês</h2>
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-700/50">
+            <h2 class="text-base sm:text-xl font-semibold text-white mb-3 sm:mb-4">📅 Selecionar Mês</h2>
             
             <!-- Debug Info -->
             {% if ano_mes %}
@@ -362,48 +365,58 @@
         </div>
 
         <!-- Detalhes das Viagens do Mês -->
-        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
-            <h3 class="text-xl font-semibold text-white mb-6">Viagens do Mês ({{ relatorios|length }} encontradas)</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-white">
-                    <thead>
-                        <tr class="border-b border-gray-600">
-                            <th class="text-left py-3 px-4">Data</th>
-                            <th class="text-left py-3 px-4">Motorista</th>
-                            <th class="text-left py-3 px-4">Caminhão</th>
-                            <th class="text-left py-3 px-4">Rota</th>
-                            <th class="text-right py-3 px-4">Diárias</th>
-                            <th class="text-right py-3 px-4">Gasolina</th>
-                            <th class="text-center py-3 px-4">Custos Gerais</th>
-                            <th class="text-right py-3 px-4">Receita</th>
-                            <th class="text-right py-3 px-4">Lucro</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for relatorio in relatorios %}
-                        <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
-                            <td class="py-3 px-4">{{ relatorio.data_viagem|date:"d/m/Y" }}</td>
-                            <td class="py-3 px-4 font-medium">{{ relatorio.motorista|default:"N/A" }}</td>
-                            <td class="py-3 px-4">{{ relatorio.caminhao|default:"N/A" }}</td>
-                            <td class="py-3 px-4">{{ relatorio.partida|default:"N/A" }} → {{ relatorio.chegada|default:"N/A" }}</td>
-                            <td class="py-3 px-4 text-right">{{ relatorio.diarias }} (R$ {{ relatorio.valor_diarias|floatformat:2 }})</td>
-                            <td class="py-3 px-4 text-right">{{ relatorio.litros_gasolina|floatformat:2 }}L (R$ {{ relatorio.gasto_gasolina|floatformat:2 }})</td>
-                            <td class="py-3 px-4 text-center">
-                                <button onclick="toggleCustosGerais({{ relatorio.id }})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors">
-                                    Ver Custos
-                                </button>
-                            </td>
-                            <td class="py-3 px-4 text-right">R$ {{ relatorio.receita_frete|floatformat:2 }}</td>
-                            <td class="py-3 px-4 text-right {% if relatorio.get_lucro >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+        <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-700/50">
+            <h3 class="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">🚛 Viagens do Mês ({{ relatorios|length }})</h3>
+            
+            <!-- Grid de Cards -->
+            <div class="grid grid-cols-1 gap-3 sm:gap-4">
+                {% for relatorio in relatorios %}
+                <div class="bg-gray-700/50 rounded-lg p-4 border border-gray-600/30 hover:bg-gray-700/70 transition-colors">
+                    <!-- Cabeçalho do Card -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <p class="text-gray-400 text-xs mb-1">📅 {{ relatorio.data_viagem|date:"d/m/Y" }}</p>
+                            <p class="text-white font-semibold text-sm sm:text-base">{{ relatorio.partida|default:"N/A" }} → {{ relatorio.chegada|default:"N/A" }}</p>
+                            <p class="text-gray-300 text-xs mt-1">👨‍💼 {{ relatorio.motorista|default:"N/A" }} | 🚛 {{ relatorio.caminhao|default:"N/A" }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400">Lucro</p>
+                            <p class="text-base sm:text-lg font-bold {% if relatorio.get_lucro >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
                                 R$ {{ relatorio.get_lucro|floatformat:2 }}
-                            </td>
-                        </tr>
-                        <!-- Linha expandível com custos gerais -->
-                        <tr id="custos-{{ relatorio.id }}" class="hidden bg-gray-700/20">
-                            <td colspan="9" class="py-4 px-4">
-                                <div class="bg-gray-800/50 rounded-lg p-4">
-                                    <h4 class="text-lg font-semibold text-white mb-3">💰 Custos Gerais da Viagem</h4>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Detalhes Financeiros -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 pb-3 border-b border-gray-600/30">
+                        <div>
+                            <p class="text-xs text-gray-400">💰 Receita</p>
+                            <p class="text-sm text-green-400 font-semibold">R$ {{ relatorio.receita_frete|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">⛽ Gasolina</p>
+                            <p class="text-sm text-red-400 font-semibold">R$ {{ relatorio.gasto_gasolina|floatformat:2 }}</p>
+                            <p class="text-xs text-gray-500">{{ relatorio.litros_gasolina|floatformat:2 }}L</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">🏨 Diárias</p>
+                            <p class="text-sm text-orange-400 font-semibold">R$ {{ relatorio.valor_diarias|floatformat:2 }}</p>
+                            <p class="text-xs text-gray-500">{{ relatorio.diarias }} dias</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">💳 Custos</p>
+                            <button onclick="toggleCustosGerais({{ relatorio.id }})" class="text-sm text-blue-400 font-semibold hover:text-blue-300">
+                                Ver <span class="text-xs">▼</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Seção expandível com custos gerais -->
+                <div id="custos-{{ relatorio.id }}" class="hidden mt-3 bg-gray-800/50 rounded-lg p-4 border-t-2 border-blue-500/30">
+                    <h4 class="text-base sm:text-lg font-semibold text-white mb-3">💰 Custos Gerais da Viagem</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {% for custo in relatorio.custos_gerais.all %}
                                         <div class="bg-gradient-to-r from-gray-700/30 to-gray-800/30 rounded-lg p-3 border border-gray-600/50">
                                             <div class="flex items-center justify-between mb-2">
@@ -448,18 +461,14 @@
                                             </div>
                                             {% endif %}
                                         </div>
-                                        {% empty %}
-                                        <div class="col-span-full text-center text-gray-400 py-4">
-                                            <p>Nenhum custo geral registrado para esta viagem</p>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                        {% empty %}
+                        <div class="col-span-full text-center text-gray-400 py-4">
+                            <p>Nenhum custo geral registrado para esta viagem</p>
+                        </div>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
         {% else %}

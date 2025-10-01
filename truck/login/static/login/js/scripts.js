@@ -497,10 +497,21 @@ function salvarRelatorio() {
 }
 
 function viewReportSummary(reportId) {
+    console.log('=== VIEW REPORT SUMMARY ===');
+    console.log('Report ID:', reportId);
+    console.log('Reports array:', reports);
+    
     // Usar requestAnimationFrame para evitar bloqueios
     requestAnimationFrame(() => {
         const report = reports.find(r => r.id === reportId);
-        if (!report) return;
+        
+        if (!report) {
+            console.error('Relatório não encontrado no array. ID:', reportId);
+            showNotification('Relatório não encontrado! Recarregue a página.', 'error');
+            return;
+        }
+        
+        console.log('Relatório encontrado:', report);
         
         // Calcular totais
         const totalDiarias = (report.quantidadeDiarias || 0) * 70;
@@ -1721,11 +1732,11 @@ function mostrarResultadosBusca(data, dataFormatada) {
     if (relatorios.length === 0) {
         console.log('Nenhum relatório encontrado, exibindo mensagem');
         resultadosDiv.innerHTML = `
-            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
-                <h3 class="text-2xl font-bold text-white mb-6">📊 Resultados da Busca - ${dataFormatada}</h3>
-                <div class="text-center text-gray-400 py-8">
-                    <span class="text-4xl">📅</span>
-                    <p class="mt-4 text-lg">Nenhum relatório encontrado para esta data</p>
+            <div class="glass-effect rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
+                <h3 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">📊 Resultados da Busca - ${dataFormatada}</h3>
+                <div class="text-center text-gray-400 py-6 sm:py-8">
+                    <span class="text-3xl sm:text-4xl">📅</span>
+                    <p class="mt-3 sm:mt-4 text-base sm:text-lg">Nenhum relatório encontrado para esta data</p>
                 </div>
             </div>
         `;
@@ -1790,48 +1801,61 @@ function mostrarResultadosBusca(data, dataFormatada) {
                 </div>
             </div>
             
-            <!-- Tabela de Relatórios -->
+            <!-- Lista de Relatórios (Cards em Mobile) -->
             <div class="bg-gray-800/50 rounded-xl p-4 sm:p-6">
-                <h4 class="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">📋 Relatórios Encontrados</h4>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-white">
-                        <thead>
-                            <tr class="border-b border-gray-600">
-                                <th class="text-left py-3 px-4" data-label="Data">Data</th>
-                                <th class="text-left py-3 px-4" data-label="Rota">Rota</th>
-                                <th class="text-left py-3 px-4" data-label="Motorista">Motorista</th>
-                                <th class="text-left py-3 px-4" data-label="Receita">Receita</th>
-                                <th class="text-left py-3 px-4" data-label="Gastos">Gastos</th>
-                                <th class="text-left py-3 px-4" data-label="Lucro">Lucro</th>
-                                <th class="text-left py-3 px-4" data-label="Ações">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${relatorios.map(relatorio => {
-                                const receita = relatorio.receita_frete || 0;
-                                const gastos = (relatorio.gasto_gasolina || 0) + (relatorio.valor_diarias || 0);
-                                const lucro = receita - gastos;
-                                
-                                return `
-                                <tr class="border-b border-gray-700 hover:bg-gray-800/50">
-                                    <td class="py-3 px-4" data-label="Data">${relatorio.data_viagem || 'N/A'}</td>
-                                    <td class="py-3 px-4" data-label="Rota">${relatorio.partida || 'N/A'} → ${relatorio.chegada || 'N/A'}</td>
-                                    <td class="py-3 px-4" data-label="Motorista">${relatorio.motorista || 'N/A'}</td>
-                                    <td class="py-3 px-4 text-green-400" data-label="Receita">R$ ${receita.toFixed(2).replace('.', ',')}</td>
-                                    <td class="py-3 px-4 text-red-400" data-label="Gastos">R$ ${gastos.toFixed(2).replace('.', ',')}</td>
-                                    <td class="py-3 px-4 ${lucro >= 0 ? 'text-green-400' : 'text-red-400'}" data-label="Lucro">
+                <h4 class="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">📋 Relatórios Encontrados (${relatorios.length})</h4>
+                
+                <!-- Grid de Cards -->
+                <div class="grid grid-cols-1 gap-3 sm:gap-4">
+                    ${relatorios.map(relatorio => {
+                        const receita = relatorio.receita_frete || 0;
+                        const gastos = (relatorio.gasto_gasolina || 0) + (relatorio.valor_diarias || 0);
+                        const lucro = receita - gastos;
+                        
+                        return `
+                        <div class="bg-gray-700/50 rounded-lg p-4 border border-gray-600/30 hover:bg-gray-700/70 transition-colors">
+                            <!-- Cabeçalho do Card -->
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <p class="text-gray-400 text-xs mb-1">📅 ${relatorio.data_viagem || 'N/A'}</p>
+                                    <p class="text-white font-semibold text-sm sm:text-base">${relatorio.partida || 'N/A'} → ${relatorio.chegada || 'N/A'}</p>
+                                    <p class="text-gray-300 text-xs mt-1">👨‍💼 ${relatorio.motorista || 'N/A'}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-gray-400">Lucro</p>
+                                    <p class="text-base sm:text-lg font-bold ${lucro >= 0 ? 'text-green-400' : 'text-red-400'}">
                                         R$ ${lucro.toFixed(2).replace('.', ',')}
-                                    </td>
-                                    <td class="py-3 px-4 flex gap-2" data-label="Ações">
-                                        <button onclick="viewReportSummary(${relatorio.id})" class="text-blue-400 hover:text-blue-300 text-xs sm:text-sm">Ver</button>
-                                        <button onclick="editReport(${relatorio.id})" class="text-yellow-400 hover:text-yellow-300 text-xs sm:text-sm">Editar</button>
-                                        <button onclick="deleteReport(${relatorio.id})" class="text-red-400 hover:text-red-300 text-xs sm:text-sm">Excluir</button>
-                                    </td>
-                                </tr>
-                            `;
-                            }).join('')}
-                        </tbody>
-                    </table>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Detalhes Financeiros -->
+                            <div class="grid grid-cols-2 gap-2 mb-3 pb-3 border-b border-gray-600/30">
+                                <div>
+                                    <p class="text-xs text-gray-400">💰 Receita</p>
+                                    <p class="text-sm text-green-400 font-semibold">R$ ${receita.toFixed(2).replace('.', ',')}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400">💸 Gastos</p>
+                                    <p class="text-sm text-red-400 font-semibold">R$ ${gastos.toFixed(2).replace('.', ',')}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Botões de Ação -->
+                            <div class="flex gap-2">
+                                <button onclick="viewReportSummary(${relatorio.id})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors">
+                                    👁️ Ver
+                                </button>
+                                <button onclick="editReport(${relatorio.id})" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors">
+                                    ✏️ Editar
+                                </button>
+                                <button onclick="deleteReport(${relatorio.id})" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors">
+                                    🗑️ Excluir
+                                </button>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
                 </div>
             </div>
         </div>

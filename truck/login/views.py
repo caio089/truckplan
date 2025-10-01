@@ -1963,32 +1963,40 @@ def atualizar_relatorio(request, relatorio_id):
         relatorio = get_object_or_404(DailyReport, id=relatorio_id)
         logger.info(f'Relatório encontrado: {relatorio.id} - {relatorio.data_viagem}')
     except Exception as e:
-        logger.error(f'Erro ao buscar relatório {relatorio_id}: {e}')
-        return render(request, 'login/editar_relatorio.html', {'erro': f'Relatório não encontrado: {e}'})
+        logger.error(f'Erro ao buscar relatório {relatorio_id}: {e}', exc_info=True)
+        messages.error(request, f'Relatório não encontrado!')
+        return redirect('dashboard')
     
     if request.method == 'GET':
         # Exibir formulário de edição com dados preenchidos
-        custos_gerais = CustosGerais.objects.filter(relatorio=relatorio)
-        
-        # Buscar salário do motorista se existir
-        salario_motorista = None
-        if relatorio.motorista:
-            ano_mes = relatorio.data_viagem.strftime('%Y-%m')
-            try:
-                salario_motorista = MotoristaSalario.objects.get(
-                    motorista=relatorio.motorista,
-                    ano_mes=ano_mes
-                )
-            except MotoristaSalario.DoesNotExist:
-                pass
-        
-        context = {
-            'relatorio': relatorio,
-            'custos_gerais': custos_gerais,
-            'salario_motorista': salario_motorista,
-        }
-        
-        return render(request, 'login/editar_relatorio.html', context)
+        try:
+            custos_gerais = CustosGerais.objects.filter(relatorio=relatorio)
+            
+            # Buscar salário do motorista se existir
+            salario_motorista = None
+            if relatorio.motorista:
+                ano_mes = relatorio.data_viagem.strftime('%Y-%m')
+                try:
+                    salario_motorista = MotoristaSalario.objects.get(
+                        motorista=relatorio.motorista,
+                        ano_mes=ano_mes
+                    )
+                except MotoristaSalario.DoesNotExist:
+                    logger.info(f'Salário não encontrado para {relatorio.motorista} em {ano_mes}')
+                    pass
+            
+            context = {
+                'relatorio': relatorio,
+                'custos_gerais': custos_gerais,
+                'salario_motorista': salario_motorista,
+            }
+            
+            logger.info(f'Renderizando template de edição para relatório {relatorio_id}')
+            return render(request, 'login/editar_relatorio.html', context)
+        except Exception as e:
+            logger.error(f'Erro ao preparar dados para edição: {e}', exc_info=True)
+            messages.error(request, f'Erro ao carregar dados do relatório!')
+            return redirect('dashboard')
     
     elif request.method == 'POST':
         try:

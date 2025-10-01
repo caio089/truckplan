@@ -7,13 +7,8 @@
     <title>Editar Relatório - TruckPlan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}?v=20251001">
     <style>
-        .glass-effect {
-            background: rgba(31, 41, 55, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-        }
         .animate-slide-up {
             animation: slideUp 0.6s ease-out;
         }
@@ -28,76 +23,7 @@
             }
         }
         
-        /* Mobile optimizations */
-        @media (max-width: 640px) {
-            .mobile-p-2 { padding: 0.5rem; }
-            .mobile-p-4 { padding: 1rem; }
-            .mobile-p-6 { padding: 1.5rem; }
-            .mobile-mb-4 { margin-bottom: 1rem; }
-            .mobile-mb-6 { margin-bottom: 1.5rem; }
-            .mobile-mb-8 { margin-bottom: 2rem; }
-            .mobile-text-sm { font-size: 0.875rem; }
-            .mobile-text-base { font-size: 1rem; }
-            .mobile-text-lg { font-size: 1.125rem; }
-            .mobile-text-xl { font-size: 1.25rem; }
-            .mobile-text-2xl { font-size: 1.5rem; }
-            .mobile-text-3xl { font-size: 1.875rem; }
-            .mobile-grid-1 { grid-template-columns: 1fr; }
-            .mobile-grid-2 { grid-template-columns: repeat(2, 1fr); }
-            .mobile-flex-col { flex-direction: column; }
-            .mobile-items-center { align-items: center; }
-            .mobile-justify-center { justify-content: center; }
-            .mobile-text-center { text-align: center; }
-            .mobile-space-y-2 > * + * { margin-top: 0.5rem; }
-            .mobile-space-y-4 > * + * { margin-top: 1rem; }
-            .mobile-gap-2 { gap: 0.5rem; }
-            .mobile-gap-4 { gap: 1rem; }
-            .mobile-gap-6 { gap: 1.5rem; }
-            .mobile-rounded-lg { border-radius: 0.5rem; }
-            .mobile-rounded-xl { border-radius: 0.75rem; }
-            .mobile-rounded-2xl { border-radius: 1rem; }
-            .mobile-hidden { display: none; }
-            .mobile-block { display: block; }
-            .mobile-w-full { width: 100%; }
-            .mobile-touch-target { min-height: 44px; min-width: 44px; }
-            .mobile-button { padding: 0.75rem 1rem; font-size: 0.875rem; }
-            .mobile-input { font-size: 16px; padding: 0.75rem; }
-            .mobile-overflow-x-auto { overflow-x: auto; }
-            .mobile-table { min-width: 100%; }
-            .mobile-table th, .mobile-table td { padding: 0.5rem; font-size: 0.875rem; }
-            .mobile-form-grid { grid-template-columns: 1fr; }
-            .mobile-form-input { padding: 0.75rem; font-size: 16px; }
-            .mobile-form-select { padding: 0.75rem; font-size: 16px; }
-            .mobile-form-button { padding: 0.75rem 1rem; font-size: 0.875rem; min-height: 44px; }
-        }
-        
-        /* Tablet optimizations */
-        @media (min-width: 641px) and (max-width: 1024px) {
-            .tablet-grid-2 { grid-template-columns: repeat(2, 1fr); }
-            .tablet-grid-3 { grid-template-columns: repeat(3, 1fr); }
-            .tablet-p-4 { padding: 1rem; }
-            .tablet-p-6 { padding: 1.5rem; }
-            .tablet-text-lg { font-size: 1.125rem; }
-            .tablet-text-xl { font-size: 1.25rem; }
-        }
-        
-        /* Very small screens */
-        @media (max-width: 375px) {
-            .xs-mobile-p-1 { padding: 0.25rem; }
-            .xs-mobile-p-2 { padding: 0.5rem; }
-            .xs-mobile-text-xs { font-size: 0.75rem; }
-            .xs-mobile-text-sm { font-size: 0.875rem; }
-            .xs-mobile-text-base { font-size: 1rem; }
-            .xs-mobile-gap-2 { gap: 0.5rem; }
-            .xs-mobile-gap-4 { gap: 1rem; }
-        }
-        
-        /* Landscape mobile */
-        @media (max-width: 896px) and (orientation: landscape) {
-            .landscape-mobile-p-2 { padding: 0.5rem; }
-            .landscape-mobile-mb-2 { margin-bottom: 0.5rem; }
-            .landscape-mobile-text-sm { font-size: 0.875rem; }
-        }
+        /* CSS mobile já está em styles.css */
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">

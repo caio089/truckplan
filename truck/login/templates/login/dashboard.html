@@ -112,28 +112,34 @@
                 font-size: 14px;
             }
             
-            /* Navegação fixa no topo */
-            #mainNav {
+            /* Navegação SEMPRE fixa no topo em mobile */
+            nav {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
                 width: 100% !important;
-                z-index: 999 !important;
-                padding: 0.75rem !important;
-                background: rgba(31, 41, 55, 0.98) !important;
+                z-index: 900 !important;
+                background: linear-gradient(135deg, rgba(31, 41, 55, 0.98), rgba(17, 24, 39, 0.98)) !important;
                 backdrop-filter: blur(12px) !important;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+                padding: 0.5rem 0.75rem !important;
             }
             
-            /* Compensar espaço do header fixo */
-            body.gradient-bg {
-                padding-top: 80px !important;
+            /* Compensar espaço do header fixo - REDUZIDO */
+            body {
+                padding-top: 50px !important;
             }
             
-            /* Conteúdo principal */
-            .relative.z-10.max-w-7xl {
-                margin-top: 0 !important;
+            /* Garantir que o conteúdo não fique sob o header */
+            .relative.z-10 {
+                position: relative;
+                z-index: 1 !important;
+            }
+            
+            /* Modais acima do header */
+            [id$="Modal"] {
+                z-index: 1000 !important;
             }
             
             /* Containers */
@@ -331,15 +337,15 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="relative z-10 p-2 sm:p-4 lg:p-6" id="mainNav">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
-            <div class="flex items-center space-x-2 sm:space-x-3">
-                <span class="text-2xl sm:text-3xl">🚛</span>
-                <h1 class="text-xl sm:text-2xl font-bold text-white">TruckPlan</h1>
+    <nav class="relative z-10 px-3 py-2 sm:p-4 lg:p-6" id="mainNav">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl sm:text-3xl">🚛</span>
+                <h1 class="text-base sm:text-2xl font-bold text-white">TruckPlan</h1>
             </div>
-            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                <span class="text-gray-300 text-sm sm:text-base">Bem-vindo, {{ user.username }}!</span>
-                <a href="{% url 'logout' %}" class="bg-gray-800/50 hover:bg-gray-700/50 text-white px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 backdrop-blur-sm border border-gray-600 mobile-touch-target text-sm sm:text-base">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <span class="hidden sm:inline text-gray-300 text-sm sm:text-base">Bem-vindo, {{ user.username }}!</span>
+                <a href="{% url 'logout' %}" class="bg-red-600/80 hover:bg-red-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 text-xs sm:text-base font-semibold">
                     Sair
                 </a>
             </div>
@@ -347,11 +353,11 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pb-8 sm:pb-12">
+    <div class="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pb-6 sm:pb-12">
         <!-- Welcome Section -->
-        <div class="text-center mb-8 sm:mb-12 animate-slide-up">
-            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-4">Dashboard</h2>
-            <p class="text-gray-300 text-sm sm:text-base lg:text-lg">Sistema de Controle de Despesas de Caminhão</p>
+        <div class="text-center mb-4 sm:mb-8 animate-slide-up">
+            <h2 class="text-lg sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-3">Dashboard</h2>
+            <p class="text-gray-400 text-xs sm:text-base lg:text-lg hidden sm:block">Sistema de Controle de Despesas de Caminhão</p>
         </div>
 
         <!-- Resumo Financeiro -->
@@ -628,7 +634,7 @@
     </div>
 
     <!-- Modais serão adicionados aqui via JavaScript -->
-    <div id="reportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div id="reportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-[1000] flex items-center justify-center p-4">
         <div class="glass-effect rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white">Gerar Novo Relatório</h3>
@@ -829,7 +835,7 @@
     </div>
 
     <!-- Modal para Custos Fixos Mensais -->
-    <div id="custosFixosModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div id="custosFixosModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-[1000] flex items-center justify-center p-4">
         <div class="glass-effect rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white">💰 Custos Fixos Mensais</h3>
@@ -907,42 +913,44 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{% static 'login/js/scripts.js' %}?v=20251001"></script>
+    <script src="{% static 'login/js/scripts.js' %}?v=20251001v3"></script>
     <script>
-        // Forçar aplicação do CSS mobile em todas as resoluções
-        function aplicarEstilosMobile() {
+        // Forçar cabeçalho fixo e compacto em mobile
+        (function() {
             const larguraTela = window.innerWidth;
-            const nav = document.getElementById('mainNav');
             
-            if (larguraTela <= 640 && nav) {
-                // Aplicar estilos fixos
-                nav.style.position = 'fixed';
-                nav.style.top = '0';
-                nav.style.left = '0';
-                nav.style.right = '0';
-                nav.style.width = '100%';
-                nav.style.zIndex = '999';
-                nav.style.backgroundColor = 'rgba(31, 41, 55, 0.98)';
-                nav.style.backdropFilter = 'blur(12px)';
+            if (larguraTela <= 640) {
+                // Encontrar o nav
+                const nav = document.querySelector('nav');
                 
-                // Adicionar padding no body
-                document.body.style.paddingTop = '80px';
-                console.log('✅ Navegação fixada no topo em mobile');
-            } else if (nav) {
-                // Remover estilos inline em desktop
-                nav.style.position = '';
-                document.body.style.paddingTop = '';
+                if (nav) {
+                    // Aplicar estilos fixos compactos
+                    nav.style.cssText = `
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        width: 100% !important;
+                        z-index: 900 !important;
+                        background: linear-gradient(135deg, rgba(31, 41, 55, 0.98), rgba(17, 24, 39, 0.98)) !important;
+                        backdrop-filter: blur(12px) !important;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+                        padding: 0.5rem 0.75rem !important;
+                    `;
+                    
+                    // Padding reduzido no body
+                    document.body.style.paddingTop = '50px';
+                    
+                    console.log('✅ Header compacto fixado em mobile!');
+                }
+                
+                // Modais acima do header
+                const modais = document.querySelectorAll('[id$="Modal"]');
+                modais.forEach(modal => {
+                    modal.style.zIndex = '1000';
+                });
             }
-        }
-        
-        // Aplicar ao carregar
-        document.addEventListener('DOMContentLoaded', aplicarEstilosMobile);
-        
-        // Aplicar ao redimensionar
-        window.addEventListener('resize', aplicarEstilosMobile);
-        
-        // Aplicar imediatamente
-        aplicarEstilosMobile();
+        })();
     </script>
     <script>
         // Limpar dados de teste e cache
