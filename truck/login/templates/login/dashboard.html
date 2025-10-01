@@ -3,8 +3,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>TruckPlan - Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚛</text></svg>">
     <script>
         // Suprimir completamente o aviso do Tailwind CDN
         (function() {
@@ -21,7 +25,7 @@
         })();
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'login/css/styles.css' %}?v=20251001">
     
     <script>
         tailwind.config = {
@@ -108,21 +112,28 @@
                 font-size: 14px;
             }
             
-            /* Navegação fixa */
-            nav {
+            /* Navegação fixa no topo */
+            #mainNav {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
-                z-index: 50 !important;
+                width: 100% !important;
+                z-index: 999 !important;
                 padding: 0.75rem !important;
                 background: rgba(31, 41, 55, 0.98) !important;
                 backdrop-filter: blur(12px) !important;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
             }
             
-            /* Adicionar padding no body para compensar o header fixo */
-            body {
-                padding-top: 70px !important;
+            /* Compensar espaço do header fixo */
+            body.gradient-bg {
+                padding-top: 80px !important;
+            }
+            
+            /* Conteúdo principal */
+            .relative.z-10.max-w-7xl {
+                margin-top: 0 !important;
             }
             
             /* Containers */
@@ -320,7 +331,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="relative z-10 p-2 sm:p-4 lg:p-6">
+    <nav class="relative z-10 p-2 sm:p-4 lg:p-6" id="mainNav">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
             <div class="flex items-center space-x-2 sm:space-x-3">
                 <span class="text-2xl sm:text-3xl">🚛</span>
@@ -528,9 +539,9 @@
 
         <!-- Resultados da Busca -->
         <div id="resultadosBusca" class="hidden">
-            <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
-                <h3 class="text-2xl font-bold text-white mb-6">📊 Resultados da Busca</h3>
-                <div id="resumoResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="glass-effect rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
+                <h3 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">📊 Resultados da Busca</h3>
+                <div id="resumoResultados" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     <!-- Resumo será preenchido aqui -->
                 </div>
                 <div id="tabelaResultados" class="overflow-x-auto">
@@ -896,7 +907,43 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{% static 'login/js/scripts.js' %}?v=20250124162500"></script>
+    <script src="{% static 'login/js/scripts.js' %}?v=20251001"></script>
+    <script>
+        // Forçar aplicação do CSS mobile em todas as resoluções
+        function aplicarEstilosMobile() {
+            const larguraTela = window.innerWidth;
+            const nav = document.getElementById('mainNav');
+            
+            if (larguraTela <= 640 && nav) {
+                // Aplicar estilos fixos
+                nav.style.position = 'fixed';
+                nav.style.top = '0';
+                nav.style.left = '0';
+                nav.style.right = '0';
+                nav.style.width = '100%';
+                nav.style.zIndex = '999';
+                nav.style.backgroundColor = 'rgba(31, 41, 55, 0.98)';
+                nav.style.backdropFilter = 'blur(12px)';
+                
+                // Adicionar padding no body
+                document.body.style.paddingTop = '80px';
+                console.log('✅ Navegação fixada no topo em mobile');
+            } else if (nav) {
+                // Remover estilos inline em desktop
+                nav.style.position = '';
+                document.body.style.paddingTop = '';
+            }
+        }
+        
+        // Aplicar ao carregar
+        document.addEventListener('DOMContentLoaded', aplicarEstilosMobile);
+        
+        // Aplicar ao redimensionar
+        window.addEventListener('resize', aplicarEstilosMobile);
+        
+        // Aplicar imediatamente
+        aplicarEstilosMobile();
+    </script>
     <script>
         // Limpar dados de teste e cache
         localStorage.removeItem('truckReports');

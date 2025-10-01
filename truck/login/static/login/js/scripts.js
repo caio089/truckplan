@@ -1744,66 +1744,66 @@ function mostrarResultadosBusca(data, dataFormatada) {
     console.log('Totais calculados:', { totalGastos, totalReceitas, lucroLiquido });
     
     resultadosDiv.innerHTML = `
-        <div class="glass-effect rounded-2xl p-8 animate-slide-up border border-gray-600/30 mb-8">
-            <h3 class="text-2xl font-bold text-white mb-6">📊 Resultados da Busca - ${dataFormatada}</h3>
+        <div class="glass-effect rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
+            <h3 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">📊 Resultados da Busca - ${dataFormatada}</h3>
             
             <!-- Resumo -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-6 text-white">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-red-100 text-sm font-medium">Total de Gastos</p>
-                            <p class="text-2xl font-bold">R$ ${totalGastos.toFixed(2)}</p>
+                            <p class="text-red-100 text-xs sm:text-sm font-medium">Total de Gastos</p>
+                            <p class="text-xl sm:text-2xl font-bold">R$ ${totalGastos.toFixed(2).replace('.', ',')}</p>
                         </div>
-                        <div class="text-3xl opacity-80">💰</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">💰</div>
                     </div>
                 </div>
                 
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-green-100 text-sm font-medium">Total de Receitas</p>
-                            <p class="text-2xl font-bold">R$ ${totalReceitas.toFixed(2)}</p>
+                            <p class="text-green-100 text-xs sm:text-sm font-medium">Total de Receitas</p>
+                            <p class="text-xl sm:text-2xl font-bold">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p>
                         </div>
-                        <div class="text-3xl opacity-80">📈</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">📈</div>
                     </div>
                 </div>
                 
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-purple-100 text-sm font-medium">Lucro Líquido</p>
-                            <p class="text-2xl font-bold">R$ ${lucroLiquido.toFixed(2)}</p>
+                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Lucro Líquido</p>
+                            <p class="text-xl sm:text-2xl font-bold">R$ ${lucroLiquido.toFixed(2).replace('.', ',')}</p>
                         </div>
-                        <div class="text-3xl opacity-80">💎</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">💎</div>
                     </div>
                 </div>
                 
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-4 sm:p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-blue-100 text-sm font-medium">Total de Viagens</p>
-                            <p class="text-2xl font-bold">${relatorios.length}</p>
+                            <p class="text-blue-100 text-xs sm:text-sm font-medium">Total de Viagens</p>
+                            <p class="text-xl sm:text-2xl font-bold">${relatorios.length}</p>
                         </div>
-                        <div class="text-3xl opacity-80">🚛</div>
+                        <div class="text-2xl sm:text-3xl opacity-80">🚛</div>
                     </div>
                 </div>
             </div>
             
             <!-- Tabela de Relatórios -->
-            <div class="bg-gray-800/50 rounded-xl p-6">
-                <h4 class="text-lg font-semibold text-white mb-4">📋 Relatórios Encontrados</h4>
+            <div class="bg-gray-800/50 rounded-xl p-4 sm:p-6">
+                <h4 class="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">📋 Relatórios Encontrados</h4>
                 <div class="overflow-x-auto">
                     <table class="w-full text-white">
                         <thead>
                             <tr class="border-b border-gray-600">
-                                <th class="text-left py-3 px-4">Data</th>
-                                <th class="text-left py-3 px-4">Rota</th>
-                                <th class="text-left py-3 px-4">Motorista</th>
-                                <th class="text-left py-3 px-4">Receita</th>
-                                <th class="text-left py-3 px-4">Gastos</th>
-                                <th class="text-left py-3 px-4">Lucro</th>
-                                <th class="text-left py-3 px-4">Ações</th>
+                                <th class="text-left py-3 px-4" data-label="Data">Data</th>
+                                <th class="text-left py-3 px-4" data-label="Rota">Rota</th>
+                                <th class="text-left py-3 px-4" data-label="Motorista">Motorista</th>
+                                <th class="text-left py-3 px-4" data-label="Receita">Receita</th>
+                                <th class="text-left py-3 px-4" data-label="Gastos">Gastos</th>
+                                <th class="text-left py-3 px-4" data-label="Lucro">Lucro</th>
+                                <th class="text-left py-3 px-4" data-label="Ações">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1814,18 +1814,18 @@ function mostrarResultadosBusca(data, dataFormatada) {
                                 
                                 return `
                                 <tr class="border-b border-gray-700 hover:bg-gray-800/50">
-                                    <td class="py-3 px-4">${relatorio.data_viagem || 'N/A'}</td>
-                                    <td class="py-3 px-4">${relatorio.partida || 'N/A'} → ${relatorio.chegada || 'N/A'}</td>
-                                    <td class="py-3 px-4">${relatorio.motorista || 'N/A'}</td>
-                                    <td class="py-3 px-4 text-green-400">R$ ${receita.toFixed(2).replace('.', ',')}</td>
-                                    <td class="py-3 px-4 text-red-400">R$ ${gastos.toFixed(2).replace('.', ',')}</td>
-                                    <td class="py-3 px-4 ${lucro >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                    <td class="py-3 px-4" data-label="Data">${relatorio.data_viagem || 'N/A'}</td>
+                                    <td class="py-3 px-4" data-label="Rota">${relatorio.partida || 'N/A'} → ${relatorio.chegada || 'N/A'}</td>
+                                    <td class="py-3 px-4" data-label="Motorista">${relatorio.motorista || 'N/A'}</td>
+                                    <td class="py-3 px-4 text-green-400" data-label="Receita">R$ ${receita.toFixed(2).replace('.', ',')}</td>
+                                    <td class="py-3 px-4 text-red-400" data-label="Gastos">R$ ${gastos.toFixed(2).replace('.', ',')}</td>
+                                    <td class="py-3 px-4 ${lucro >= 0 ? 'text-green-400' : 'text-red-400'}" data-label="Lucro">
                                         R$ ${lucro.toFixed(2).replace('.', ',')}
                                     </td>
-                                    <td class="py-3 px-4">
-                                        <button onclick="viewReportSummary(${relatorio.id})" class="text-blue-400 hover:text-blue-300 mr-2">Ver</button>
-                                        <button onclick="editReport(${relatorio.id})" class="text-yellow-400 hover:text-yellow-300 mr-2">Editar</button>
-                                        <button onclick="deleteReport(${relatorio.id})" class="text-red-400 hover:text-red-300">Excluir</button>
+                                    <td class="py-3 px-4 flex gap-2" data-label="Ações">
+                                        <button onclick="viewReportSummary(${relatorio.id})" class="text-blue-400 hover:text-blue-300 text-xs sm:text-sm">Ver</button>
+                                        <button onclick="editReport(${relatorio.id})" class="text-yellow-400 hover:text-yellow-300 text-xs sm:text-sm">Editar</button>
+                                        <button onclick="deleteReport(${relatorio.id})" class="text-red-400 hover:text-red-300 text-xs sm:text-sm">Excluir</button>
                                     </td>
                                 </tr>
                             `;
