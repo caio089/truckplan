@@ -21,14 +21,20 @@ logger = logging.getLogger(__name__)
 @csrf_protect
 @never_cache
 def login(request):
+    logger.info(f'Login view acessada - Método: {request.method}, Autenticado: {request.user.is_authenticated}')
+    
     if request.user.is_authenticated:
+        logger.info(f'Usuário já autenticado, redirecionando para dashboard')
         return redirect('dashboard')  # Redirecionar para dashboard após login
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         
+        logger.info(f'Tentativa de login - Usuário: {username}')
+        
         if not username or not password:
+            logger.warning('Login rejeitado - campos vazios')
             messages.error(request, 'Por favor, preencha todos os campos.')
             return render(request, 'login/login.html')
         
@@ -37,14 +43,16 @@ def login(request):
         if user is not None:
             if user.is_active:
                 auth_login(request, user)
-                logger.info(f'Usuário {username} fez login com sucesso')
+                logger.info(f'✅ Usuário {username} autenticado com sucesso, redirecionando para dashboard')
                 return redirect('dashboard')
             else:
+                logger.warning(f'Login rejeitado - conta desativada: {username}')
                 messages.error(request, 'Conta desativada.')
         else:
-            logger.warning(f'Tentativa de login falhada para usuário: {username}')
+            logger.warning(f'❌ Tentativa de login falhada para usuário: {username}')
             messages.error(request, 'Usuário ou senha incorretos.')
     
+    logger.info('Renderizando página de login')
     return render(request, 'login/login.html')
 
 @login_required
@@ -53,36 +61,47 @@ def dashboard(request):
     try:
         from datetime import datetime, timedelta
         
+        logger.info(f'Dashboard acessado por usuário: {request.user.username}')
+        
         # Calcular início da semana atual
         hoje = datetime.now().date()
         inicio_semana = hoje - timedelta(days=hoje.weekday())
         
-        # Buscar viagens da semana atual
+        logger.info(f'Buscando viagens de {inicio_semana} até {hoje}')
+        
+        # Buscar viagens da semana atual com timeout implícito
         viagens_semana = DailyReport.objects.filter(
             data_viagem__range=[inicio_semana, hoje]
         ).order_by('-data_viagem')
         
-        # Calcular totais
-        total_viagens = viagens_semana.count()
-        total_diarias = viagens_semana.aggregate(Sum('diarias'))['diarias__sum'] or 0
-        total_valor_diarias = viagens_semana.aggregate(Sum('valor_diarias'))['valor_diarias__sum'] or Decimal('0')
-        total_gasto_gasolina = viagens_semana.aggregate(Sum('gasto_gasolina'))['gasto_gasolina__sum'] or Decimal('0')
+        # Calcular totais - otimizado em uma única query
+        totais = viagens_semana.aggregate(
+            total_viagens=Count('id'),
+            total_diarias=Sum('diarias'),
+            total_valor_diarias=Sum('valor_diarias'),
+            total_gasto_gasolina=Sum('gasto_gasolina')
+        )
         
-        # Buscar custos fixos mensais ativos
+        total_viagens = totais['total_viagens'] or 0
+        total_diarias = totais['total_diarias'] or 0
+        total_valor_diarias = totais['total_valor_diarias'] or Decimal('0')
+        total_gasto_gasolina = totais['total_gasto_gasolina'] or Decimal('0')
+        
+        logger.info(f'Totais calculados: {total_viagens} viagens')
+        
+        # Buscar custos fixos mensais ativos - otimizado
         custos_fixos_mensais = CustoFixoMensal.objects.filter(
             status='ativo'
         ).filter(
             Q(data_fim__isnull=True) | Q(data_fim__gte=hoje)
-        )
+        )[:20]  # Limitar a 20 registros
         
         # Calcular total de custos fixos mensais
         total_custos_fixos_mensais = sum(float(custo.valor_mensal) for custo in custos_fixos_mensais)
         
         logger.info(f'Dashboard - Custos fixos encontrados: {custos_fixos_mensais.count()}')
-        logger.info(f'Dashboard - Total custos fixos: {total_custos_fixos_mensais}')
-        logger.info(f'Dashboard - Lista custos fixos: {list(custos_fixos_mensais.values())}')
         
-        # Buscar últimas 5 viagens
+        # Buscar últimas 5 viagens - otimizado
         ultimas_viagens = DailyReport.objects.all().order_by('-data_viagem', '-created_at')[:5]
         
         context = {
@@ -95,6 +114,7 @@ def dashboard(request):
             'ultimas_viagens': ultimas_viagens,
         }
         
+        logger.info('Dashboard renderizado com sucesso')
         return render(request, 'login/dashboard.html', context)
         
     except Exception as e:
@@ -110,6 +130,7 @@ def dashboard(request):
             'ultimas_viagens': [],
             'erro': str(e)
         }
+        logger.warning('Dashboard renderizado com erro, retornando dados vazios')
         return render(request, 'login/dashboard.html', context)
 
 def logout_view(request):

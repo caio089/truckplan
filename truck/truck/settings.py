@@ -151,6 +151,12 @@ if DATABASE_URL and DATABASE_URL.startswith('postgresql'):
             ssl_require=True
         )
     }
+    
+    # Adicionar configurações de timeout para evitar queries lentas
+    DATABASES['default']['OPTIONS'] = {
+        'connect_timeout': 10,
+        'options': '-c statement_timeout=30000'  # 30 segundos
+    }
 else:
     # Configuração para desenvolvimento local com SQLite
     print(f"⚠️ DATABASE_URL não está configurada corretamente: '{DATABASE_URL}'")
