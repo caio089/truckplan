@@ -3,7 +3,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#06101c">
     <title>Relatório Diário - TruckPlan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -24,8 +25,10 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{% static 'login/css/premium.css' %}?v=20260824">
+    <script defer src="{% static 'login/js/premium-ui.js' %}?v=20260824"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+<body class="app-page page-report page-report-daily bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
     <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-6 lg:py-8">
         <!-- Header -->
         <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up border border-gray-600/30">

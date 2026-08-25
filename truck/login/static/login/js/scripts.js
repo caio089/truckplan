@@ -870,6 +870,13 @@ function limparFormularioViagem() {
     setValueIfExists('nomeCaminhao', '');
     setValueIfExists('receita', '');
     setValueIfExists('editReportId', '');
+    setValueIfExists('smartPasteInput', '');
+
+    const smartPasteStatus = document.getElementById('smartPasteStatus');
+    if (smartPasteStatus) {
+        smartPasteStatus.className = 'smart-paste-status';
+        smartPasteStatus.textContent = 'Ao colar, o preenchimento acontece automaticamente.';
+    }
 
     custosGeraisRelatorio = [];
     if (typeof atualizarListaCustosGerais === 'function') {

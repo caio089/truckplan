@@ -3,7 +3,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#06101c">
     <title>Editar Custo Fixo - TruckPlan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -14,8 +15,10 @@
             min-height: 100vh;
         }
     </style>
+    <link rel="stylesheet" href="{% static 'login/css/premium.css' %}?v=20260824">
+    <script defer src="{% static 'login/js/premium-ui.js' %}?v=20260824"></script>
 </head>
-<body>
+<body class="app-page page-editor page-editor-cost">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <!-- Header -->

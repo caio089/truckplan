@@ -137,6 +137,14 @@ media/
 staticfiles/
 static/
 
+# Arquivos-fonte da interface do app (não são artefatos do collectstatic)
+!truck/login/static/
+!truck/login/static/login/
+!truck/login/static/login/css/
+!truck/login/static/login/css/premium.css
+!truck/login/static/login/js/
+!truck/login/static/login/js/premium-ui.js
+
 # Environment variables
 .env
 .env.local
@@ -317,3 +325,9 @@ docker-compose.yaml
 secrets.json
 credentials.json
 service-account.json
+
+# Infraestrutura versionada do bot privado de WhatsApp
+!whatsapp-bot/supabase/
+!whatsapp-bot/supabase/schema.sql
+!whatsapp-bot/.dockerignore
+!whatsapp-bot/Dockerfile

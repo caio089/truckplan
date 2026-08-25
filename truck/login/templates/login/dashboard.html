@@ -3,7 +3,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#06101c">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -324,8 +325,10 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{% static 'login/css/premium.css' %}?v=20260824">
+    <script defer src="{% static 'login/js/premium-ui.js' %}?v=20260824"></script>
 </head>
-<body class="gradient-bg min-h-screen">
+<body class="app-page page-dashboard gradient-bg min-h-screen">
     <!-- CSRF Token -->
     {% csrf_token %}
     
@@ -644,6 +647,54 @@
                 <form id="reportForm" class="space-y-6">
                     <!-- Campo oculto para ID do relatório sendo editado -->
                     <input type="hidden" id="editReportId" name="editReportId" value="">
+
+                    <!-- Preenchimento rápido por colagem -->
+                    <section class="smart-paste-card" aria-labelledby="smartPasteTitle">
+                        <div class="smart-paste-heading">
+                            <div class="smart-paste-icon" aria-hidden="true">⌁</div>
+                            <div>
+                                <div class="smart-paste-title-row">
+                                    <h4 id="smartPasteTitle">Colar dados da viagem</h4>
+                                    <span class="smart-paste-badge">Rápido</span>
+                                </div>
+                                <p>Cole uma informação por linha. Os seis campos serão preenchidos automaticamente.</p>
+                            </div>
+                        </div>
+
+                        <ol class="smart-paste-order" aria-label="Ordem esperada dos dados">
+                            <li><span>1</span> Ida</li>
+                            <li><span>2</span> Volta</li>
+                            <li><span>3</span> Diárias</li>
+                            <li><span>4</span> Litros</li>
+                            <li><span>5</span> Valor do óleo</li>
+                            <li><span>6</span> Frete</li>
+                        </ol>
+
+                        <label for="smartPasteInput" class="sr-only">Dados da viagem em seis linhas</label>
+                        <textarea
+                            id="smartPasteInput"
+                            class="smart-paste-input"
+                            rows="6"
+                            spellcheck="false"
+                            aria-describedby="smartPasteHelp smartPasteStatus"
+                            placeholder="Fortaleza - CE&#10;Recife - PE&#10;2&#10;320&#10;R$ 1.950,00&#10;R$ 5.800,00"
+                        ></textarea>
+
+                        <div class="smart-paste-footer">
+                            <div class="smart-paste-actions">
+                                <button type="button" id="smartPasteButton" class="smart-paste-button">
+                                    Preencher campos
+                                </button>
+                                <button type="button" id="smartPasteClear" class="smart-paste-clear">
+                                    Limpar colagem
+                                </button>
+                            </div>
+                            <p id="smartPasteHelp">Também aceita rótulos, como <strong>Frete: 5.800,00</strong>.</p>
+                        </div>
+                        <p id="smartPasteStatus" class="smart-paste-status" role="status" aria-live="polite">
+                            Ao colar, o preenchimento acontece automaticamente.
+                        </p>
+                    </section>
                     
                     <!-- Cadastro de Viagem -->
                     <div class="space-y-4">
@@ -688,12 +739,12 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de Gasolina Gastos *</label>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Litros de óleo diesel *</label>
                                 <input type="number" id="litrosGasolina" name="litrosGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
                             </div>
                             
                             <div>
-                                <label class="block text-gray-200 text-sm font-semibold mb-2">Valor Gasto com Gasolina (R$) *</label>
+                                <label class="block text-gray-200 text-sm font-semibold mb-2">Valor gasto com óleo diesel (R$) *</label>
                                 <input type="number" id="valorGasolina" name="valorGasolina" step="0.01" min="0" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20" placeholder="0,00" required>
                             </div>
                         </div>
@@ -914,44 +965,6 @@
 
     <!-- Scripts -->
     <script src="{% static 'login/js/scripts.js' %}?v=20251001-final"></script>
-    <script>
-        // Forçar cabeçalho fixo e compacto em mobile
-        (function() {
-            const larguraTela = window.innerWidth;
-            
-            if (larguraTela <= 640) {
-                // Encontrar o nav
-                const nav = document.querySelector('nav');
-                
-                if (nav) {
-                    // Aplicar estilos fixos compactos
-                    nav.style.cssText = `
-                        position: fixed !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        right: 0 !important;
-                        width: 100% !important;
-                        z-index: 900 !important;
-                        background: linear-gradient(135deg, rgba(31, 41, 55, 0.98), rgba(17, 24, 39, 0.98)) !important;
-                        backdrop-filter: blur(12px) !important;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
-                        padding: 0.5rem 0.75rem !important;
-                    `;
-                    
-                    // Padding reduzido no body
-                    document.body.style.paddingTop = '50px';
-                    
-                    console.log('✅ Header compacto fixado em mobile!');
-                }
-                
-                // Modais acima do header
-                const modais = document.querySelectorAll('[id$="Modal"]');
-                modais.forEach(modal => {
-                    modal.style.zIndex = '1000';
-                });
-            }
-        })();
-    </script>
     <script>
         // Limpar dados de teste e cache
         localStorage.removeItem('truckReports');

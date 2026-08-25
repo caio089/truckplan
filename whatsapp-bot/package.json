@@ -1,0 +1,30 @@
+{
+  "name": "truckplan-whatsapp-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bot privado de cadastro de fretes via WhatsApp, Baileys e Supabase.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "npm run build && node --test dist/test/**/*.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.112.3",
+    "@whiskeysockets/baileys": "7.0.0-rc13",
+    "dotenv": "17.2.2",
+    "pino": "9.9.5",
+    "qrcode-terminal": "0.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "@types/qrcode-terminal": "0.12.2",
+    "tsx": "4.20.5",
+    "typescript": "7.0.2"
+  }
+}

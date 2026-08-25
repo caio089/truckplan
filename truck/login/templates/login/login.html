@@ -1,8 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#06101c">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -180,8 +182,10 @@
             .mb-8 { margin-bottom: 1rem; }
         }
     </style>
+    <link rel="stylesheet" href="{% static 'login/css/premium.css' %}?v=20260824">
+    <script defer src="{% static 'login/js/premium-ui.js' %}?v=20260824"></script>
 </head>
-<body class="gradient-bg min-h-screen flex items-center justify-center p-2 sm:p-4">
+<body class="app-page page-login gradient-bg min-h-screen flex items-center justify-center p-2 sm:p-4">
     <!-- Background Animation -->
     <div class="absolute inset-0 overflow-hidden">
         <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full animate-pulse-slow hidden sm:block"></div>
@@ -253,8 +257,10 @@
                             required
                             autocomplete="current-password"
                         >
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <span class="text-gray-400 text-lg sm:text-xl">🔒</span>
+                        <div class="absolute inset-y-0 right-0 pr-1 flex items-center">
+                            <button type="button" id="passwordToggle" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false">
+                                <span aria-hidden="true">👁️</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -275,7 +281,7 @@
 
         <!-- Footer -->
         <div class="text-center mt-4 sm:mt-6 text-gray-300 text-xs sm:text-sm">
-            <p>© 2024 TruckPlan - Sistema de Gestão de Despesas</p>
+            <p>© {% now "Y" %} TruckPlan — Gestão de despesas</p>
         </div>
     </div>
 
@@ -283,7 +289,8 @@
         // Auto-focus no campo de usuário
         document.addEventListener('DOMContentLoaded', function() {
             const usernameField = document.getElementById('username');
-            if (usernameField) {
+            // Evita abrir o teclado automaticamente e cobrir o formulário no celular.
+            if (usernameField && window.matchMedia('(min-width: 768px)').matches) {
                 usernameField.focus();
             }
         });
@@ -293,6 +300,16 @@
         const usernameField = document.getElementById('username');
         const passwordField = document.getElementById('password');
         const submitButton = form.querySelector('button[type="submit"]');
+        const passwordToggle = document.getElementById('passwordToggle');
+
+        passwordToggle.addEventListener('click', function() {
+            const shouldShow = passwordField.type === 'password';
+            passwordField.type = shouldShow ? 'text' : 'password';
+            this.setAttribute('aria-pressed', String(shouldShow));
+            this.setAttribute('aria-label', shouldShow ? 'Ocultar senha' : 'Mostrar senha');
+            this.querySelector('span').textContent = shouldShow ? '🙈' : '👁️';
+            passwordField.focus({ preventScroll: true });
+        });
 
         // Validação em tempo real
         function validateForm() {
@@ -367,18 +384,6 @@
                 notification.remove();
             }, 3000);
         }
-
-        // Efeito de hover nos campos de input
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('scale-105');
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('scale-105');
-            });
-        });
 
         // Inicializar validação
         validateForm();
