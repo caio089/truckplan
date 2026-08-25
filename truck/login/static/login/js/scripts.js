@@ -2,6 +2,10 @@
 let reports = [];
 let currentWeekData = { gastos: 0, lucros: 0, lucroLiquido: 0 };
 let custosGeraisRelatorio = [];
+function setTextIfPresent(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+}
 
 // ===== FUNÇÕES PRINCIPAIS =====
 
@@ -122,10 +126,10 @@ function updateWeekSummary() {
     const lucroLiquido = totalLucros - totalGastos;
     const mediaDiaria = weekReports.length > 0 ? lucroLiquido / weekReports.length : 0;
     
-    document.getElementById('totalLucrosSemanal').textContent = `R$ ${totalLucros.toFixed(2).replace('.', ',')}`;
-    document.getElementById('totalGastosSemanal').textContent = `R$ ${totalGastos.toFixed(2).replace('.', ',')}`;
-    document.getElementById('lucroLiquidoSemanal').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
-    document.getElementById('mediaDiariaSemanal').textContent = `R$ ${mediaDiaria.toFixed(2).replace('.', ',')}`;
+    setTextIfPresent('totalLucrosSemanal', `R$ ${totalLucros.toFixed(2).replace('.', ',')}`);
+    setTextIfPresent('totalGastosSemanal', `R$ ${totalGastos.toFixed(2).replace('.', ',')}`);
+    setTextIfPresent('lucroLiquidoSemanal', `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`);
+    setTextIfPresent('mediaDiariaSemanal', `R$ ${mediaDiaria.toFixed(2).replace('.', ',')}`);
 }
 
 // Atualizar resumo mensal
@@ -149,10 +153,10 @@ function updateMonthSummary() {
     const lucroLiquido = totalLucros - totalGastos;
     const mediaDiaria = monthReports.length > 0 ? lucroLiquido / monthReports.length : 0;
     
-    document.getElementById('totalLucrosMensal').textContent = `R$ ${totalLucros.toFixed(2).replace('.', ',')}`;
-    document.getElementById('totalGastosMensal').textContent = `R$ ${totalGastos.toFixed(2).replace('.', ',')}`;
-    document.getElementById('lucroLiquidoMensal').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
-    document.getElementById('mediaDiariaMensal').textContent = `R$ ${mediaDiaria.toFixed(2).replace('.', ',')}`;
+    setTextIfPresent('totalLucrosMensal', `R$ ${totalLucros.toFixed(2).replace('.', ',')}`);
+    setTextIfPresent('totalGastosMensal', `R$ ${totalGastos.toFixed(2).replace('.', ',')}`);
+    setTextIfPresent('lucroLiquidoMensal', `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`);
+    setTextIfPresent('mediaDiariaMensal', `R$ ${mediaDiaria.toFixed(2).replace('.', ',')}`);
 }
 
 // ===== NAVEGAÇÃO =====
@@ -430,10 +434,15 @@ function salvarRelatorio() {
     
     // Validar campos obrigatórios
     const camposObrigatorios = ['dataViagem', 'localPartida', 'localChegada', 'quantidadeDiarias', 'litrosGasolina', 'valorGasolina', 'nomeMotorista', 'nomeCaminhao'];
+    const nomesCampos = {
+        dataViagem: 'Data da viagem', localPartida: 'Local de partida', localChegada: 'Local de chegada',
+        quantidadeDiarias: 'Quantidade de diárias', litrosGasolina: 'Litros de óleo diesel',
+        valorGasolina: 'Valor gasto com óleo diesel', nomeMotorista: 'Nome do motorista', nomeCaminhao: 'Nome do caminhão'
+    };
     for (const campo of camposObrigatorios) {
         const elemento = document.getElementById(campo);
         if (!elemento || !elemento.value.trim()) {
-            showNotification(`Campo ${campo} é obrigatório!`, 'error');
+            showNotification(`${nomesCampos[campo]} é obrigatório.`, 'error');
             elemento?.focus();
             return;
         }
@@ -1373,7 +1382,10 @@ async function excluirCustoFixo(custoId) {
 // ===== SALVAMENTO =====
 
 async function salvarRelatorioNoServidor(reportData, isEdit) {
+    const form = document.getElementById('reportForm');
+    const submitButton = form?.querySelector('button[type="submit"]');
     try {
+        if (submitButton) submitButton.disabled = true;
         const formData = new FormData();
         
         // Enviar tanto data_viagem quanto dataViagem para compatibilidade
@@ -1425,8 +1437,8 @@ async function salvarRelatorioNoServidor(reportData, isEdit) {
             }
         });
         
+        const result = await response.json().catch(() => ({ success: false, message: 'Resposta inválida do servidor.' }));
         if (response.ok) {
-            const result = await response.json();
             if (result.success) {
                 showNotification(result.message, 'success');
                 closeReportModal();
@@ -1438,11 +1450,18 @@ async function salvarRelatorioNoServidor(reportData, isEdit) {
                 showNotification(result.message, 'error');
             }
         } else {
-            showNotification('Erro ao salvar relatório!', 'error');
+            showNotification(result.message || 'Erro ao salvar relatório.', 'error');
         }
     } catch (error) {
         console.error('Erro ao salvar relatório:', error);
-        showNotification('Erro ao salvar relatório!', 'error');
+        showNotification('Não foi possível salvar. Verifique sua conexão e tente novamente.', 'error');
+    } finally {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.classList.remove('is-submitting');
+            submitButton.removeAttribute('aria-busy');
+        }
+        form?.removeAttribute('aria-busy');
     }
 }
 
@@ -1610,13 +1629,14 @@ function getCSRFToken() {
 
 function showNotification(message, type) {
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+    notification.className = `notification fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
         type === 'success' ? 'bg-green-600 text-white' :
         type === 'error' ? 'bg-red-600 text-white' :
         type === 'info' ? 'bg-blue-600 text-white' :
         'bg-gray-600 text-white'
     }`;
     notification.textContent = message;
+    notification.setAttribute('role', type === 'error' ? 'alert' : 'status');
     
     document.body.appendChild(notification);
     
@@ -1656,7 +1676,6 @@ function updatePreviousReportsList() {
                 </div>
             `;
         }
-        mostrarResultadosBusca(reports);
     }
 }
 
