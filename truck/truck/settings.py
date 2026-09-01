@@ -17,10 +17,9 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Configurações específicas para Render
-if os.environ.get('RENDER'):
-    # Configurações específicas para o ambiente Render
-    pass
+ON_VERCEL = bool(os.environ.get('VERCEL'))
+ON_RENDER = bool(os.environ.get('RENDER'))
+ON_CLOUD = ON_VERCEL or ON_RENDER
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,14 +32,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-%!e8du$3hdcb47yr*ko()muqp%i_ts5@hzzmxhjybw21uywl%z')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+DEBUG = os.environ.get('DEBUG', 'False' if ON_CLOUD else 'True').lower() == 'true'
 
 # Parse ALLOWED_HOSTS e limpar espaços em branco
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')]
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',') if host.strip()]
 
-# Adicionar *.onrender.com se estiver no Render
-if os.environ.get('RENDER'):
+if ON_RENDER:
     ALLOWED_HOSTS.append('.onrender.com')
+if ON_VERCEL:
+    ALLOWED_HOSTS.extend(['.vercel.app', '.now.sh'])
 
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True
@@ -64,7 +64,11 @@ CSRF_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
 CSRF_COOKIE_HTTPONLY = True
 
 # CSRF trusted origins
-default_csrf = ['https://truckplan.onrender.com', 'https://*.onrender.com']
+default_csrf = [
+    'https://truckplan.onrender.com',
+    'https://*.onrender.com',
+    'https://*.vercel.app',
+]
 env_csrf = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 if env_csrf:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in env_csrf.split(',') if o.strip()]
@@ -131,7 +135,7 @@ import os
 DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
 
 # Verificar se DATABASE_URL está válida (não vazia e contém protocolo)
-if DATABASE_URL and DATABASE_URL.startswith('postgresql'):
+if DATABASE_URL and DATABASE_URL.startswith(('postgresql://', 'postgres://')):
     # Remover aspas se existirem
     DATABASE_URL = DATABASE_URL.strip('"').strip("'")
     
@@ -152,7 +156,7 @@ if DATABASE_URL and DATABASE_URL.startswith('postgresql'):
     DATABASES = {
         'default': dj_database_url.parse(
             DATABASE_URL,
-            conn_max_age=600,
+            conn_max_age=0 if ON_VERCEL else 600,
             ssl_require=True
         )
     }
