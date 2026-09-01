@@ -14,3 +14,7 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'truck.settings')
 
 application = get_wsgi_application()
+
+from truck.vercel_bootstrap import ensure_sqlite_schema
+
+ensure_sqlite_schema()

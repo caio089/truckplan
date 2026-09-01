@@ -1,0 +1,17 @@
+{
+  "services": {
+    "truckplan": {
+      "root": "truck",
+      "framework": "django",
+      "entrypoint": "truck.wsgi:application"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "truckplan"
+      }
+    }
+  ]
+}

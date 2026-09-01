@@ -167,14 +167,24 @@ if DATABASE_URL and DATABASE_URL.startswith(('postgresql://', 'postgres://')):
         'options': '-c statement_timeout=30000'  # 30 segundos
     }
 else:
-    if not ON_VERCEL:
-        print("DATABASE_URL nao configurada. Usando SQLite para desenvolvimento local.")
+    sqlite_path = Path('/tmp/truckplan.sqlite3') if ON_VERCEL else (BASE_DIR / 'db.sqlite3')
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': str(sqlite_path),
         }
     }
+
+if ON_VERCEL:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+    MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(
+        CSRF_TRUSTED_ORIGINS + [
+            'https://truckplan.vercel.app',
+            'https://*.vercel.app',
+        ]
+    ))
 
 
 # Password validation
@@ -219,7 +229,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # WhiteNoise configuration for static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+if ON_VERCEL:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

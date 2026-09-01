@@ -331,3 +331,4 @@ service-account.json
 !whatsapp-bot/supabase/schema.sql
 !whatsapp-bot/.dockerignore
 !whatsapp-bot/Dockerfile
+.vercel
