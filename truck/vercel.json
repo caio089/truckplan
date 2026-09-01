@@ -1,8 +1,17 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "truck/wsgi.py": {
-      "maxDuration": 60
+  "services": {
+    "truckplan": {
+      "root": ".",
+      "framework": "django",
+      "entrypoint": "truck.wsgi:application"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "truckplan"
+      }
+    }
+  ]
 }

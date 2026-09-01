@@ -167,10 +167,8 @@ if DATABASE_URL and DATABASE_URL.startswith(('postgresql://', 'postgres://')):
         'options': '-c statement_timeout=30000'  # 30 segundos
     }
 else:
-    # Configuração para desenvolvimento local com SQLite
-    print(f"⚠️ DATABASE_URL não está configurada corretamente: '{DATABASE_URL}'")
-    print("📝 Usando SQLite para desenvolvimento local")
-    print("💡 Para usar PostgreSQL, configure DATABASE_URL no arquivo truck/.env")
+    if not ON_VERCEL:
+        print("DATABASE_URL nao configurada. Usando SQLite para desenvolvimento local.")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
