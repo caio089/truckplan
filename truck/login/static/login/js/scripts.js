@@ -93,6 +93,7 @@ async function carregarRelatoriosDoServidor() {
         if (response.ok) {
             const data = await response.json();
             reports = data.relatorios || [];
+            window.reports = reports;
             
             requestAnimationFrame(() => {
                 updateWeekSummary();

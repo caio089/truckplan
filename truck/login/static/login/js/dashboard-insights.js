@@ -4,22 +4,67 @@
     let trendChart;
     let mixChart;
     let selectedMonth = toYearMonth(new Date());
+    let loadToken = 0;
 
     function toYearMonth(date) {
         return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
     }
 
+    function normalizeMonthValue(raw) {
+        const value = String(raw || '').trim();
+        const iso = value.match(/(\d{4})[\/\-](\d{1,2})/);
+        if (iso) return iso[1] + '-' + String(iso[2]).padStart(2, '0');
+        const br = value.match(/^(\d{1,2})[\/\-](\d{4})$/);
+        if (br) return br[2] + '-' + String(br[1]).padStart(2, '0');
+        return value.slice(0, 7);
+    }
+
+    function monthRange(ym) {
+        const [year, month] = String(ym).split('-').map(Number);
+        const lastDay = new Date(year, month, 0).getDate();
+        return {
+            start: ym + '-01',
+            end: ym + '-' + String(lastDay).padStart(2, '0')
+        };
+    }
+
     function monthLabel(ym) {
         const [year, month] = ym.split('-').map(Number);
-        return new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        const label = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        return label.charAt(0).toUpperCase() + label.slice(1);
     }
 
     function money(value) {
         return 'R$ ' + Number(value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    function storedReports() {
+        if (typeof window.reports !== 'undefined' && Array.isArray(window.reports)) return window.reports;
+        return [];
+    }
+
+    function reportMonth(report) {
+        const raw = String(report.date || report.data_viagem || '');
+        const iso = raw.match(/(\d{4})-(\d{2})/);
+        if (iso) return iso[1] + '-' + iso[2];
+        const br = raw.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (br) return br[3] + '-' + br[2];
+        return '';
+    }
+
+    function normalizeReport(report) {
+        return {
+            date: String(report.date || report.data_viagem || '').slice(0, 10),
+            receita: Number(report.receita || report.receita_frete || 0),
+            valorGasolina: Number(report.valorGasolina || report.gasto_gasolina || 0),
+            totalDiarias: Number(report.totalDiarias || report.valor_diarias || 0),
+            totalCustosGerais: Number(report.totalCustosGerais || 0),
+            litrosGasolina: Number(report.litrosGasolina || report.litros_gasolina || 0)
+        };
+    }
+
     function reportsOfMonth(ym) {
-        return (window.reports || []).filter((report) => String(report.date || '').startsWith(ym));
+        return storedReports().filter((report) => reportMonth(report) === ym).map(normalizeReport);
     }
 
     function fixedCosts() {
@@ -149,24 +194,46 @@
         });
     }
 
-    function refreshDashboardInsights() {
-        const monthInput = document.getElementById('filtroMesDashboard');
-        if (monthInput && monthInput.value) selectedMonth = monthInput.value;
-        const list = reportsOfMonth(selectedMonth);
+    function paint(list, ym) {
         const metrics = compute(list);
-        const label = monthLabel(selectedMonth);
-        setMetric('dashboardPeriodLabel', label.charAt(0).toUpperCase() + label.slice(1));
+        setMetric('dashboardPeriodLabel', monthLabel(ym));
         renderKpis(metrics);
-        renderCharts(list, metrics, selectedMonth);
-        if (typeof updateWeekSummary === 'function' && updateWeekSummary !== refreshDashboardInsights) {
-            /* keep legacy cards in sync if they still exist */
-        }
+        renderCharts(list, metrics, ym);
+    }
+
+    function readSelectedMonth() {
+        const monthInput = document.getElementById('filtroMesDashboard');
+        const normalized = normalizeMonthValue((monthInput && monthInput.value) || selectedMonth);
+        if (/^\d{4}-\d{2}$/.test(normalized)) selectedMonth = normalized;
+        if (monthInput) monthInput.value = selectedMonth;
+        return selectedMonth;
+    }
+
+    function refreshDashboardInsights() {
+        const ym = readSelectedMonth();
+        paint(reportsOfMonth(ym), ym);
+        fetchSelectedMonth(ym);
+    }
+
+    function fetchSelectedMonth(ym) {
+        if (typeof buscarRelatoriosPeriodo !== 'function') return;
+        const range = monthRange(ym);
+        const token = ++loadToken;
+        buscarRelatoriosPeriodo(range.start, range.end)
+            .then((data) => {
+                if (token !== loadToken) return;
+                const list = (data.relatorios || []).map(normalizeReport);
+                paint(list, ym);
+            })
+            .catch((error) => {
+                if (token !== loadToken) return;
+                console.error('Falha ao carregar o mês no dashboard:', error);
+            });
     }
 
     function shiftMonth(delta) {
         const [year, month] = selectedMonth.split('-').map(Number);
-        const next = new Date(year, month - 1 + delta, 1);
-        selectedMonth = toYearMonth(next);
+        selectedMonth = toYearMonth(new Date(year, month - 1 + delta, 1));
         const monthInput = document.getElementById('filtroMesDashboard');
         if (monthInput) monthInput.value = selectedMonth;
         refreshDashboardInsights();
@@ -176,7 +243,17 @@
         const monthInput = document.getElementById('filtroMesDashboard');
         if (monthInput) {
             monthInput.value = selectedMonth;
-            monthInput.addEventListener('change', refreshDashboardInsights);
+            ['change', 'input', 'blur'].forEach((eventName) => {
+                monthInput.addEventListener(eventName, refreshDashboardInsights);
+            });
+            monthInput.addEventListener('paste', (event) => {
+                const text = (event.clipboardData || window.clipboardData).getData('text');
+                const ym = normalizeMonthValue(text);
+                if (!/^\d{4}-\d{2}$/.test(ym)) return;
+                event.preventDefault();
+                monthInput.value = ym;
+                refreshDashboardInsights();
+            });
         }
         const prev = document.getElementById('filtroMesAnterior');
         const next = document.getElementById('filtroMesProximo');
@@ -185,15 +262,12 @@
         document.querySelectorAll('[data-period-chip]').forEach((button) => {
             button.addEventListener('click', () => {
                 const kind = button.getAttribute('data-period-chip');
+                const ym = readSelectedMonth();
                 if (kind === 'mes') {
-                    const [year, month] = selectedMonth.split('-').map(Number);
-                    const start = selectedMonth + '-01';
-                    const end = selectedMonth + '-' + String(new Date(year, month, 0).getDate()).padStart(2, '0');
-                    if (typeof buscarRelatoriosPeriodo === 'function') {
-                        buscarRelatoriosPeriodo(start, end)
-                            .then((data) => mostrarResultadosBusca(data, monthLabel(selectedMonth)))
-                            .catch((error) => showNotification(error.message, 'error'));
-                    }
+                    const range = monthRange(ym);
+                    buscarRelatoriosPeriodo(range.start, range.end)
+                        .then((data) => mostrarResultadosBusca(data, monthLabel(ym)))
+                        .catch((error) => showNotification(error.message, 'error'));
                 }
                 if (kind === 'semana' && typeof mostrarRelatoriosSemana === 'function') mostrarRelatoriosSemana();
                 if (kind === 'hoje' && typeof mostrarRelatoriosHoje === 'function') mostrarRelatoriosHoje();
