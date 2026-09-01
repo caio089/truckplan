@@ -325,8 +325,8 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="{% static 'login/css/premium.css' %}?v=20260825">
-    <script defer src="{% static 'login/js/premium-ui.js' %}?v=20260825"></script>
+    <link rel="stylesheet" href="{% static 'login/css/premium.css' %}?v=20260901-dash">
+    <script defer src="{% static 'login/js/premium-ui.js' %}?v=20260901-dash"></script>
 </head>
 <body class="app-page page-dashboard gradient-bg min-h-screen">
     <!-- CSRF Token -->
@@ -347,7 +347,8 @@
                 <h1 class="text-base sm:text-2xl font-bold text-white">TruckPlan</h1>
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4">
-                <span class="hidden sm:inline text-gray-300 text-sm sm:text-base">Bem-vindo, {{ user.username }}!</span>
+                <span class="hidden sm:inline text-gray-300 text-sm sm:text-base">Olá, {{ user.username }}</span>
+                <button type="button" onclick="window.openReportModal && window.openReportModal()" class="dash-nav-cta" data-action="open-report-modal">Novo relatório</button>
                 <a href="{% url 'logout' %}" class="bg-red-600/80 hover:bg-red-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 text-xs sm:text-base font-semibold">
                     Sair
                 </a>
@@ -357,194 +358,85 @@
 
     <!-- Main Content -->
     <div class="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pb-6 sm:pb-12">
-        <!-- Welcome Section -->
-        <div class="text-center mb-4 sm:mb-8 animate-slide-up">
-            <h2 class="text-lg sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-3">Dashboard</h2>
-            <p class="text-gray-400 text-xs sm:text-base lg:text-lg hidden sm:block">Sistema de Controle de Despesas de Caminhão</p>
-        </div>
-
-        <!-- Resumo Financeiro -->
-        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-                <h3 class="text-xl sm:text-2xl font-bold text-white">Resumo Financeiro</h3>
-                <div class="flex space-x-2 w-full sm:w-auto">
-                    <button id="btnSemanal" onclick="alternarResumo('semanal')" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
-                        Semanal
-                    </button>
-                    <button id="btnMensal" onclick="alternarResumo('mensal')" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
-                        Mensal
-                    </button>
-                </div>
-            </div>
-            
-            <div id="resumoSemanal" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-red-100 text-xs sm:text-sm font-medium">Total de Gastos</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalGastosSemanal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Esta semana</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💰</div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-green-100 text-xs sm:text-sm font-medium">Total de Receitas</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalLucrosSemanal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Esta semana</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📈</div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Lucro Líquido</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="lucroLiquidoSemanal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Esta semana</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💎</div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-yellow-100 text-xs sm:text-sm font-medium">Média Diária</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="mediaDiariaSemanal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Por dia</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📊</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="resumoMensal" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 hidden">
-                <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-red-100 text-xs sm:text-sm font-medium">Total de Gastos</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalGastosMensal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Este mês</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💰</div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-green-100 text-xs sm:text-sm font-medium">Total de Receitas</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="totalLucrosMensal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Este mês</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📈</div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-purple-100 text-xs sm:text-sm font-medium">Lucro Líquido</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="lucroLiquidoMensal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Este mês</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">💎</div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-yellow-100 text-xs sm:text-sm font-medium">Média Diária</p>
-                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold" id="mediaDiariaMensal">R$ 0,00</p>
-                            <p class="text-xs opacity-80">Por dia</p>
-                        </div>
-                        <div class="text-2xl sm:text-3xl lg:text-4xl opacity-80">📊</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Busca por Data -->
-        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
-            <h3 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">🔍 Buscar Relatórios por Data</h3>
-            
-            <!-- Botões de Navegação para Relatórios -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <button onclick="irParaRelatorioDiario()" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
-                    <span class="mr-2 text-sm sm:text-base">📅</span>
-                    <span class="hidden sm:inline">Relatório Diário</span>
-                    <span class="sm:hidden">Diário</span>
-                </button>
-                <button onclick="irParaRelatorioSemanal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
-                    <span class="mr-2 text-sm sm:text-base">📊</span>
-                    <span class="hidden sm:inline">Relatório Semanal</span>
-                    <span class="sm:hidden">Semanal</span>
-                </button>
-                <button onclick="irParaRelatorioMensal()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
-                    <span class="mr-2 text-sm sm:text-base">📈</span>
-                    <span class="hidden sm:inline">Relatório Mensal</span>
-                    <span class="sm:hidden">Mensal</span>
-                </button>
-                <button onclick="showPreviousReports()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center cursor-pointer mobile-touch-target text-sm sm:text-base">
-                    <span class="mr-2 text-sm sm:text-base">📋</span>
-                    <span class="hidden sm:inline">Relatórios Anteriores</span>
-                    <span class="sm:hidden">Anteriores</span>
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <section class="dash-command glass-effect rounded-2xl p-4 sm:p-6 animate-slide-up border border-gray-600/30 mb-5">
+            <div class="dash-command-top">
                 <div>
-                    <label class="block text-gray-200 text-sm font-semibold mb-2">📅 Data Específica</label>
-                    <input type="date" id="dataEspecifica" class="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-gray-400 focus:ring-4 focus:ring-gray-200/20 mobile-input" placeholder="Selecione a data">
+                    <p class="dash-kicker">Painel operacional</p>
+                    <h2 class="text-xl sm:text-3xl font-bold text-white">Como está o mês</h2>
+                    <p class="text-gray-400 text-sm mt-1">Escolha o mês. Os números, gráficos e a busca acompanham o filtro.</p>
                 </div>
-                <div class="flex items-end">
-                    <button onclick="buscarRelatorioPorData()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 mobile-touch-target text-sm sm:text-base">
-                        🔍 Buscar Relatório
-                    </button>
+                <div class="dash-month-control">
+                    <button type="button" id="filtroMesAnterior" class="dash-month-btn" aria-label="Mês anterior">‹</button>
+                    <label class="dash-month-field">
+                        <span>Mês</span>
+                        <input type="month" id="filtroMesDashboard">
+                    </label>
+                    <button type="button" id="filtroMesProximo" class="dash-month-btn" aria-label="Próximo mês">›</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="glass-effect rounded-2xl p-4 sm:p-6 lg:p-8 animate-slide-up border border-gray-600/30 mb-6 sm:mb-8">
-            <h3 class="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Ações Rápidas</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <button onclick="window.openReportModal && window.openReportModal()" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-600 mobile-touch-target" data-action="open-report-modal">
-                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
-                        <span class="text-2xl sm:text-3xl">📊</span>
-                        <span class="text-xs sm:text-sm">Novo Relatório</span>
-                    </div>
-                </button>
-
-                <button onclick="mostrarRelatoriosHoje()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-green-500 mobile-touch-target">
-                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
-                        <span class="text-2xl sm:text-3xl">📅</span>
-                        <span class="text-xs sm:text-sm">Hoje</span>
-                    </div>
-                </button>
-
-                <button onclick="mostrarRelatoriosSemana()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-blue-500 mobile-touch-target">
-                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
-                        <span class="text-2xl sm:text-3xl">📈</span>
-                        <span class="text-xs sm:text-sm">Esta Semana</span>
-                    </div>
-                </button>
-
-                <button onclick="mostrarRelatoriosMes()" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white p-4 sm:p-6 rounded-xl font-semibold text-base sm:text-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-purple-500 mobile-touch-target">
-                    <div class="flex flex-col items-center justify-center space-y-1 sm:space-y-2">
-                        <span class="text-2xl sm:text-3xl">📊</span>
-                        <span class="text-xs sm:text-sm">Este Mês</span>
-                    </div>
-                </button>
-
+            <div class="dash-chip-row">
+                <button type="button" class="dash-chip" data-period-chip="hoje">Ver hoje</button>
+                <button type="button" class="dash-chip" data-period-chip="semana">Ver semana</button>
+                <button type="button" class="dash-chip is-primary" data-period-chip="mes">Listar viagens do mês</button>
+                <button type="button" class="dash-chip" onclick="irParaRelatorioMensal()">PDF / relatório mensal</button>
             </div>
-        </div>
+        </section>
+
+        <section class="dash-board glass-effect rounded-2xl p-4 sm:p-6 animate-slide-up border border-gray-600/30 mb-5" id="dashboardFixedCosts" data-total="{{ total_custos_fixos_mensais|default:0 }}">
+            <div class="flex items-end justify-between gap-3 mb-4">
+                <div>
+                    <p class="dash-kicker">Indicadores</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-white" id="dashboardPeriodLabel">Este mês</h3>
+                </div>
+            </div>
+            <div class="dash-kpi-grid">
+                <article class="dash-kpi is-revenue"><span>Receita de frete</span><strong id="kpiReceita">R$ 0,00</strong></article>
+                <article class="dash-kpi is-cost"><span>Despesas</span><strong id="kpiGastos">R$ 0,00</strong></article>
+                <article class="dash-kpi is-profit"><span>Lucro líquido</span><strong id="kpiLucro">R$ 0,00</strong></article>
+                <article class="dash-kpi"><span>Margem</span><strong id="kpiMargem">0%</strong></article>
+                <article class="dash-kpi"><span>Viagens</span><strong id="kpiViagens">0</strong></article>
+                <article class="dash-kpi"><span>Ticket médio</span><strong id="kpiTicket">R$ 0,00</strong></article>
+                <article class="dash-kpi"><span>Combustível</span><strong id="kpiCombustivel">R$ 0,00</strong></article>
+                <article class="dash-kpi"><span>Litros</span><strong id="kpiLitros">0 L</strong></article>
+                <article class="dash-kpi"><span>Diárias</span><strong id="kpiDiarias">R$ 0,00</strong></article>
+                <article class="dash-kpi"><span>Custos extras</span><strong id="kpiExtras">R$ 0,00</strong></article>
+                <article class="dash-kpi"><span>Custos fixos</span><strong id="kpiFixos">R$ 0,00</strong></article>
+                <article class="dash-kpi"><span>Média por viagem</span><strong id="kpiMediaViagem">R$ 0,00</strong></article>
+            </div>
+            <div class="dash-chart-grid">
+                <div class="dash-chart-card">
+                    <h4>Receita x gastos no mês</h4>
+                    <div class="dash-chart-wrap"><canvas id="chartTendencia"></canvas></div>
+                </div>
+                <div class="dash-chart-card">
+                    <h4>Onde o dinheiro sai</h4>
+                    <div class="dash-chart-wrap"><canvas id="chartMix"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dash-tools glass-effect rounded-2xl p-4 sm:p-6 animate-slide-up border border-gray-600/30 mb-5">
+            <div class="dash-tools-grid">
+                <div>
+                    <p class="dash-kicker">Atalhos</p>
+                    <h3 class="text-lg font-bold text-white mb-3">O que você mais usa</h3>
+                    <div class="dash-shortcut-grid">
+                        <button type="button" onclick="window.openReportModal && window.openReportModal()" data-action="open-report-modal">Novo relatório</button>
+                        <button type="button" onclick="irParaRelatorioDiario()">Relatório diário</button>
+                        <button type="button" onclick="irParaRelatorioSemanal()">Relatório semanal</button>
+                        <button type="button" onclick="irParaRelatorioMensal()">Relatório mensal</button>
+                    </div>
+                </div>
+                <div>
+                    <p class="dash-kicker">Busca rápida</p>
+                    <h3 class="text-lg font-bold text-white mb-3">Um dia específico</h3>
+                    <div class="dash-search-row">
+                        <input type="date" id="dataEspecifica">
+                        <button type="button" onclick="buscarRelatorioPorData()">Buscar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Resultados da Busca -->
         <div id="resultadosBusca" class="hidden">
@@ -964,7 +856,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{% static 'login/js/scripts.js' %}?v=20260901-json-fix"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="{% static 'login/js/scripts.js' %}?v=20260901-dash"></script>
+    <script src="{% static 'login/js/dashboard-insights.js' %}?v=20260901-dash"></script>
     <script>
         // Limpar dados de teste e cache
         localStorage.removeItem('truckReports');

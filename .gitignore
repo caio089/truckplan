@@ -144,6 +144,7 @@ static/
 !truck/login/static/login/css/premium.css
 !truck/login/static/login/js/
 !truck/login/static/login/js/premium-ui.js
+!truck/login/static/login/js/dashboard-insights.js
 
 # Environment variables
 .env

@@ -94,11 +94,11 @@ async function carregarRelatoriosDoServidor() {
             const data = await response.json();
             reports = data.relatorios || [];
             
-            // Usar requestAnimationFrame para atualizações
             requestAnimationFrame(() => {
                 updateWeekSummary();
                 updateMonthSummary();
                 updatePreviousReportsList();
+                if (typeof refreshDashboardInsights === 'function') refreshDashboardInsights();
             });
         } else {
             console.error('Erro ao carregar relatórios:', response.status);
