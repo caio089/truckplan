@@ -61,7 +61,8 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # CSRF protection
 CSRF_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_FAILURE_VIEW = 'truck.csrf.csrf_failure'
 
 # CSRF trusted origins
 default_csrf = [
@@ -176,8 +177,6 @@ else:
     }
 
 if ON_VERCEL:
-    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-    MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
     CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(
         CSRF_TRUSTED_ORIGINS + [
@@ -185,6 +184,9 @@ if ON_VERCEL:
             'https://*.vercel.app',
         ]
     ))
+    if 'sqlite3' in DATABASES['default']['ENGINE']:
+        SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+        MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 
 
 # Password validation

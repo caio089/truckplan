@@ -9,6 +9,42 @@ function setTextIfPresent(id, value) {
 
 // ===== FUNÇÕES PRINCIPAIS =====
 
+function parseJsonSafe(text) {
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        throw new Error('A busca falhou. Recarregue a página e faça login novamente.');
+    }
+}
+
+function buscarRelatoriosPeriodo(dataInicio, dataFim) {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        return Promise.reject(new Error('Token CSRF não encontrado. Recarregue a página.'));
+    }
+
+    return fetch('/login/buscar-relatorios-periodo/', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            data_inicio: dataInicio,
+            data_fim: dataFim
+        })
+    }).then(async (response) => {
+        const text = await response.text();
+        const data = parseJsonSafe(text);
+        if (!response.ok || data.success === false) {
+            throw new Error(data.error || `Falha ao buscar relatórios (${response.status})`);
+        }
+        return data;
+    });
+}
+
 // Função para buscar relatório por data específica
 function buscarRelatorioPorData() {
     const dataEspecifica = document.getElementById('dataEspecifica').value;
@@ -31,22 +67,7 @@ function buscarRelatorioPorData() {
     
     console.log('Buscando relatórios para data:', dataEspecifica);
     
-    // Buscar dados do servidor
-    fetch('/login/buscar-relatorios-periodo/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({
-            data_inicio: dataEspecifica,
-            data_fim: dataEspecifica
-        })
-    })
-    .then(response => {
-        console.log('Resposta do servidor:', response.status);
-        return response.json();
-    })
+    buscarRelatoriosPeriodo(dataEspecifica, dataEspecifica)
     .then(data => {
         console.log('Dados recebidos:', data);
         if (data.success) {
@@ -57,14 +78,17 @@ function buscarRelatorioPorData() {
     })
     .catch(error => {
         console.error('Erro ao buscar relatórios:', error);
-        mostrarErroBusca('Erro de conexão ao buscar relatórios');
+        mostrarErroBusca(error.message || 'Erro de conexão ao buscar relatórios');
     });
 }
 
 // Carregar relatórios do servidor
 async function carregarRelatoriosDoServidor() {
     try {
-        const response = await fetch('/login/listar-relatorios/');
+        const response = await fetch('/login/listar-relatorios/', {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        });
         
         if (response.ok) {
             const data = await response.json();
@@ -207,43 +231,9 @@ function mostrarRelatoriosHoje() {
         console.log('Mostrando relatórios de hoje...');
         const hoje = new Date().toISOString().split('T')[0];
         console.log('Data de hoje:', hoje);
-        
-        // Obter CSRF token de forma mais robusta
-        const csrfToken = getCSRFToken();
-        if (!csrfToken) {
-            console.error('CSRF token não encontrado');
-            showNotification('Erro: Token CSRF não encontrado', 'error');
-            return;
-        }
-        console.log('CSRF token encontrado:', csrfToken);
-        
-        // Buscar dados do servidor
-        fetch('/login/buscar-relatorios-periodo/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                data_inicio: hoje,
-                data_fim: hoje
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        buscarRelatoriosPeriodo(hoje, hoje)
         .then(data => {
-            console.log('Dados recebidos:', data);
-            if (data.success) {
-                console.log('Chamando mostrarResultadosBusca com:', data.relatorios);
-                mostrarResultadosBusca(data, 'Período');
-            } else {
-                console.error('Erro do servidor:', data.error);
-                showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
-            }
+            mostrarResultadosBusca(data, 'Hoje');
         })
         .catch(error => {
             console.error('Erro na requisição:', error);
@@ -265,42 +255,9 @@ function mostrarRelatoriosSemana() {
         const dataInicio = inicioSemana.toISOString().split('T')[0];
         const dataFim = hoje.toISOString().split('T')[0];
         console.log('Período da semana:', dataInicio, 'a', dataFim);
-        
-        // Obter CSRF token de forma mais robusta
-        const csrfToken = getCSRFToken();
-        if (!csrfToken) {
-            console.error('CSRF token não encontrado');
-            showNotification('Erro: Token CSRF não encontrado', 'error');
-            return;
-        }
-        
-        // Buscar dados do servidor
-        fetch('/login/buscar-relatorios-periodo/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                data_inicio: dataInicio,
-                data_fim: dataFim
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        buscarRelatoriosPeriodo(dataInicio, dataFim)
         .then(data => {
-            console.log('Dados recebidos:', data);
-            if (data.success) {
-                console.log('Chamando mostrarResultadosBusca com:', data.relatorios);
-                mostrarResultadosBusca(data, 'Período');
-            } else {
-                console.error('Erro do servidor:', data.error);
-                showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
-            }
+            mostrarResultadosBusca(data, 'Semana');
         })
         .catch(error => {
             console.error('Erro na requisição:', error);
@@ -321,42 +278,9 @@ function mostrarRelatoriosMes() {
         const dataInicio = inicioMes.toISOString().split('T')[0];
         const dataFim = hoje.toISOString().split('T')[0];
         console.log('Período do mês:', dataInicio, 'a', dataFim);
-        
-        // Obter CSRF token de forma mais robusta
-        const csrfToken = getCSRFToken();
-        if (!csrfToken) {
-            console.error('CSRF token não encontrado');
-            showNotification('Erro: Token CSRF não encontrado', 'error');
-            return;
-        }
-        
-        // Buscar dados do servidor
-        fetch('/login/buscar-relatorios-periodo/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                data_inicio: dataInicio,
-                data_fim: dataFim
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        buscarRelatoriosPeriodo(dataInicio, dataFim)
         .then(data => {
-            console.log('Dados recebidos:', data);
-            if (data.success) {
-                console.log('Chamando mostrarResultadosBusca com:', data.relatorios);
-                mostrarResultadosBusca(data, 'Período');
-            } else {
-                console.error('Erro do servidor:', data.error);
-                showNotification(`Erro: ${data.error || 'Erro desconhecido'}`, 'error');
-            }
+            mostrarResultadosBusca(data, 'Mês');
         })
         .catch(error => {
             console.error('Erro na requisição:', error);
@@ -1714,21 +1638,7 @@ function buscarRelatoriosPorData() {
     // Buscar relatórios do servidor
     console.log('Buscando relatórios para data:', dataEspecifica);
     
-    fetch('/login/buscar-relatorios-periodo/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: JSON.stringify({
-            data_inicio: dataEspecifica,
-            data_fim: dataEspecifica
-        })
-    })
-    .then(response => {
-        console.log('Resposta do servidor:', response.status);
-        return response.json();
-    })
+    buscarRelatoriosPeriodo(dataEspecifica, dataEspecifica)
     .then(data => {
         console.log('Dados recebidos:', data);
         if (data.success) {
@@ -1739,7 +1649,7 @@ function buscarRelatoriosPorData() {
     })
     .catch(error => {
         console.error('Erro ao buscar relatórios:', error);
-        mostrarErroBusca('Erro de conexão. Tente novamente.');
+        mostrarErroBusca(error.message || 'Erro de conexão. Tente novamente.');
     });
 }
 

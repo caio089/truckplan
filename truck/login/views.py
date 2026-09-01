@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.http import JsonResponse
+from functools import wraps
 import json
 from django.core.paginator import Paginator
 from django.db.models import Sum, Count, Q
@@ -17,6 +18,29 @@ import logging
 from .models import DailyReport, MonthlyCost, MotoristaSalario, CustosGerais, CustoFixoMensal
 
 logger = logging.getLogger(__name__)
+
+
+def json_login_required(view_func):
+    """Evita redirecionar APIs JSON para o HTML de login."""
+    @wraps(view_func)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'success': False,
+                'error': 'Sessão expirada. Faça login novamente.',
+            }, status=401)
+        return view_func(request, *args, **kwargs)
+    return wrapped
+
+
+def _serialize_resumo(rows):
+    payload = []
+    for row in rows:
+        item = {}
+        for key, value in row.items():
+            item[key] = float(value) if isinstance(value, Decimal) else value
+        payload.append(item)
+    return payload
 
 @csrf_protect
 @never_cache
@@ -55,6 +79,7 @@ def login(request):
     logger.info('Renderizando página de login')
     return render(request, 'login/login.html')
 
+@ensure_csrf_cookie
 @login_required
 def dashboard(request):
     """Dashboard principal com resumo da semana atual"""
@@ -320,7 +345,7 @@ def cadastrar_viagem(request):
     
     return render(request, 'login/cadastrar_viagem.html')
 
-@login_required
+@json_login_required
 def listar_relatorios(request):
     """View para listar todos os relatórios"""
     try:
@@ -1646,7 +1671,7 @@ def buscar_detalhes_viagem(request, viagem_id):
             'error': str(e)
         })
 
-@login_required
+@json_login_required
 def buscar_relatorios_periodo(request):
     """API para buscar relatórios por período"""
     if request.method == 'POST':
@@ -1786,8 +1811,8 @@ def buscar_relatorios_periodo(request):
                     'total_receita_frete': float(total_receita_frete),
                     'lucro': float(lucro)
                 },
-                'resumo_motorista': list(resumo_motorista),
-                'resumo_caminhao': list(resumo_caminhao)
+                'resumo_motorista': _serialize_resumo(resumo_motorista),
+                'resumo_caminhao': _serialize_resumo(resumo_caminhao)
             })
             
         except Exception as e:
@@ -1802,7 +1827,7 @@ def buscar_relatorios_periodo(request):
         'error': 'Método não permitido'
     })
 
-@login_required
+@json_login_required
 def buscar_relatorios_mes(request):
     """API para buscar relatórios por mês"""
     if request.method == 'POST':
