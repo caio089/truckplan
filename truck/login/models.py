@@ -306,3 +306,26 @@ class CustoFixoMensal(models.Model):
         if self.data_fim and data > self.data_fim:
             return False
         return True
+
+
+class WhatsAppProcessedMessage(models.Model):
+    """Evita processar o mesmo evento do WA-AKG duas vezes."""
+    message_id = models.CharField(max_length=120, unique=True)
+    phone_number = models.CharField(max_length=32)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Mensagem WhatsApp processada"
+        verbose_name_plural = "Mensagens WhatsApp processadas"
+
+
+class WhatsAppPendingReport(models.Model):
+    """Rascunho extraído pela IA até o usuário confirmar no WhatsApp."""
+    phone_number = models.CharField(max_length=32, unique=True)
+    source_message_id = models.CharField(max_length=120)
+    payload = models.JSONField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Relatório WhatsApp pendente"
+        verbose_name_plural = "Relatórios WhatsApp pendentes"

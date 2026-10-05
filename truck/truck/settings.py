@@ -279,3 +279,16 @@ LOGGING = {
         'level': 'INFO' if not DEBUG else 'DEBUG',
     },
 }
+
+# WA-AKG (WhatsApp Gateway) + xAI Grok
+WA_AKG_BASE_URL = os.environ.get('WA_AKG_BASE_URL', '').rstrip('/')
+WA_AKG_API_KEY = os.environ.get('WA_AKG_API_KEY', '')
+WA_AKG_SESSION_ID = os.environ.get('WA_AKG_SESSION_ID', '')
+WA_AKG_WEBHOOK_SECRET = os.environ.get('WA_AKG_WEBHOOK_SECRET', '')
+XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
+XAI_MODEL = os.environ.get('XAI_MODEL', 'grok-4-fast-non-reasoning')
+WHATSAPP_AUTHORIZED_NUMBERS = [
+    item.strip() for item in os.environ.get('WHATSAPP_AUTHORIZED_NUMBERS', '').split(',') if item.strip()
+]
+WHATSAPP_DEFAULT_MOTORISTA = os.environ.get('WHATSAPP_DEFAULT_MOTORISTA', '')
+WHATSAPP_DEFAULT_CAMINHAO = os.environ.get('WHATSAPP_DEFAULT_CAMINHAO', '')

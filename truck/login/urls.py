@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_whatsapp
 
 urlpatterns = [
     path('', views.login, name='login'),
@@ -43,4 +44,5 @@ urlpatterns = [
     path('apagar-custo-fixo/<int:custo_id>/', views.apagar_custo_fixo, name='apagar_custo_fixo'),
     
     # Rotas para parcelas de custos
+    path('webhooks/wa-akg/', views_whatsapp.waakg_webhook, name='waakg_webhook'),
 ]
