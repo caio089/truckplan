@@ -7,6 +7,7 @@ import json
 import logging
 
 from django.conf import settings
+from django.db.utils import OperationalError, ProgrammingError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
