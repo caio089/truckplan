@@ -97,13 +97,25 @@ def _bot_authorized(request) -> bool:
 
 
 def _connection() -> WhatsAppConnection:
-    row, _created = WhatsAppConnection.objects.get_or_create(pk=1)
-    return row
+    try:
+        row, _created = WhatsAppConnection.objects.get_or_create(pk=1)
+        return row
+    except OperationalError:
+        from django.core.management import call_command
+        call_command('migrate', interactive=False, run_syncdb=True, verbosity=0)
+        row, _created = WhatsAppConnection.objects.get_or_create(pk=1)
+        return row
 
 
 def _app_settings() -> WhatsAppSettings:
-    row, _created = WhatsAppSettings.objects.get_or_create(pk=1)
-    return row
+    try:
+        row, _created = WhatsAppSettings.objects.get_or_create(pk=1)
+        return row
+    except OperationalError:
+        from django.core.management import call_command
+        call_command('migrate', interactive=False, run_syncdb=True, verbosity=0)
+        row, _created = WhatsAppSettings.objects.get_or_create(pk=1)
+        return row
 
 
 @json_login_required
