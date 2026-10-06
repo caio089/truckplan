@@ -3,15 +3,14 @@ import makeWASocket, {
   DisconnectReason,
   makeCacheableSignalKeyStore,
   normalizeMessageContent,
+  useMultiFileAuthState,
   type WAMessage,
   type WAMessageKey,
   type WASocket
 } from '@whiskeysockets/baileys';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Logger } from 'pino';
 import qrcode from 'qrcode-terminal';
 import type { IncomingMessage } from '../application/contracts.js';
-import { useSupabaseAuthState } from '../infra/supabase-baileys-auth.js';
 
 type ExtendedMessageKey = WAMessageKey & {
   remoteJidAlt?: string;
@@ -46,9 +45,8 @@ export class WhatsAppGateway {
   private inboundChain: Promise<void> = Promise.resolve();
 
   constructor(
-    private readonly supabase: SupabaseClient,
-    private readonly sessionId: string,
-    private readonly authorizedNumber: string,
+    private readonly authDir: string,
+    private readonly authorizedNumber: string | null,
     private readonly logger: Logger,
     private readonly onAuthorizedMessage: (message: IncomingMessage) => Promise<void>
   ) {}
@@ -75,7 +73,7 @@ export class WhatsAppGateway {
 
   private async connect(): Promise<void> {
     const currentGeneration = ++this.generation;
-    const { state, saveCreds } = await useSupabaseAuthState(this.supabase, this.sessionId);
+    const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
     const socket = makeWASocket({
       auth: {
         creds: state.creds,
@@ -113,7 +111,7 @@ export class WhatsAppGateway {
 
       const statusCode = getStatusCode(update.lastDisconnect?.error);
       if (statusCode === DisconnectReason.loggedOut) {
-        this.logger.error('WhatsApp desconectado permanentemente. Remova a sessão no Supabase e vincule novamente.');
+        this.logger.error('WhatsApp desconectado. Apague a pasta auth_info e escaneie o QR de novo.');
         return;
       }
 
@@ -154,15 +152,17 @@ export class WhatsAppGateway {
       key.participantAlt
     ].map(phoneFromJid).filter((phone): phone is string => Boolean(phone));
 
-    if (!candidateNumbers.includes(this.authorizedNumber)) return;
+    const phone = candidateNumbers[0];
+    if (!phone) return;
+    if (this.authorizedNumber && !candidateNumbers.includes(this.authorizedNumber)) return;
 
     const text = extractText(message);
     if (!text) return;
 
     await this.onAuthorizedMessage({
       messageId: message.key.id,
-      phoneNumber: this.authorizedNumber,
-      replyJid: `${this.authorizedNumber}@s.whatsapp.net`,
+      phoneNumber: phone,
+      replyJid: remoteJid,
       text
     });
   }

@@ -1,6 +1,8 @@
 import type { Logger } from 'pino';
 import type { BotMessenger, BotSession, FreightRepository, IncomingMessage } from './contracts.js';
 import { parseFreightReport } from '../domain/freight-report.js';
+import { extractReportWithGroq } from '../infra/groq-extractor.js';
+import type { MemoryFreightRepository } from '../infra/memory-freight-repository.js';
 import {
   CANCEL_MESSAGE,
   EXIT_MESSAGE,
@@ -27,14 +29,16 @@ function clearedSession(phoneNumber: string, state: BotSession['state'] = 'idle'
 
 export class FreightBot {
   constructor(
-    private readonly authorizedNumber: string,
+    private readonly authorizedNumber: string | null,
     private readonly repository: FreightRepository,
     private readonly messenger: BotMessenger,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly groqApiKey: string,
+    private readonly groqModel: string
   ) {}
 
   async handleIncoming(message: IncomingMessage): Promise<void> {
-    if (message.phoneNumber !== this.authorizedNumber) return;
+    if (this.authorizedNumber && message.phoneNumber !== this.authorizedNumber) return;
 
     const claimed = await this.repository.claimMessage(message.messageId, message.phoneNumber);
     if (!claimed) return;
@@ -116,10 +120,22 @@ export class FreightBot {
       return;
     }
 
-    const result = parseFreightReport(message.text);
+    const groqResult = this.groqApiKey.startsWith('gsk_')
+      ? await extractReportWithGroq(
+          this.groqApiKey,
+          this.groqModel,
+          message.text,
+          new Date().toISOString().slice(0, 10)
+        )
+      : parseFreightReport(message.text);
+    const result = groqResult.success ? groqResult : parseFreightReport(message.text);
     if (!result.success) {
       await this.messenger.sendWhatsAppMessage(message.replyJid, validationMessage(result.errors));
       return;
+    }
+
+    if ('rememberExtras' in this.repository && 'extras' in groqResult && groqResult.extras) {
+      (this.repository as MemoryFreightRepository).rememberExtras(message.messageId, groqResult.extras);
     }
 
     await this.repository.saveSession({

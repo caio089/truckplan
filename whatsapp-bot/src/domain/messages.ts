@@ -16,29 +16,11 @@ Escolha uma opção:
 
 export const NEW_REPORT_MESSAGE = `📝 NOVO RELATÓRIO
 
-Envie TODOS os dados em uma única mensagem, mantendo uma informação em cada linha.
+Envie os dados da viagem em texto livre, por exemplo:
 
-Copie o modelo abaixo e substitua pelas informações da viagem:
+Hoje Teresina pra Fortaleza, 2 diárias, 180 L de diesel por 1080, frete 4500, motorista João, caminhão Scania.
 
-Origem:
-Chegada:
-Diárias:
-Litros de óleo:
-Valor do óleo:
-Custo adicional:
-
-📌 Exemplo:
-
-Origem: Teresina
-Chegada: Fortaleza
-Diárias: 2
-Litros de óleo: 180
-Valor do óleo: 1080
-Custo adicional: 85
-
-Se não houver custo adicional, coloque:
-
-Custo adicional: 0`;
+A IA monta o relatório e pede confirmação.`;
 
 export const CANCEL_MESSAGE = `❌ Cadastro cancelado.
 

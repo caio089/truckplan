@@ -1,4 +1,4 @@
-"""Extrai campos de relatório: Grok quando houver token; senão, parser local."""
+"""Extrai campos de relatório: Groq, Grok (xAI) ou parser local."""
 
 from __future__ import annotations
 
@@ -69,18 +69,35 @@ REQUIRED = [
 
 
 def extract_report_from_text(message: str, today_iso: str) -> dict:
+    if settings.GROQ_API_KEY:
+        try:
+            return _extract_chat_completions(
+                "https://api.groq.com/openai/v1/chat/completions",
+                settings.GROQ_API_KEY,
+                settings.GROQ_MODEL,
+                message,
+                today_iso,
+            )
+        except Exception:
+            logger.exception("Groq falhou; tentando próximo extrator")
     if settings.XAI_API_KEY:
         try:
-            return _extract_with_grok(message, today_iso)
+            return _extract_chat_completions(
+                "https://api.x.ai/v1/chat/completions",
+                settings.XAI_API_KEY,
+                settings.XAI_MODEL,
+                message,
+                today_iso,
+            )
         except Exception:
             logger.exception("Grok falhou; usando parser local")
     return _extract_locally(message, today_iso)
 
 
-def _extract_with_grok(message: str, today_iso: str) -> dict:
+def _extract_chat_completions(url: str, api_key: str, model: str, message: str, today_iso: str) -> dict:
     body = json.dumps(
         {
-            "model": settings.XAI_MODEL,
+            "model": model,
             "temperature": 0,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT.format(hoje=today_iso)},
@@ -89,12 +106,12 @@ def _extract_with_grok(message: str, today_iso: str) -> dict:
         }
     ).encode("utf-8")
     request = Request(
-        "https://api.x.ai/v1/chat/completions",
+        url,
         data=body,
         method="POST",
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {settings.XAI_API_KEY}",
+            "Authorization": f"Bearer {api_key}",
         },
     )
     with urlopen(request, timeout=25) as response:
@@ -134,7 +151,7 @@ def _parse_json_object(content: str) -> dict:
     text = (content or "").strip()
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
-        raise ValueError("Grok não retornou JSON")
+        raise ValueError("IA não retornou JSON")
     data = json.loads(match.group(0))
     if not isinstance(data, dict):
         raise ValueError("JSON inválido")

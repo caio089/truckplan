@@ -17,7 +17,7 @@ class MemoryRepository implements FreightRepository {
   readonly sessions = new Map<string, BotSession>();
   readonly reports: Array<FreightReport & { phoneNumber: string; sourceMessageId: string }> = [];
 
-  async claimMessage(messageId: string): Promise<boolean> {
+  async claimMessage(messageId: string, _phoneNumber?: string): Promise<boolean> {
     if (this.processed.has(messageId)) return false;
     this.processed.add(messageId);
     return true;
@@ -77,7 +77,7 @@ describe('FreightBot', () => {
     repository = new MemoryRepository();
     messenger = new MemoryMessenger();
     const logger = { error: () => undefined } as unknown as Logger;
-    bot = new FreightBot(authorized, repository, messenger, logger);
+    bot = new FreightBot(authorized, repository, messenger, logger, 'test', 'llama-3.3-70b-versatile');
   });
 
   it('ignora completamente qualquer número não autorizado', async () => {

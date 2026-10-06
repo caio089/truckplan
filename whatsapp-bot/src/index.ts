@@ -2,8 +2,7 @@ import 'dotenv/config';
 import pino from 'pino';
 import { FreightBot } from './application/freight-bot.js';
 import { loadConfig } from './config.js';
-import { createServerSupabaseClient } from './infra/supabase-client.js';
-import { SupabaseFreightRepository } from './infra/supabase-freight-repository.js';
+import { MemoryFreightRepository } from './infra/memory-freight-repository.js';
 import { WhatsAppGateway } from './whatsapp/gateway.js';
 import { QueuedWhatsAppMessenger, WhatsAppMessageQueue } from './whatsapp/message-queue.js';
 
@@ -11,19 +10,17 @@ const config = loadConfig();
 const logger = pino({
   level: config.logLevel,
   redact: {
-    paths: ['supabaseSecretKey', 'req.headers.authorization', '*.authorization'],
+    paths: ['groqApiKey', 'truckplanBotSecret', 'req.headers.authorization', '*.authorization'],
     censor: '[SEGREDO]'
   }
 });
 
-const supabase = createServerSupabaseClient(config.supabaseUrl, config.supabaseSecretKey);
-const repository = new SupabaseFreightRepository(supabase);
+const repository = new MemoryFreightRepository(config.truckplanApiUrl, config.truckplanBotSecret);
 const responseQueue = new WhatsAppMessageQueue(config.responseDelayMs);
 
 let bot: FreightBot;
 const gateway = new WhatsAppGateway(
-  supabase,
-  config.whatsappSessionId,
+  config.authDir,
   config.authorizedNumber,
   logger.child({ component: 'baileys' }),
   async (message) => bot.handleIncoming(message)
@@ -34,7 +31,9 @@ bot = new FreightBot(
   config.authorizedNumber,
   repository,
   messenger,
-  logger.child({ component: 'freight-bot' })
+  logger.child({ component: 'freight-bot' }),
+  config.groqApiKey,
+  config.groqModel
 );
 
 let shutdownStarted = false;
@@ -62,4 +61,4 @@ process.on('unhandledRejection', (error) => {
 });
 
 await gateway.start();
-logger.info('Bot TruckPlan iniciado. Aguardando conexão do WhatsApp.');
+logger.info('Bot TruckPlan + Groq iniciado. Escaneie o QR se aparecer.');

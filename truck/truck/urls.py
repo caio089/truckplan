@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
-from login.views_whatsapp import waakg_webhook
+from login.views_whatsapp import baileys_ingest, waakg_webhook
 
 def redirect_to_login(request):
     return redirect('login')
@@ -26,5 +26,6 @@ urlpatterns = [
     path('', redirect_to_login, name='home'),
     path('login/', include('login.urls')),
     path('webhooks/wa-akg/', waakg_webhook, name='waakg_webhook_root'),
+    path('webhooks/baileys/', baileys_ingest, name='baileys_ingest_root'),
     path('admin/', admin.site.urls),
 ]
