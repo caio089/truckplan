@@ -3,6 +3,7 @@ import pino from 'pino';
 import { FreightBot } from './application/freight-bot.js';
 import { loadConfig } from './config.js';
 import { MemoryFreightRepository } from './infra/memory-freight-repository.js';
+import { publishSession } from './infra/truckplan-session.js';
 import { WhatsAppGateway } from './whatsapp/gateway.js';
 import { QueuedWhatsAppMessenger, WhatsAppMessageQueue } from './whatsapp/message-queue.js';
 
@@ -23,7 +24,10 @@ const gateway = new WhatsAppGateway(
   config.authDir,
   config.authorizedNumber,
   logger.child({ component: 'baileys' }),
-  async (message) => bot.handleIncoming(message)
+  async (message) => bot.handleIncoming(message),
+  async (event) => {
+    await publishSession(config.truckplanApiUrl, config.truckplanBotSecret, event);
+  }
 );
 
 const messenger = new QueuedWhatsAppMessenger(responseQueue, () => gateway.getSocket());

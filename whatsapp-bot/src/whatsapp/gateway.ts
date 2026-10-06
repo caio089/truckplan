@@ -48,7 +48,8 @@ export class WhatsAppGateway {
     private readonly authDir: string,
     private readonly authorizedNumber: string | null,
     private readonly logger: Logger,
-    private readonly onAuthorizedMessage: (message: IncomingMessage) => Promise<void>
+    private readonly onAuthorizedMessage: (message: IncomingMessage) => Promise<void>,
+    private readonly onSessionEvent?: (event: { status: 'qr' | 'connected' | 'disconnected'; qr?: string; jid?: string }) => Promise<void>
   ) {}
 
   getSocket(): WASocket {
@@ -98,18 +99,25 @@ export class WhatsAppGateway {
       if (currentGeneration !== this.generation) return;
 
       if (update.qr) {
-        this.logger.info('Escaneie o QR em WhatsApp > Dispositivos conectados > Conectar dispositivo');
+        this.logger.info('Escaneie o QR no painel TruckPlan ou em Dispositivos conectados');
         qrcode.generate(update.qr, { small: true });
+        void this.onSessionEvent?.({ status: 'qr', qr: update.qr }).catch((error) => {
+          this.logger.error({ err: error }, 'Falha ao enviar QR para o painel');
+        });
       }
 
       if (update.connection === 'open') {
         this.logger.info({ user: socket.user?.id }, 'WhatsApp conectado');
+        void this.onSessionEvent?.({ status: 'connected', jid: socket.user?.id }).catch((error) => {
+          this.logger.error({ err: error }, 'Falha ao enviar status conectado');
+        });
         return;
       }
 
       if (update.connection !== 'close' || this.stopping) return;
 
       const statusCode = getStatusCode(update.lastDisconnect?.error);
+      void this.onSessionEvent?.({ status: 'disconnected' }).catch(() => undefined);
       if (statusCode === DisconnectReason.loggedOut) {
         this.logger.error('WhatsApp desconectado. Apague a pasta auth_info e escaneie o QR de novo.');
         return;

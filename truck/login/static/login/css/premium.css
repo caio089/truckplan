@@ -1270,7 +1270,48 @@ body.page-dashboard .dash-search-row input {
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
+body.page-dashboard .dash-config-grid {
+    display: grid;
+    gap: 16px;
+}
+
+@media (min-width: 800px) {
+    body.page-dashboard .dash-config-grid {
+        grid-template-columns: 260px 1fr;
+        align-items: start;
+    }
+}
+
+body.page-dashboard .dash-qr-box {
+    min-height: 220px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.page-dashboard .dash-config-form {
+    display: grid;
+    gap: 12px;
+}
+
+body.page-dashboard .dash-config-form label span {
+    display: block;
+    color: #9fb3c8;
+    font-size: .78rem;
+    margin-bottom: 6px;
+}
+
+body.page-dashboard .dash-config-form input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--tp-border);
+    background: rgba(8, 21, 34, .72);
+    color: #fff;
+    padding: 10px 12px;
+}
     *, *::before, *::after {
         scroll-behavior: auto !important;
         animation-duration: .01ms !important;

@@ -329,3 +329,26 @@ class WhatsAppPendingReport(models.Model):
     class Meta:
         verbose_name = "Relatório WhatsApp pendente"
         verbose_name_plural = "Relatórios WhatsApp pendentes"
+
+
+class WhatsAppSettings(models.Model):
+    """Configuração do bot Baileys preenchida no painel."""
+    groq_api_key = models.CharField(max_length=200, blank=True)
+    authorized_number = models.CharField(max_length=32, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Configuração WhatsApp"
+        verbose_name_plural = "Configurações WhatsApp"
+
+
+class WhatsAppConnection(models.Model):
+    """Estado ao vivo do QR e da sessão Baileys."""
+    status = models.CharField(max_length=24, default="disconnected")
+    qr_text = models.TextField(blank=True)
+    connected_jid = models.CharField(max_length=80, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Conexão WhatsApp"
+        verbose_name_plural = "Conexões WhatsApp"

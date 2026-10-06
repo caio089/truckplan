@@ -46,4 +46,6 @@ urlpatterns = [
     # Rotas para parcelas de custos
     path('webhooks/wa-akg/', views_whatsapp.waakg_webhook, name='waakg_webhook'),
     path('webhooks/baileys/', views_whatsapp.baileys_ingest, name='baileys_ingest'),
+    path('webhooks/baileys/session/', views_whatsapp.baileys_session, name='baileys_session'),
+    path('whatsapp-config/', views_whatsapp.whatsapp_settings, name='whatsapp_settings'),
 ]

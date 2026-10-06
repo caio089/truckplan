@@ -375,6 +375,8 @@
                 </div>
             </div>
             <div class="dash-chip-row">
+                <button type="button" class="dash-chip is-primary" id="tabOperacao" onclick="mostrarAbaPainel('operacao')">Operação</button>
+                <button type="button" class="dash-chip" id="tabConfig" onclick="mostrarAbaPainel('config')">Configurações</button>
                 <button type="button" class="dash-chip" data-period-chip="hoje">Ver hoje</button>
                 <button type="button" class="dash-chip" data-period-chip="semana">Ver semana</button>
                 <button type="button" class="dash-chip is-primary" data-period-chip="mes">Listar viagens do mês</button>
@@ -382,6 +384,32 @@
             </div>
         </section>
 
+        <section id="painelConfiguracoes" class="dash-config glass-effect rounded-2xl p-4 sm:p-6 border border-gray-600/30 mb-5 hidden">
+            <p class="dash-kicker">WhatsApp + Groq</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Conectar número</h3>
+            <p class="text-gray-400 text-sm mb-4">Deixe o bot ligado no computador (<code>npm start</code> na pasta whatsapp-bot). O QR aparece aqui para escanear em <strong>Dispositivos conectados</strong>.</p>
+            <div class="dash-config-grid">
+                <div class="dash-qr-card">
+                    <p class="dash-kicker" id="whatsappStatusLabel">Aguardando bot</p>
+                    <div id="whatsappQr" class="dash-qr-box"></div>
+                    <p class="text-gray-500 text-xs mt-2" id="whatsappJid"></p>
+                </div>
+                <form id="whatsappConfigForm" class="dash-config-form" onsubmit="return salvarConfigWhatsapp(event)">
+                    <label>
+                        <span>Número autorizado (DDI+DDD)</span>
+                        <input type="text" id="cfgAuthorizedNumber" placeholder="5586999999999" autocomplete="off">
+                    </label>
+                    <label>
+                        <span>Chave Groq</span>
+                        <input type="password" id="cfgGroqKey" placeholder="gsk_..." autocomplete="off">
+                    </label>
+                    <button type="submit" class="dash-chip is-primary">Salvar configurações</button>
+                    <p class="text-gray-400 text-xs" id="whatsappConfigMsg"></p>
+                </form>
+            </div>
+        </section>
+
+        <div id="painelOperacao">
         <section class="dash-board glass-effect rounded-2xl p-4 sm:p-6 animate-slide-up border border-gray-600/30 mb-5" id="dashboardFixedCosts" data-total="{{ total_custos_fixos_mensais|default:0 }}">
             <div class="flex items-end justify-between gap-3 mb-4">
                 <div>
@@ -525,6 +553,7 @@
                 <p class="text-xs sm:text-sm">Adicione custos fixos mensais como seguro, IPVA, etc.</p>
             </div>
             {% endif %}
+        </div>
         </div>
     </div>
 
@@ -857,7 +886,8 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <script src="{% static 'login/js/scripts.js' %}?v=20260901-dash"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="{% static 'login/js/scripts.js' %}?v=20260901-monthfix"></script>
     <script src="{% static 'login/js/dashboard-insights.js' %}?v=20260901-monthfix"></script>
     <script>
         // Limpar dados de teste e cache
@@ -877,6 +907,88 @@
         document.addEventListener('DOMContentLoaded', function() {
             carregarRelatoriosDoServidor();
         });
+
+        let whatsappPoll = null;
+        let lastQrText = '';
+
+        function mostrarAbaPainel(aba) {
+            const config = document.getElementById('painelConfiguracoes');
+            const operacao = document.getElementById('painelOperacao');
+            const tabOp = document.getElementById('tabOperacao');
+            const tabCfg = document.getElementById('tabConfig');
+            const showConfig = aba === 'config';
+            if (config) config.classList.toggle('hidden', !showConfig);
+            if (operacao) operacao.classList.toggle('hidden', showConfig);
+            tabOp?.classList.toggle('is-primary', !showConfig);
+            tabCfg?.classList.toggle('is-primary', showConfig);
+            if (showConfig) {
+                carregarConfigWhatsapp();
+                if (!whatsappPoll) whatsappPoll = setInterval(carregarConfigWhatsapp, 3000);
+            } else if (whatsappPoll) {
+                clearInterval(whatsappPoll);
+                whatsappPoll = null;
+            }
+        }
+
+        async function carregarConfigWhatsapp() {
+            try {
+                const response = await fetch('/login/whatsapp-config/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await response.json();
+                if (!data.ok) return;
+                const number = document.getElementById('cfgAuthorizedNumber');
+                const groq = document.getElementById('cfgGroqKey');
+                if (number && !number.matches(':focus')) number.value = data.authorized_number || '';
+                if (groq && !groq.matches(':focus') && data.groq_api_key_masked) groq.placeholder = data.groq_api_key_masked;
+                const labels = { qr: 'Escaneie o QR no celular', connected: 'WhatsApp conectado', disconnected: 'Bot desconectado' };
+                const statusEl = document.getElementById('whatsappStatusLabel');
+                if (statusEl) statusEl.textContent = labels[data.status] || 'Aguardando bot';
+                const jidEl = document.getElementById('whatsappJid');
+                if (jidEl) jidEl.textContent = data.connected_jid || '';
+                const box = document.getElementById('whatsappQr');
+                if (!box) return;
+                if (data.status === 'qr' && data.qr) {
+                    if (data.qr !== lastQrText) {
+                        lastQrText = data.qr;
+                        box.innerHTML = '';
+                        if (window.QRCode) new QRCode(box, { text: data.qr, width: 220, height: 220 });
+                        else box.textContent = 'QR recebido. Atualize a página se não aparecer a imagem.';
+                    }
+                } else if (data.status === 'connected') {
+                    lastQrText = '';
+                    box.innerHTML = '<p class="text-emerald-300 font-semibold">Conectado</p>';
+                } else {
+                    lastQrText = '';
+                    box.innerHTML = '<p class="text-gray-500 text-sm">Ligue o bot no computador para gerar o QR.</p>';
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function salvarConfigWhatsapp(event) {
+            event.preventDefault();
+            const msg = document.getElementById('whatsappConfigMsg');
+            try {
+                const response = await fetch('/login/whatsapp-config/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': typeof getCSRFToken === 'function' ? getCSRFToken() : '',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        authorized_number: document.getElementById('cfgAuthorizedNumber')?.value || '',
+                        groq_api_key: document.getElementById('cfgGroqKey')?.value || ''
+                    })
+                });
+                const data = await response.json();
+                if (msg) msg.textContent = data.ok ? 'Configuração salva.' : (data.error || 'Não foi possível salvar.');
+                if (data.ok) carregarConfigWhatsapp();
+            } catch (error) {
+                if (msg) msg.textContent = 'Erro ao salvar.';
+            }
+            return false;
+        }
         
         // Função para ir para relatório diário
         function irParaRelatorioDiario() {
